@@ -15,4 +15,6 @@ public:
 	static const float ZeroTolerance;
 };
 
+#define NUM_VERTICES_PER_POLYGON 3
+
 #endif
