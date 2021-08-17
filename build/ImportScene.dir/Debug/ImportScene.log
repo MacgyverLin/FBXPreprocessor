@@ -1,74 +1,11 @@
-﻿  Building Custom Rule D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/CMakeLists.txt
-  Argument.cxx
-..\Argument.cxx(14,8): warning C4996: 'stricmp': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _stricmp. See online help for details.
-..\Argument.cxx(19,13): warning C4996: 'stricmp': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _stricmp. See online help for details.
-..\Argument.cxx(22,9): warning C4996: 'stricmp': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _stricmp. See online help for details.
-..\Argument.cxx(26,14): warning C4996: 'stricmp': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _stricmp. See online help for details.
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(25,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(30,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  Argument.h
-..\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-..\Argument.h(25,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
-..\Argument.h(30,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  BSPMeshSlicer.cxx
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Geometry.h(1889,51): warning C4100: 'polygons': unreferenced formal parameter
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(25,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(30,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  FBXMeshBuilder.cxx
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Geometry.h(1889,51): warning C4100: 'polygons': unreferenced formal parameter
-..\FBXMeshBuilder.cxx(44,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(145,56): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(155,68): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(179,30): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(184,31): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(189,27): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(194,32): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(199,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-..\FBXMeshBuilder.cxx(244,32): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(25,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(30,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  Geometry.cxx
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Geometry.h(1889,51): warning C4100: 'polygons': unreferenced formal parameter
-  MeshBuilder.cxx
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Geometry.h(1889,51): warning C4100: 'polygons': unreferenced formal parameter
-..\MeshBuilder.cxx(104,46): warning C4100: 'fbxScene': unreferenced formal parameter
-..\MeshBuilder.cxx(155,41): warning C4100: 'fbxScene': unreferenced formal parameter
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(30,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  MeshBuilder.h
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Geometry.h(1889,51): warning C4100: 'polygons': unreferenced formal parameter
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(25,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(30,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  Geometry.h
-..\Geometry.h(1889,51): warning C4100: 'polygons': unreferenced formal parameter
-  MeshSlicer.cxx
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Geometry.h(1889,51): warning C4100: 'polygons': unreferenced formal parameter
-..\MeshSlicer.cxx(113,45): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-..\MeshSlicer.cxx(114,45): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(25,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene - Copy\Argument.h(30,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  main.cxx
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\Argument.h(27,8): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\Argument.h(40,8): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\Argument.h(33,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
-D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\Argument.h(46,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
-  Common.cxx
-  Generating Code...
-ImportScene.dir\Debug\Argument.obj : warning LNK4042: object specified more than once; extras ignored
+﻿ImportScene.dir\Debug\Argument.obj : warning LNK4042: object specified more than once; extras ignored
 ImportScene.dir\Debug\MeshBuilder.obj : warning LNK4042: object specified more than once; extras ignored
-ImportScene.dir\Debug\Geometry.obj : warning LNK4042: object specified more than once; extras ignored
 libfbxsdk-mt.lib(fbxdebug.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxdebug.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxalloc.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxalloc.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxstring.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxstring.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
+libfbxsdk-mt.lib(fbxpropertytypes.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxpropertytypes.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxvector2.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxvector2.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxvector4.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxvector4.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
-libfbxsdk-mt.lib(fbxpropertytypes.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxpropertytypes.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxobject.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxobject.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxnode.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxnode.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxlayer.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxlayer.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
@@ -84,9 +21,9 @@ libfbxsdk-mt.lib(fbxiosettings.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' wa
 libfbxsdk-mt.lib(fbxexporter.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxexporter.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbximporter.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbximporter.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxiopluginregistry.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxiopluginregistry.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
+libfbxsdk-mt.lib(fbxsystemunit.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxsystemunit.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxaffinematrix.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxaffinematrix.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxquaternion.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxquaternion.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
-libfbxsdk-mt.lib(fbxsystemunit.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxsystemunit.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxclassid.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxclassid.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxquery.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxquery.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info
 libfbxsdk-mt.lib(fbxevents.obj) : warning LNK4099: PDB 'libfbxsdk-mt.pdb' was not found with 'libfbxsdk-mt.lib(fbxevents.obj)' or at 'D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\libfbxsdk-mt.pdb'; linking object as if no debug info

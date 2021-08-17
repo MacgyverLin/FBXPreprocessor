@@ -13,16 +13,10 @@
     <ClCompile Include="..\MeshBuilder.h">
       <Filter>Source Files\Processor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Geometry.h">
-      <Filter>Source Files\Processor</Filter>
-    </ClCompile>
     <ClCompile Include="..\Argument.cxx">
       <Filter>Source Files\Processor</Filter>
     </ClCompile>
     <ClCompile Include="..\MeshSlicer.cxx">
-      <Filter>Source Files\Processor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Geometry.cxx">
       <Filter>Source Files\Processor</Filter>
     </ClCompile>
     <ClCompile Include="..\MeshBuilder.cxx">
@@ -33,6 +27,39 @@
     </ClCompile>
     <ClCompile Include="..\BSPMeshSlicer.cxx">
       <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AABB.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BSP.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Color.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Math.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Matrix4.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Mesh.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Plane.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Polygon.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Vector2.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Vector3.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Vertex.cxx">
+      <Filter>Source Files\Processor\Maths</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +138,39 @@
     <ClInclude Include="..\BSPMeshSlicer.h">
       <Filter>Source Files\Processor</Filter>
     </ClInclude>
+    <ClInclude Include="..\AABB.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BSP.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Color.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Math.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Matrix4.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Plane.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Polygon.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Vector2.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Vector3.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Vertex.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Mesh.h">
+      <Filter>Source Files\Processor\Maths</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\CMakeLists.txt" />
@@ -124,6 +184,9 @@
     </Filter>
     <Filter Include="Source Files\Processor">
       <UniqueIdentifier>{b29200e7-f475-4daf-859c-b4b1718c3e34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Processor\Maths">
+      <UniqueIdentifier>{50bf0073-36ba-44e9-8a28-417a077721dd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

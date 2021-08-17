@@ -1,5 +1,7 @@
 #include "MeshBuilder.h"
 
+#define NUM_VERTICES_PER_POLYGON 3
+
 MeshBuilder::MeshBuilder()
 {
 }

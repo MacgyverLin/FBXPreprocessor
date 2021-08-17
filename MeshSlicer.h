@@ -9,7 +9,8 @@
 #include <assert.h>
 
 #include "Argument.h"
-#include "Geometry.h"
+#include "Mesh.h"
+#include "Plane.h"
 
 class MeshSlicer
 {

@@ -7,7 +7,8 @@
 #include <assert.h>
 
 #include "Argument.h"
-#include "Geometry.h"
+#include "Matrix4.h"
+#include "Mesh.h"
 
 class BSPMeshSlicer
 {
@@ -20,6 +21,7 @@ public:
 private:
 	bool Slice(const Mesh& mesh, const MeshArray& cutters, MeshArray& slicedMeshArray);
 	Mesh Slice(const Mesh& mesh, const Mesh& cutter) const;
+	Mesh Intersect(const Mesh& m0, const Mesh& m1) const;
 
 	void MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int count);
 	Polygon MakeCutterPolygon(const Mesh& mesh, int materialID);

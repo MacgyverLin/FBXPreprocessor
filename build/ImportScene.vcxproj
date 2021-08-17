@@ -242,19 +242,39 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\AABB.cxx" />
     <ClCompile Include="..\Argument.cxx" />
     <ClCompile Include="..\Argument.h" />
+    <ClCompile Include="..\BSP.cxx" />
     <ClCompile Include="..\BSPMeshSlicer.cxx" />
+    <ClCompile Include="..\Color.cxx" />
     <ClCompile Include="..\FBXMeshBuilder.cxx" />
-    <ClCompile Include="..\Geometry.cxx" />
+    <ClCompile Include="..\Math.cxx" />
+    <ClCompile Include="..\Matrix4.cxx" />
+    <ClCompile Include="..\Mesh.cxx" />
     <ClCompile Include="..\MeshBuilder.cxx" />
     <ClCompile Include="..\MeshBuilder.h" />
-    <ClCompile Include="..\Geometry.h" />
     <ClCompile Include="..\MeshSlicer.cxx" />
+    <ClCompile Include="..\Plane.cxx" />
+    <ClCompile Include="..\Polygon.cxx" />
+    <ClCompile Include="..\Vector2.cxx" />
+    <ClCompile Include="..\Vector3.cxx" />
+    <ClCompile Include="..\Vertex.cxx" />
     <ClCompile Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\main.cxx" />
+    <ClInclude Include="..\AABB.h" />
+    <ClInclude Include="..\BSP.h" />
     <ClInclude Include="..\BSPMeshSlicer.h" />
+    <ClInclude Include="..\Color.h" />
     <ClInclude Include="..\FBXMeshBuilder.h" />
+    <ClInclude Include="..\Math.h" />
+    <ClInclude Include="..\Matrix4.h" />
+    <ClInclude Include="..\Mesh.h" />
     <ClInclude Include="..\MeshSlicer.h" />
+    <ClInclude Include="..\Plane.h" />
+    <ClInclude Include="..\Polygon.h" />
+    <ClInclude Include="..\Vector2.h" />
+    <ClInclude Include="..\Vector3.h" />
+    <ClInclude Include="..\Vertex.h" />
     <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayAnimation.h" />
     <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCache.h" />
     <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCamera.h" />
