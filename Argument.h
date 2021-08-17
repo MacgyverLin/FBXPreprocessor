@@ -42,6 +42,7 @@ static void ErrorMsg(char* format, ...)
 
 	FBXSDK_printf(buffer);
 }
+
 static void DisplayMaterialMapping1(FbxMesh* fbxMesh)
 {
 	const char* lMappingTypes[] = { "None", "By Control Point", "By Polygon Vertex", "By Polygon", "By Edge", "All Same" };

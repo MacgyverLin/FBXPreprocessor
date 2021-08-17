@@ -16,7 +16,7 @@ bool BSPMeshSlicer::Slice(const std::vector<Mesh>& meshes, std::vector<MeshArray
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		MeshArray cutters;
-		MakeCutters(meshes[i], cutters, 3, 1);
+		MakeCutters(meshes[i], cutters, meshes[i].maxMaterialIdx+1, 1);
 
 		if (!Slice(meshes[i], cutters, precutMeshArrays[i]))
 			return false;
@@ -41,62 +41,6 @@ Mesh BSPMeshSlicer::Slice(const Mesh& mesh, const Mesh& cutter) const
 	return Intersect(mesh, cutter);
 }
 
-#if 0
-var a = new CSG.Node(this.clone().polygons);
-var b = new CSG.Node(csg.clone().polygons);
-a.invert();
-b.clipTo(a);
-b.invert();
-a.clipTo(b);
-b.clipTo(a);
-a.build(b.allPolygons());
-a.invert();
-return CSG.fromPolygons(a.allPolygons());
-#endif
-
-Mesh BSPMeshSlicer::Intersect(const Mesh& m0, const Mesh& m1) const
-{
-	Mesh result;
-
-	if (!m0.IsEmpty() && !m1.IsEmpty())
-	{
-		BSP a(m0.polygons);
-		BSP b(m1.polygons);
-
-		a.Invert();
-		b.ClipBy(a);		// find polygon of b inside ~a
-		b.Invert();
-		a.ClipBy(b);		// find polygon of a inside ~b
-
-		b.ClipBy(a);		// remove b polygons coplanar with a
-
-		// join polygons in a, b
-		// a.FromPolygons(b.ToPolygons());
-		std::vector<Polygon> polygons;
-		b.ToPolygons(polygons);
-		a.FromPolygons(polygons);
-
-		a.Invert();			// ~(~A | ~B)
-
-		// output
-		a.ToPolygons(result.polygons);
-	}
-	else if (m0.IsEmpty() && !m1.IsEmpty())
-	{
-		result = Mesh();
-	}
-	else if (!m0.IsEmpty() && m1.IsEmpty())
-	{
-		result = Mesh();
-	}
-	else// if (m0.IsEmpty() && m1.IsEmpty())
-	{
-		result = Mesh();
-	}
-
-	return result;
-}
-
 //////////////////////////////////////////////////////////////////////////////////
 void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int count)
 {
@@ -117,8 +61,8 @@ Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID)
 {
 	Vector3 rotateAxis(Math::UnitRandom(), Math::UnitRandom(), Math::UnitRandom()); rotateAxis.Normalize();
 
-	Vector3 normal = mesh.aabb.GetMajorAxis(true);
-	Vector3 center = mesh.aabb.GetCenter(true);
+	Vector3 normal = mesh.GetAABB().GetMajorAxis(true);
+	Vector3 center = mesh.GetAABB().GetCenter(true);
 	Vector3 tangent = Matrix4(rotateAxis, 90).TimesDirectionVector(normal);
 	Vector3 binormal = normal.Cross(tangent);
 

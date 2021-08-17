@@ -31,13 +31,13 @@ private:
 	bool BuildMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, std::vector<Mesh >& meshes);
 	bool BuildMesh(FbxNode* fbxNode, Mesh& mesh);
 
-	bool BuildMaterial(FbxNode* fbxNode, Polygon& polygon, int polygonIndex);
-	bool BuildPosition(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId);
-	bool BuildColor(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId);
-	bool BuildUV(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int polygonIndex, int polygonVertexIndex);
-	bool BuildNormal(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId);
-	bool BuildTangent(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId);
-	bool BuildBinormal(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId);
+	bool BuildMaterial(FbxNode* fbxNode, Mesh& mesh, Polygon& polygon, int polygonIndex);
+	bool BuildPosition(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
+	bool BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
+	bool BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int polygonIndex, int polygonVertexIndex);
+	bool BuildNormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
+	bool BuildTangent(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
+	bool BuildBinormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
 };
 
 #endif

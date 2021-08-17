@@ -21,6 +21,12 @@ public:
 
 	Polygon& operator = (const Polygon& other);
 
+	int GetMaterialIdx() const;
+	
+	int GetVerticesCount() const;
+
+	const Vertex& GetVertex(int i) const;
+
 	void Clear();
 
 	void Flip();
@@ -28,6 +34,8 @@ public:
 	bool IsEmpty() const;
 
 	void Transform(const Vector3& t, const Vector3& s);
+
+	friend void ConvertTriangleFanToTriangles(const Polygon& polygon, std::vector<Polygon>& polygons);
 private:
 	int materialIdx;
 	std::vector<Vertex> vertices;

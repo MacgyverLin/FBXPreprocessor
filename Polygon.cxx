@@ -29,6 +29,21 @@ Polygon& Polygon::operator = (const Polygon& other)
 	return *this;
 }
 
+int Polygon::GetMaterialIdx() const
+{
+	return materialIdx;
+}
+
+int Polygon::GetVerticesCount() const
+{
+	return vertices.size();
+}
+
+const Vertex& Polygon::GetVertex(int i) const
+{
+	return vertices[i];
+}
+
 void Polygon::Clear()
 {
 	materialIdx = 0;
@@ -54,5 +69,23 @@ void Polygon::Transform(const Vector3& t, const Vector3& s)
 	for (size_t i = 0; i < vertices.size(); i++)
 	{
 		vertices[i].position = vertices[i].position * s + t;
+	}
+}
+
+void ConvertTriangleFanToTriangles(const Polygon& polygon, std::vector<Polygon>& polygons)
+{
+	if (polygon.vertices.size() < 3)
+		return;
+
+	int startIdx = polygons.size();
+	polygons.resize(polygons.size() + polygon.vertices.size() - 2);
+	for (size_t i = 0; i < polygon.vertices.size() - 2; i++)
+	{
+		polygons[startIdx + i].materialIdx = polygon.materialIdx;
+
+		polygons[startIdx + i].vertices.resize(3);
+		polygons[startIdx + i].vertices[0] = polygon.vertices[0];
+		polygons[startIdx + i].vertices[1] = polygon.vertices[i + 1];
+		polygons[startIdx + i].vertices[2] = polygon.vertices[i + 2];
 	}
 }

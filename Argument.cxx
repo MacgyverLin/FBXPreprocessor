@@ -6,7 +6,7 @@ Arguments::Arguments(int argc, const char** argv)
 	outputPath = "out.fbx"; 
 	unity = true;
 	unreal = false;
-
+	 
 	for (int i = 1; i < argc; i++)
 	{
 		if (argv[i][0] == '-') 

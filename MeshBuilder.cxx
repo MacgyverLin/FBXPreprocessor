@@ -51,38 +51,17 @@ void MeshBuilder::CollectMeshNode(FbxNode* fbxNode, std::vector<FbxNode* >& fbxN
 
 		switch (lAttributeType)
 		{
-		case FbxNodeAttribute::eMarker:
-			// DisplayMarker(fbxNode);
-			break;
-
-		case FbxNodeAttribute::eSkeleton:
-			// DisplaySkeleton(fbxNode);
-			break;
-
 		case FbxNodeAttribute::eMesh:
 			fbxNodes.push_back(fbxNode);
 			break;
 
+		case FbxNodeAttribute::eMarker:
+		case FbxNodeAttribute::eSkeleton:
 		case FbxNodeAttribute::eNurbs:
-			// DisplayNurb(fbxNode);
-			break;
-
 		case FbxNodeAttribute::ePatch:
-			// DisplayPatch(fbxNode);
-			break;
-
 		case FbxNodeAttribute::eCamera:
-			// DisplayCamera(fbxNode);
-			break;
-
 		case FbxNodeAttribute::eLight:
-			// DisplayLight(fbxNode);
-			break;
-
 		case FbxNodeAttribute::eLODGroup:
-			// DisplayLodGroup(fbxNode);
-			break;
-
 		default:
 			break;
 		}
@@ -165,7 +144,7 @@ bool MeshBuilder::BuildMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNod
 	return true;
 }
 
-bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, Polygon& polygon, int polygonIndex)
+bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, Mesh& mesh, Polygon& polygon, int polygonIndex)
 {
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
@@ -183,6 +162,8 @@ bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, Polygon& polygon, int polygonI
 			case FbxGeometryElement::eDirect:
 			{
 				polygon.materialIdx = leMaterial->GetIndexArray().GetAt(polygonIndex);
+				if (mesh.maxMaterialIdx < polygon.materialIdx)
+					mesh.maxMaterialIdx = polygon.materialIdx;
 			}
 			break;
 
@@ -209,7 +190,7 @@ bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, Polygon& polygon, int polygonI
 	return true;
 }
 
-bool MeshBuilder::BuildPosition(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId)
+bool MeshBuilder::BuildPosition(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId)
 {
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
@@ -220,11 +201,12 @@ bool MeshBuilder::BuildPosition(FbxNode* fbxNode, Vertex& vertex, int lControlPo
 	return true;
 }
 
-bool MeshBuilder::BuildColor(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId)
+bool MeshBuilder::BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId)
 {
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
+	mesh.colorChannelCount = std::min(fbxMesh->GetElementVertexColorCount(), NUM_COLORS);
 	for (int layer = 0; layer < fbxMesh->GetElementVertexColorCount() && layer < NUM_COLORS; layer++)
 	{
 		FbxGeometryElementVertexColor* leVtxc = fbxMesh->GetElementVertexColor(layer);
@@ -312,11 +294,12 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Vertex& vertex, int lControlPoint
 	return true;
 }
 
-bool MeshBuilder::BuildUV(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int polygonIndex, int polygonVertexIndex)
+bool MeshBuilder::BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int polygonIndex, int polygonVertexIndex)
 {
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
+	mesh.uvChannelCount = std::min(fbxMesh->GetElementUVCount(), NUM_UVS);
 	for (int layer = 0; layer < fbxMesh->GetElementUVCount() && layer < NUM_UVS; ++layer)
 	{
 		FbxGeometryElementUV* leUV = fbxMesh->GetElementUV(layer);
@@ -397,11 +380,12 @@ bool MeshBuilder::BuildUV(FbxNode* fbxNode, Vertex& vertex, int lControlPointInd
 	return true;
 }
 
-bool MeshBuilder::BuildNormal(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId)
+bool MeshBuilder::BuildNormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId)
 {
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
+	mesh.normalChannelCount = std::min(fbxMesh->GetElementNormalCount(), NUM_NORMALS);
 	for (int layer = 0; layer < fbxMesh->GetElementNormalCount() && layer < NUM_NORMALS; ++layer)
 	{
 		FbxGeometryElementNormal* leNormal = fbxMesh->GetElementNormal(layer);
@@ -459,11 +443,12 @@ bool MeshBuilder::BuildNormal(FbxNode* fbxNode, Vertex& vertex, int lControlPoin
 	return true;
 }
 
-bool MeshBuilder::BuildTangent(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId)
+bool MeshBuilder::BuildTangent(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId)
 {
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
+	mesh.tangentChannelCount = std::min(fbxMesh->GetElementTangentCount(), NUM_TANGENTS);
 	for (int layer = 0; layer < fbxMesh->GetElementTangentCount() && layer < NUM_TANGENTS; ++layer)
 	{
 		FbxGeometryElementTangent* leTangent = fbxMesh->GetElementTangent(layer);
@@ -521,11 +506,12 @@ bool MeshBuilder::BuildTangent(FbxNode* fbxNode, Vertex& vertex, int lControlPoi
 	return true;
 }
 
-bool MeshBuilder::BuildBinormal(FbxNode* fbxNode, Vertex& vertex, int lControlPointIndex, int vertexId)
+bool MeshBuilder::BuildBinormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId)
 {
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
+	mesh.binormalChannelCount = std::min(fbxMesh->GetElementBinormalCount(), NUM_BINORMALS);
 	for (int layer = 0; layer < fbxMesh->GetElementBinormalCount() && layer < NUM_BINORMALS; ++layer)
 	{
 		FbxGeometryElementBinormal* leBinormal = fbxMesh->GetElementBinormal(layer);
@@ -590,15 +576,15 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 	FbxDouble3 aabbMin = fbxMesh->BBoxMin;
 	FbxDouble3 aabbMax = fbxMesh->BBoxMax;
 
-	mesh.aabb = AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2]));
-	mesh.polygons.resize(fbxMesh->GetPolygonCount());
+	mesh.aabb1 = AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2]));
+	mesh.polygons1.resize(fbxMesh->GetPolygonCount());
 
 	int vertexId = 0;
 	for (int polygonIndex = 0; polygonIndex < fbxMesh->GetPolygonCount(); polygonIndex++)
 	{
-		Polygon& polygon = mesh.polygons[polygonIndex];
+		Polygon& polygon = mesh.polygons1[polygonIndex];
 
-		if (!BuildMaterial(fbxNode, polygon, polygonIndex))
+		if (!BuildMaterial(fbxNode, mesh, polygon, polygonIndex))
 			return false;
 
 		for (int polygonVertexIndex = 0; polygonVertexIndex < fbxMesh->GetPolygonSize(polygonIndex); polygonVertexIndex++)
@@ -616,32 +602,32 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 
 			////////////////////////////////////////////////
 			// collect position
-			if (!BuildPosition(fbxNode, vertex, lControlPointIndex, vertexId))
+			if (!BuildPosition(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
 			////////////////////////////////////////////////
 			// collect color
-			if (!BuildColor(fbxNode, vertex, lControlPointIndex, vertexId))
+			if (!BuildColor(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
 			/////////////////////////////////
 			// collect uv
-			if (!BuildUV(fbxNode, vertex, lControlPointIndex, polygonIndex, polygonVertexIndex))
+			if (!BuildUV(fbxNode, mesh, vertex, lControlPointIndex, polygonIndex, polygonVertexIndex))
 				return false;
 
 			/////////////////////////////////
 			// collect normal
-			if (!BuildNormal(fbxNode, vertex, lControlPointIndex, vertexId))
+			if (!BuildNormal(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
 			/////////////////////////////////
 			// collect tangent
-			if (!BuildTangent(fbxNode, vertex, lControlPointIndex, vertexId))
+			if (!BuildTangent(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
 			/////////////////////////////////
 			// collect binormal
-			if (!BuildBinormal(fbxNode, vertex, lControlPointIndex, vertexId))
+			if (!BuildBinormal(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
 			vertexId++;

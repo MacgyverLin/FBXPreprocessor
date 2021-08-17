@@ -27,9 +27,28 @@ public:
 	void Transform(const Vector3& t, const Vector3& s);
 
 	void Add(const Polygon& polygon);
+
+	const AABB& GetAABB() const;
+
+	int GetPolygonCount() const;
+	
+	const Polygon& GetPolygon(int i) const;
+
+	friend void ConvertTriangleFanToTriangles(Mesh& mesh);
+
+	friend Mesh Intersect(const Mesh& m0, const Mesh& m1);
+
+	int GetVerticesCount() const;
 private:
-	AABB aabb;
-	std::vector<Polygon> polygons;
+	int maxMaterialIdx;
+
+	int colorChannelCount;
+	int uvChannelCount;
+	int normalChannelCount;
+	int tangentChannelCount;
+	int binormalChannelCount;
+	AABB aabb1;
+	std::vector<Polygon> polygons1;
 };
 
 typedef std::vector<Mesh> MeshArray;

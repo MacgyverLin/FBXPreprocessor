@@ -16,9 +16,6 @@
     <ClCompile Include="..\Argument.cxx">
       <Filter>Source Files\Processor</Filter>
     </ClCompile>
-    <ClCompile Include="..\MeshSlicer.cxx">
-      <Filter>Source Files\Processor</Filter>
-    </ClCompile>
     <ClCompile Include="..\MeshBuilder.cxx">
       <Filter>Source Files\Processor</Filter>
     </ClCompile>
@@ -130,9 +127,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\FBXMeshBuilder.h">
-      <Filter>Source Files\Processor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\MeshSlicer.h">
       <Filter>Source Files\Processor</Filter>
     </ClInclude>
     <ClInclude Include="..\BSPMeshSlicer.h">
