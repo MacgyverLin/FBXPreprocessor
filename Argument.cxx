@@ -9,7 +9,7 @@ Arguments::Arguments(int argc, const char** argv)
 
 	for (int i = 1; i < argc; i++)
 	{
-		if (argv[i][0] == '-')
+		if (argv[i][0] == '-') 
 		{
 			if (stricmp(&argv[i][1], "o") == 0 || stricmp(&argv[i][1], "out") == 0)
 			{

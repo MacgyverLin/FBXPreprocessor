@@ -132,7 +132,7 @@ bool MeshBuilder::ValidatePolygon(FbxMesh* fbxMesh)
 	{
 		if (fbxMesh->GetPolygonSize(polygonIndex) != NUM_VERTICES_PER_POLYGON)
 		{
-			ErrorMsg(FbxString("Number of Vertices in Polygon must be ") + NUM_VERTICES_PER_POLYGON + FbxString(", export FBX with Triangulation"));
+			ErrorMsg("Number of Vertices in Polygon must be %d, try re-export FBX with Triangulation on", NUM_VERTICES_PER_POLYGON);
 			return false;
 		}
 	}
@@ -234,75 +234,78 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Vertex& vertex, int lControlPoint
 
 		switch (leVtxc->GetMappingMode())
 		{
-		case FbxGeometryElement::eByControlPoint:
-		{
-			switch (leVtxc->GetReferenceMode())
+			case FbxGeometryElement::eByControlPoint:
 			{
-			case FbxGeometryElement::eDirect:
-			{
-				// DisplayColor(header, leVtxc->GetDirectArray().GetAt(lControlPointIndex));
+				switch (leVtxc->GetReferenceMode())
+				{
+					case FbxGeometryElement::eDirect:
+					{
+						// DisplayColor(header, leVtxc->GetDirectArray().GetAt(lControlPointIndex));
 
-				color = leVtxc->GetDirectArray().GetAt(lControlPointIndex);
+						color = leVtxc->GetDirectArray().GetAt(lControlPointIndex);
+					}
+					break;
+
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						//int id = leVtxc->GetIndexArray().GetAt(lControlPointIndex);
+						//DisplayColor(header, leVtxc->GetDirectArray().GetAt(id));
+
+						int id = leVtxc->GetIndexArray().GetAt(lControlPointIndex);
+						color = leVtxc->GetDirectArray().GetAt(id);
+					}
+					break;
+
+					case FbxGeometryElement::eIndex:
+					default:
+					{
+						ErrorMsg("unsupported leVtxc->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+					}
+					return false;
+				}
 			}
 			break;
 
-			case FbxGeometryElement::eIndexToDirect:
+			case FbxGeometryElement::eByPolygonVertex:
 			{
-				//int id = leVtxc->GetIndexArray().GetAt(lControlPointIndex);
-				//DisplayColor(header, leVtxc->GetDirectArray().GetAt(id));
+				switch (leVtxc->GetReferenceMode())
+				{
+					case FbxGeometryElement::eDirect:
+					{
+						// DisplayColor(header, leVtxc->GetDirectArray().GetAt(vertexId));
+						color = leVtxc->GetDirectArray().GetAt(vertexId);
+					}
+					break;
 
-				int id = leVtxc->GetIndexArray().GetAt(lControlPointIndex);
-				color = leVtxc->GetDirectArray().GetAt(id);
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						//int id = leVtxc->GetIndexArray().GetAt(vertexId);
+						//DisplayColor(header, leVtxc->GetDirectArray().GetAt(id));
+
+						int id = leVtxc->GetIndexArray().GetAt(vertexId);
+						color = leVtxc->GetDirectArray().GetAt(id);
+					}
+					break;
+
+					case FbxGeometryElement::eIndex:
+					default:
+					{
+						ErrorMsg("unsupported leVtxc->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+					}
+					return false;
+				}
 			}
 			break;
 
-			case FbxGeometryElement::eIndex:
+			case FbxGeometryElement::eNone:
+			case FbxGeometryElement::eByPolygon:
+			case FbxGeometryElement::eByEdge:
+			case FbxGeometryElement::eAllSame:
 			default:
 			{
-
+				ErrorMsg("unsupported leVtxc->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
-			break; // other reference modes not shown here!
-			}
-		}
-		break;
-
-		case FbxGeometryElement::eByPolygonVertex:
-		{
-			switch (leVtxc->GetReferenceMode())
-			{
-			case FbxGeometryElement::eDirect:
-			{
-				// DisplayColor(header, leVtxc->GetDirectArray().GetAt(vertexId));
-				color = leVtxc->GetDirectArray().GetAt(vertexId);
-			}
-			break;
-
-			case FbxGeometryElement::eIndexToDirect:
-			{
-				//int id = leVtxc->GetIndexArray().GetAt(vertexId);
-				//DisplayColor(header, leVtxc->GetDirectArray().GetAt(id));
-
-				int id = leVtxc->GetIndexArray().GetAt(vertexId);
-				color = leVtxc->GetDirectArray().GetAt(id);
-			}
-			break;
-
-			case FbxGeometryElement::eIndex:
-			default:
-			{
-
-			}
-			break; // other reference modes not shown here!
-			}
-		}
-		break;
-
-		case FbxGeometryElement::eNone:
-		case FbxGeometryElement::eByPolygon:
-		case FbxGeometryElement::eByEdge:
-		case FbxGeometryElement::eAllSame:
-		default:
-			break;
+			return false;
 		}
 	}
 
@@ -323,68 +326,71 @@ bool MeshBuilder::BuildUV(FbxNode* fbxNode, Vertex& vertex, int lControlPointInd
 
 		switch (leUV->GetMappingMode())
 		{
-		case FbxGeometryElement::eByControlPoint:
-		{
-			switch (leUV->GetReferenceMode())
+			case FbxGeometryElement::eByControlPoint:
 			{
-			case FbxGeometryElement::eDirect:
-			{
-				// Display2DVector(header, leUV->GetDirectArray().GetAt(lControlPointIndex));
+				switch (leUV->GetReferenceMode())
+				{
+					case FbxGeometryElement::eDirect:
+					{
+						// Display2DVector(header, leUV->GetDirectArray().GetAt(lControlPointIndex));
 
-				uv = leUV->GetDirectArray().GetAt(lControlPointIndex);
+						uv = leUV->GetDirectArray().GetAt(lControlPointIndex);
+					}
+					break;
+
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						// int id = leUV->GetIndexArray().GetAt(lControlPointIndex);
+						// Display2DVector(header, leUV->GetDirectArray().GetAt(id));
+
+						int id = leUV->GetIndexArray().GetAt(lControlPointIndex);
+						uv = leUV->GetDirectArray().GetAt(id);
+					}
+					break;
+
+					case FbxGeometryElement::eIndex:
+					default:
+					{
+						ErrorMsg("unsupported leUV->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+					}
+					return false;
+				}
 			}
 			break;
 
-			case FbxGeometryElement::eIndexToDirect:
+			case FbxGeometryElement::eByPolygonVertex:
 			{
-				// int id = leUV->GetIndexArray().GetAt(lControlPointIndex);
-				// Display2DVector(header, leUV->GetDirectArray().GetAt(id));
+				int lTextureUVIndex = fbxMesh->GetTextureUVIndex(polygonIndex, polygonVertexIndex);
+				switch (leUV->GetReferenceMode())
+				{
+					case FbxGeometryElement::eDirect:
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						// Display2DVector(header, leUV->GetDirectArray().GetAt(lTextureUVIndex));
 
-				int id = leUV->GetIndexArray().GetAt(lControlPointIndex);
-				uv = leUV->GetDirectArray().GetAt(id);
+						uv = leUV->GetDirectArray().GetAt(lTextureUVIndex);
+					}
+					break;
+
+					case FbxGeometryElement::eIndex:
+					default:
+					{
+						ErrorMsg("unsupported leUV->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+					}
+					return false;
+				}
 			}
 			break;
 
-			case FbxGeometryElement::eIndex:
+			case FbxGeometryElement::eNone:
+			case FbxGeometryElement::eByPolygon:
+			case FbxGeometryElement::eByEdge:
+			case FbxGeometryElement::eAllSame:
 			default:
 			{
-				// other reference modes not shown here!
+				ErrorMsg("unsupported leUV->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
-			break;
-			}
-		}
-		break;
-
-		case FbxGeometryElement::eByPolygonVertex:
-		{
-			int lTextureUVIndex = fbxMesh->GetTextureUVIndex(polygonIndex, polygonVertexIndex);
-			switch (leUV->GetReferenceMode())
-			{
-			case FbxGeometryElement::eDirect:
-			case FbxGeometryElement::eIndexToDirect:
-			{
-				// Display2DVector(header, leUV->GetDirectArray().GetAt(lTextureUVIndex));
-
-				uv = leUV->GetDirectArray().GetAt(lTextureUVIndex);
-			}
-			break;
-
-			case FbxGeometryElement::eIndex:
-			default:
-			{
-				// other reference modes not shown here!
-			}
-			break;
-			}
-		}
-		break;
-
-		case FbxGeometryElement::eNone:
-		case FbxGeometryElement::eByPolygon:
-		case FbxGeometryElement::eByEdge:
-		case FbxGeometryElement::eAllSame:
-		default:
-			break;
+			return false;
 		}
 	}
 
@@ -405,45 +411,48 @@ bool MeshBuilder::BuildNormal(FbxNode* fbxNode, Vertex& vertex, int lControlPoin
 
 		switch (leNormal->GetMappingMode())
 		{
-		case FbxGeometryElement::eByPolygonVertex:
-		{
-			switch (leNormal->GetReferenceMode())
+			case FbxGeometryElement::eByPolygonVertex:
 			{
-			case FbxGeometryElement::eDirect:
-			{
-				// Display3DVector(header, leNormal->GetDirectArray().GetAt(vertexId));
+				switch (leNormal->GetReferenceMode())
+				{
+					case FbxGeometryElement::eDirect:
+					{
+						// Display3DVector(header, leNormal->GetDirectArray().GetAt(vertexId));
 
-				normal = leNormal->GetDirectArray().GetAt(vertexId);
+						normal = leNormal->GetDirectArray().GetAt(vertexId);
+					}
+					break;
+
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						// int id = leNormal->GetIndexArray().GetAt(vertexId);
+						// Display3DVector(header, leNormal->GetDirectArray().GetAt(id));
+
+						int id = leNormal->GetIndexArray().GetAt(vertexId);
+						normal = leNormal->GetDirectArray().GetAt(id);
+					}
+					break;
+
+					case FbxGeometryElement::eIndex:
+					default:
+					{
+						ErrorMsg("unsupported leNormal->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+					}
+					return false;
+				}
 			}
 			break;
 
-			case FbxGeometryElement::eIndexToDirect:
-			{
-				// int id = leNormal->GetIndexArray().GetAt(vertexId);
-				// Display3DVector(header, leNormal->GetDirectArray().GetAt(id));
-
-				int id = leNormal->GetIndexArray().GetAt(vertexId);
-				normal = leNormal->GetDirectArray().GetAt(id);
-			}
-			break;
-
-			case FbxGeometryElement::eIndex:
+			case FbxGeometryElement::eNone:
+			case FbxGeometryElement::eByControlPoint:
+			case FbxGeometryElement::eByPolygon:
+			case FbxGeometryElement::eByEdge:
+			case FbxGeometryElement::eAllSame:
 			default:
 			{
-				// other reference modes not shown here!
+				ErrorMsg("unsupported leNormal->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
-			break;
-			}
-		}
-		break;
-
-		case FbxGeometryElement::eNone:
-		case FbxGeometryElement::eByControlPoint:
-		case FbxGeometryElement::eByPolygon:
-		case FbxGeometryElement::eByEdge:
-		case FbxGeometryElement::eAllSame:
-		default:
-			break;
+			return false;
 		}
 	}
 
@@ -464,42 +473,48 @@ bool MeshBuilder::BuildTangent(FbxNode* fbxNode, Vertex& vertex, int lControlPoi
 
 		switch (leTangent->GetMappingMode())
 		{
-		case FbxGeometryElement::eByPolygonVertex:
-		{
-			switch (leTangent->GetReferenceMode())
+			case FbxGeometryElement::eByPolygonVertex:
 			{
-			case FbxGeometryElement::eDirect:
-			{
-				// Display3DVector(header, leTangent->GetDirectArray().GetAt(vertexId));
+				switch (leTangent->GetReferenceMode())
+				{
+					case FbxGeometryElement::eDirect:
+					{
+						// Display3DVector(header, leTangent->GetDirectArray().GetAt(vertexId));
 
-				tangent = leTangent->GetDirectArray().GetAt(vertexId);
+						tangent = leTangent->GetDirectArray().GetAt(vertexId);
+					}
+					break;
+
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						//int id = leTangent->GetIndexArray().GetAt(vertexId);
+						//Display3DVector(header, leTangent->GetDirectArray().GetAt(id));
+
+						int id = leTangent->GetIndexArray().GetAt(vertexId);
+						tangent = leTangent->GetDirectArray().GetAt(id);
+					}
+					break;
+
+					case FbxGeometryElement::eIndex:
+					default:
+					{
+						ErrorMsg("unsupported leTangent->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+					}
+					return false;
+				}
 			}
 			break;
 
-			case FbxGeometryElement::eIndexToDirect:
-			{
-				//int id = leTangent->GetIndexArray().GetAt(vertexId);
-				//Display3DVector(header, leTangent->GetDirectArray().GetAt(id));
-
-				int id = leTangent->GetIndexArray().GetAt(vertexId);
-				tangent = leTangent->GetDirectArray().GetAt(id);
-			}
-			break;
-
-			case FbxGeometryElement::eIndex:
+			case FbxGeometryElement::eNone:
+			case FbxGeometryElement::eByControlPoint:
+			case FbxGeometryElement::eByPolygon:
+			case FbxGeometryElement::eByEdge:
+			case FbxGeometryElement::eAllSame:
 			default:
-				break; // other reference modes not shown here!
+			{
+				ErrorMsg("unsupported leTangent->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
-		}
-		break;
-
-		case FbxGeometryElement::eNone:
-		case FbxGeometryElement::eByControlPoint:
-		case FbxGeometryElement::eByPolygon:
-		case FbxGeometryElement::eByEdge:
-		case FbxGeometryElement::eAllSame:
-		default:
-			break;
+			return false;
 		}
 	}
 
@@ -520,42 +535,48 @@ bool MeshBuilder::BuildBinormal(FbxNode* fbxNode, Vertex& vertex, int lControlPo
 		// FBXSDK_sprintf(header, 100, "            Binormal: ");
 		switch (leBinormal->GetMappingMode())
 		{
-		case FbxGeometryElement::eByPolygonVertex:
-		{
-			switch (leBinormal->GetReferenceMode())
+			case FbxGeometryElement::eByPolygonVertex:
 			{
-			case FbxGeometryElement::eDirect:
-			{
-				// Display3DVector(header, leBinormal->GetDirectArray().GetAt(vertexId));
+				switch (leBinormal->GetReferenceMode())
+				{
+					case FbxGeometryElement::eDirect:
+					{
+						// Display3DVector(header, leBinormal->GetDirectArray().GetAt(vertexId));
 
-				binormal = leBinormal->GetDirectArray().GetAt(vertexId);
+						binormal = leBinormal->GetDirectArray().GetAt(vertexId);
+					}
+					break;
+
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						//int id = leBinormal->GetIndexArray().GetAt(vertexId);
+						//Display3DVector(header, leBinormal->GetDirectArray().GetAt(id));
+
+						int id = leBinormal->GetIndexArray().GetAt(vertexId);
+						binormal = leBinormal->GetDirectArray().GetAt(id);
+					}
+					break;
+
+					case FbxGeometryElement::eIndex:
+					default:
+					{
+						ErrorMsg("unsupported leBinormal->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+					}
+					return false;
+				}
 			}
 			break;
 
-			case FbxGeometryElement::eIndexToDirect:
-			{
-				//int id = leBinormal->GetIndexArray().GetAt(vertexId);
-				//Display3DVector(header, leBinormal->GetDirectArray().GetAt(id));
-
-				int id = leBinormal->GetIndexArray().GetAt(vertexId);
-				binormal = leBinormal->GetDirectArray().GetAt(id);
-			}
-			break;
-
-			case FbxGeometryElement::eIndex:
+			case FbxGeometryElement::eNone:
+			case FbxGeometryElement::eByControlPoint:
+			case FbxGeometryElement::eByPolygon:
+			case FbxGeometryElement::eByEdge:
+			case FbxGeometryElement::eAllSame:
 			default:
-				break; // other reference modes not shown here!
+			{
+				ErrorMsg("unsupported leBinormal->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
-		}
-		break;
-
-		case FbxGeometryElement::eNone:
-		case FbxGeometryElement::eByControlPoint:
-		case FbxGeometryElement::eByPolygon:
-		case FbxGeometryElement::eByEdge:
-		case FbxGeometryElement::eAllSame:
-		default:
-			break;
+			return false;
 		}
 	}
 

@@ -17,16 +17,31 @@ public:
 	bool unreal;
 };
 
-static void InfoMsg(FbxString msg)
+static void InfoMsg(char* format, ...)
 {
-	FBXSDK_printf("Info: " + msg);
+	static char buffer[1024];
+	va_list aptr;
+	int ret;
+
+	va_start(aptr, format);
+	ret = vsprintf(buffer, format, aptr);
+	va_end(aptr);
+
+	FBXSDK_printf(buffer);
 }
 
-static void ErrorMsg(FbxString msg)
+static void ErrorMsg(char* format, ...)
 {
-	FBXSDK_printf("Error: " + msg);
-}
+	static char buffer[1024];
+	va_list aptr;
+	int ret;
 
+	va_start(aptr, format);
+	ret = vsprintf(buffer, format, aptr);
+	va_end(aptr);
+
+	FBXSDK_printf(buffer);
+}
 static void DisplayMaterialMapping1(FbxMesh* fbxMesh)
 {
 	const char* lMappingTypes[] = { "None", "By Control Point", "By Polygon Vertex", "By Polygon", "By Edge", "All Same" };
