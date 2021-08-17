@@ -1,12 +1,10 @@
-// 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
-
 #ifndef _MeshSlicer_h_
 #define _MeshSlicer_h_
 
 #include "../Common/Common.h"
 #include <vector>
 #include <map>
-#include <assert.h>
+#include <assert.h> 
 
 #include "Argument.h"
 #include "Mesh.h"
