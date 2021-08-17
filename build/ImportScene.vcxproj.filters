@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\main.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common\Common.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Argument.h">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MeshBuilder.h">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Geometry.h">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Argument.cxx">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MeshSlicer.cxx">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Geometry.cxx">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MeshBuilder.cxx">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FBXMeshBuilder.cxx">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BSPMeshSlicer.cxx">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayAnimation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayGenericInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayGlobalSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayHierarchy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayLink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayMarker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayNurb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayPatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayLodGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayPivotsAndLimits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayPose.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplaySkeleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayUserProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common\Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FBXMeshBuilder.h">
+      <Filter>Source Files\Processor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MeshSlicer.h">
+      <Filter>Source Files\Processor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BSPMeshSlicer.h">
+      <Filter>Source Files\Processor</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{89B38D6A-CDE1-3DB3-9113-44FD5D8BBE32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{45D32D0E-F977-3364-AC15-98590F929D5D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Processor">
+      <UniqueIdentifier>{b29200e7-f475-4daf-859c-b4b1718c3e34}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

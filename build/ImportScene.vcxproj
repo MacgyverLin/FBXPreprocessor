@@ -1,0 +1,293 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1710EECD-D9DE-3956-B22D-471CF0D6E0D3}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ImportScene</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ImportScene.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ImportScene</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ImportScene.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ImportScene</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ImportScene.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ImportScene</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\libfbxsdk-mt.lib;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\libxml2-mt.lib;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\zlib-mt.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/bin/vs2017-mt/Debug/ImportScene.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/bin/vs2017-mt/Debug/ImportScene.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\libfbxsdk-mt.lib;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\libxml2-mt.lib;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\zlib-mt.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/bin/vs2017-mt/Release/ImportScene.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/bin/vs2017-mt/Release/ImportScene.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\libfbxsdk-mt.lib;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\libxml2-mt.lib;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\$(Configuration)\zlib-mt.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/bin/vs2017-mt/RelWithDebInfo/ImportScene.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/bin/vs2017-mt/RelWithDebInfo/ImportScene.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\CMakeLists.txt">
+      <StdOutEncoding>UTF-8</StdOutEncoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene" "-BD:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/build" --check-stamp-file "D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\CMakeSettings.txt;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeCCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeCXXCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeRCCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene" "-BD:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/build" --check-stamp-file "D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\CMakeSettings.txt;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeCCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeCXXCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeRCCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene" "-BD:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/build" --check-stamp-file "D:/Program Files/Autodesk/FBX/FBX SDK/2020.2.1/samples/ImportScene/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\CMakeSettings.txt;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeCCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeCXXCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeRCCompiler.cmake;D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\3.19.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Argument.cxx" />
+    <ClCompile Include="..\Argument.h" />
+    <ClCompile Include="..\BSPMeshSlicer.cxx" />
+    <ClCompile Include="..\FBXMeshBuilder.cxx" />
+    <ClCompile Include="..\Geometry.cxx" />
+    <ClCompile Include="..\MeshBuilder.cxx" />
+    <ClCompile Include="..\MeshBuilder.h" />
+    <ClCompile Include="..\Geometry.h" />
+    <ClCompile Include="..\MeshSlicer.cxx" />
+    <ClCompile Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\main.cxx" />
+    <ClInclude Include="..\BSPMeshSlicer.h" />
+    <ClInclude Include="..\FBXMeshBuilder.h" />
+    <ClInclude Include="..\MeshSlicer.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayAnimation.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCache.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCamera.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayCommon.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayGenericInfo.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayGlobalSettings.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayHierarchy.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayLight.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayLink.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayMarker.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayMaterial.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayMesh.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayNurb.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayPatch.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayLodGroup.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayPivotsAndLimits.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayPose.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayShape.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplaySkeleton.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayTexture.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\DisplayUserProperties.h" />
+    <ClInclude Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common\Common.h" />
+    <ClCompile Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\Common\Common.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\build\ZERO_CHECK.vcxproj">
+      <Project>{F476AC85-FA3F-37F7-A147-C8990CC6D79D}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
