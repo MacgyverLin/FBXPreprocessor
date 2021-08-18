@@ -34,11 +34,11 @@ public:
 	
 	const Polygon& GetPolygon(int i) const;
 
+	int GetVerticesCount() const;
+
 	friend void ConvertTriangleFanToTriangles(Mesh& mesh);
 
 	friend Mesh Intersect(const Mesh& m0, const Mesh& m1);
-
-	int GetVerticesCount() const;
 private:
 	int maxMaterialIdx;
 

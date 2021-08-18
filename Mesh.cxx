@@ -121,7 +121,6 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 	a.invert();
 	return CSG.fromPolygons(a.allPolygons());
 #endif
-
 	Mesh result;
 
 	if (!m0.IsEmpty() && !m1.IsEmpty())
@@ -146,6 +145,14 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 
 		// output
 		a.ToPolygons(result.polygons1);
+
+		result.maxMaterialIdx = m0.maxMaterialIdx;
+		result.colorChannelCount = m0.colorChannelCount;
+		result.uvChannelCount = m0.uvChannelCount;
+		result.normalChannelCount = m0.normalChannelCount;
+		result.tangentChannelCount = m0.tangentChannelCount;
+		result.binormalChannelCount = m0.binormalChannelCount;
+		result.aabb1 = m0.aabb1;
 	}
 	else if (m0.IsEmpty() && !m1.IsEmpty())
 	{

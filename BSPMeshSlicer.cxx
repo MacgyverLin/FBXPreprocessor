@@ -47,7 +47,7 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 	cutters.resize(count * 2);
 	for (size_t i = 0; i < cutters.size(); i += 2)
 	{
-		Polygon p = MakeCutterPolygon(mesh, materialID);
+		Polygon p = MakeCutterPolygon(mesh, materialID, true, true);
 
 		cutters[i + 0].Add(p);
 
@@ -57,12 +57,12 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 	}
 }
 
-Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID)
+Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID, bool randomizeNormal, bool randomizeCenter)
 {
 	Vector3 rotateAxis(Math::UnitRandom(), Math::UnitRandom(), Math::UnitRandom()); rotateAxis.Normalize();
 
-	Vector3 normal = mesh.GetAABB().GetMajorAxis(true);
-	Vector3 center = mesh.GetAABB().GetCenter(true);
+	Vector3 normal = mesh.GetAABB().GetMajorAxis(randomizeNormal);
+	Vector3 center = mesh.GetAABB().GetCenter(randomizeCenter);
 	Vector3 tangent = Matrix4(rotateAxis, 90).TimesDirectionVector(normal);
 	Vector3 binormal = normal.Cross(tangent);
 
@@ -72,34 +72,34 @@ Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID)
 
 	/////////////////////////////////////////////////////////////
 	std::vector<Vertex> vertices;
-	vertices.push_back(MakeVertex(center, normal, tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(center, normal, tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(center, normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(center, normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
 
 	return Polygon(materialID, vertices);
 }
 
-Vertex BSPMeshSlicer::MakeVertex(const Vector3& center, const Vector3& normal, const Vector3& tangent, const Vector3& binormal, float polygonSize,
+Vertex BSPMeshSlicer::MakeVertex(const Mesh& mesh, const Vector3& center, const Vector3& normal, const Vector3& tangent, const Vector3& binormal, float polygonSize,
 	const Matrix4& projMatrix, float uvScale)
 {
 	Vertex v;
 	v.position = center + tangent * polygonSize + binormal * polygonSize;
 	Vector3 vProj = projMatrix.TimesPositionVector(v.position);
 
-	for (size_t i = 0; i < NUM_COLORS; i++)
+	for (size_t i = 0; i < mesh.colorChannelCount; i++)
 		v.colors[i] = Color(1.0, 1.0, 1.0, 1.0);
 
-	for (size_t i = 0; i < NUM_UVS; i++)
+	for (size_t i = 0; i < mesh.uvChannelCount; i++)
 		v.uvs[i] = Vector2(vProj.X(), vProj.Y()) * uvScale;
 
-	for (size_t i = 0; i < NUM_NORMALS; i++)
+	for (size_t i = 0; i < mesh.normalChannelCount; i++)
 		v.normals[i] = normal;
 
-	for (size_t i = 0; i < NUM_TANGENTS; i++)
+	for (size_t i = 0; i < mesh.tangentChannelCount; i++)
 		v.tangents[i] = tangent;
 
-	for (size_t i = 0; i < NUM_BINORMALS; i++)
+	for (size_t i = 0; i < mesh.binormalChannelCount; i++)
 		v.binormals[i] = binormal;
 
 	return v;

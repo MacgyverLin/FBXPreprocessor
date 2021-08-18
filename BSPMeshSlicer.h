@@ -23,8 +23,8 @@ private:
 	Mesh Slice(const Mesh& mesh, const Mesh& cutter) const;
 
 	void MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int count);
-	Polygon MakeCutterPolygon(const Mesh& mesh, int materialID);
-	Vertex MakeVertex(const Vector3& center, const Vector3& normal, const Vector3& tangent, const Vector3& binormal, float polygonSize,
+	Polygon MakeCutterPolygon(const Mesh& mesh, int materialID, bool randomizeNormal, bool randomizeCenter);
+	Vertex MakeVertex(const Mesh& mesh, const Vector3& center, const Vector3& normal, const Vector3& tangent, const Vector3& binormal, float polygonSize,
 		const Matrix4& projMatrix, float uvScale);
 };
 

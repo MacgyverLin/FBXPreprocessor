@@ -23,17 +23,11 @@ private:
 	FbxNode* BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name);
 
 	void FillPosition(FbxMesh* dstMesh, const Mesh& mesh);
-	void FillDirectColor(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillDirectNormal(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillDirectUV(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillDirectTangent(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillDirectBinormal(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-
-	void FillIndexedColor(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillIndexedNormal(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillIndexedUV(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillIndexedTangent(FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillIndexedBinormal(FbxMesh* dstMesh, const Mesh& mesh, int ch);
+	void FillColor(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
+	void FillNormal(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
+	void FillUV(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
+	void FillTangent(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
+	void FillBinormal(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 
 	void FillPolygon(FbxMesh* dstMesh, const Mesh& mesh);
 	void FillMaterial(FbxMesh* dstMesh, FbxNode* dstNode);

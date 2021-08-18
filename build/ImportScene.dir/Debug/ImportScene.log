@@ -1,6 +1,45 @@
-﻿  BSPMeshSlicer.cxx
+﻿  FBXMeshBuilder.cxx
 D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\Argument.h(27,8): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\Argument.h(40,8): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\FBXMeshBuilder.cxx(129,40): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(134,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(139,37): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(144,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(149,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(171,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(173,40): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(173,53): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(204,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(205,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(205,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(228,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(229,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(229,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(253,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(254,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(254,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(277,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(278,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(278,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(301,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(302,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(302,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(327,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(329,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(344,68): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(26,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(18): message : while compiling class template member function 'void VertexBatcher<Vector2>::Add(const T &)'
+          with
+          [
+              T=Vector2
+          ]
+..\FBXMeshBuilder.cxx(254): message : see reference to function template instantiation 'void VertexBatcher<Vector2>::Add(const T &)' being compiled
+          with
+          [
+              T=Vector2
+          ]
+..\FBXMeshBuilder.cxx(251): message : see reference to class template instantiation 'VertexBatcher<Vector2>' being compiled
+..\FBXMeshBuilder.cxx(40,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\Argument.h(20,13): warning C4505: 'InfoMsg': unreferenced local function has been removed
 D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\Argument.h(33,13): warning C4505: 'ErrorMsg': unreferenced local function has been removed
 D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\Argument.h(46,13): warning C4505: 'DisplayMaterialMapping1': unreferenced local function has been removed
