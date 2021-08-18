@@ -1,7 +1,7 @@
 #ifndef _MeshBuilder_h_
 #define _MeshBuilder_h_
 
-#include "../Common/Common.h"
+#include "Common.h"
 #include <vector>
 #include <map>
 #include <assert.h>

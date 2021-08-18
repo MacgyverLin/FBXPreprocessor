@@ -281,7 +281,7 @@ void BSP::GetPolygonsType(const Plane& splitPlane, const Polygon& polygon, int& 
 
 int BSP::GetSplitPlaneIdx(const std::vector<Polygon>& polygons) const
 {
-	return Math::RangeRandom(0,  polygons.size()-1);
+	return (int)Math::RangeRandom(0,  polygons.size()-1);
 	
 	/*
 	int coplanerCount = 0;

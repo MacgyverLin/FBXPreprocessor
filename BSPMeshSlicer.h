@@ -1,11 +1,6 @@
 #ifndef _BSPMeshSlicer_h_
 #define _BSPMeshSlicer_h_
 
-#include "../Common/Common.h"
-#include <vector>
-#include <map>
-#include <assert.h>
-
 #include "Argument.h"
 #include "Matrix4.h"
 #include "Mesh.h"
@@ -18,6 +13,7 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////
 	bool Slice(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays);
+	bool Copy(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays);
 private:
 	bool Slice(const Mesh& mesh, const MeshArray& cutters, MeshArray& slicedMeshArray);
 	Mesh Slice(const Mesh& mesh, const Mesh& cutter) const;

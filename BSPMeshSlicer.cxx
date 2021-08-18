@@ -9,6 +9,18 @@ BSPMeshSlicer::~BSPMeshSlicer()
 {
 }
 
+bool BSPMeshSlicer::Copy(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays)
+{
+	precutMeshArrays.resize(meshes.size());
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		precutMeshArrays[i].resize(1);
+		precutMeshArrays[i][0] = meshes[i];
+	}
+
+	return true;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 bool BSPMeshSlicer::Slice(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays)
 {

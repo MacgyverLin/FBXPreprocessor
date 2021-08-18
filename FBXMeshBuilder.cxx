@@ -93,15 +93,15 @@ bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& 
 
 /*
 TODO:
-	1) indexed done, not check
+	1) checked indexed done
 
-	2) mesh.colorChannelCount, mesh.normalChannelCount...
-	for (size_t ch = 0; ch < NUM_COLORS; ch++)...
-	for (size_t ch = 0; ch < NUM_NORMALS; ch++)...
+	2) checked mesh.colorChannelCount, mesh.normalChannelCount
+		for (size_t ch = 0; ch < NUM_COLORS; ch++)...
+		for (size_t ch = 0; ch < NUM_NORMALS; ch++)...
 
-	3) Split plane Selection
+	3) indexed position
 
-	4) indexed position
+	4) Split plane Selection
 */
 
 FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name)
@@ -149,8 +149,9 @@ FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, cons
 
 	////////////////////////////////////////////////////////
 	// fill polygons
-	FillPosition(dstMesh, mesh);
-	FillPolygon(dstMesh, mesh);
+	//FillPosition(dstMesh, mesh);
+	//FillPolygon(dstMesh, mesh);
+	FillPolygon2(useBatch, dstMesh, mesh);
 
 	////////////////////////////////////////////////////////
 	// fill material
@@ -160,23 +161,6 @@ FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, cons
 	FillMaterial(dstMesh, fbxNode);
 
 	return dstNode;
-}
-
-void FBXMeshBuilder::FillPosition(FbxMesh* dstMesh, const Mesh& mesh)
-{
-	int vertexIdx = 0;
-	
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-	{
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-		{
-			const Vector3& p = mesh.GetPolygon(i).GetVertex(k).position;
-
-			dstMesh->mControlPoints.Add(FbxVector4(p.X(), p.Y(), p.Z(), 0.0));
-
-			vertexIdx++;
-		}
-	}
 }
 
 /*
@@ -335,6 +319,23 @@ void FBXMeshBuilder::FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 	}
 }
 
+void FBXMeshBuilder::FillPosition(FbxMesh* dstMesh, const Mesh& mesh)
+{
+	int vertexIdx = 0;
+
+	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
+	{
+		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
+		{
+			const Vector3& p = mesh.GetPolygon(i).GetVertex(k).position;
+
+			dstMesh->mControlPoints.Add(FbxVector4(p.X(), p.Y(), p.Z(), 0.0));
+
+			vertexIdx++;
+		}
+	}
+}
+
 void FBXMeshBuilder::FillPolygon(FbxMesh* dstMesh, const Mesh& mesh)
 {
 	int vertexIdx = 0;
@@ -345,6 +346,37 @@ void FBXMeshBuilder::FillPolygon(FbxMesh* dstMesh, const Mesh& mesh)
 		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
 		{
 			dstMesh->AddPolygon(vertexIdx);
+
+			vertexIdx++;
+		}
+
+		dstMesh->EndPolygon();
+	}
+}
+
+void FBXMeshBuilder::FillPolygon2(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh)
+{
+	VertexBatcher<Vector3> batcher(useBatch);
+	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
+		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
+			batcher.Add(mesh.GetPolygon(i).GetVertex(k).position);
+
+	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	{
+		const Vector3& p = batcher.vertices[i];
+		dstMesh->mControlPoints.Add(FbxVector4(p.X(), p.Y(), p.Z(), 0.0));
+	}
+
+
+
+	int vertexIdx = 0;
+	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
+	{
+		dstMesh->BeginPolygon(mesh.GetPolygon(i).materialIdx);
+
+		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
+		{
+			dstMesh->AddPolygon(batcher.indices[vertexIdx]);
 
 			vertexIdx++;
 		}
