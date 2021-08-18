@@ -24,8 +24,8 @@ private:
 
 	void FillPosition(FbxMesh* dstMesh, const Mesh& mesh);
 	void FillColor(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
-	void FillNormal(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 	void FillUV(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
+	void FillNormal(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 	void FillTangent(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 	void FillBinormal(bool directMode, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 

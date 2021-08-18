@@ -207,7 +207,7 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int l
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
 	mesh.colorChannelCount = std::min(fbxMesh->GetElementVertexColorCount(), NUM_COLORS);
-	for (int layer = 0; layer < fbxMesh->GetElementVertexColorCount() && layer < NUM_COLORS; layer++)
+	for (int layer = 0; layer < mesh.colorChannelCount; layer++)
 	{
 		FbxGeometryElementVertexColor* leVtxc = fbxMesh->GetElementVertexColor(layer);
 		// FBXSDK_sprintf(header, 100, "            Color vertex: ");
@@ -300,7 +300,7 @@ bool MeshBuilder::BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lCon
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
 	mesh.uvChannelCount = std::min(fbxMesh->GetElementUVCount(), NUM_UVS);
-	for (int layer = 0; layer < fbxMesh->GetElementUVCount() && layer < NUM_UVS; ++layer)
+	for (int layer = 0; layer < mesh.uvChannelCount; ++layer)
 	{
 		FbxGeometryElementUV* leUV = fbxMesh->GetElementUV(layer);
 		// FBXSDK_sprintf(header, 100, "            Texture UV: ");
@@ -386,7 +386,7 @@ bool MeshBuilder::BuildNormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int 
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
 	mesh.normalChannelCount = std::min(fbxMesh->GetElementNormalCount(), NUM_NORMALS);
-	for (int layer = 0; layer < fbxMesh->GetElementNormalCount() && layer < NUM_NORMALS; ++layer)
+	for (int layer = 0; layer < mesh.normalChannelCount; ++layer)
 	{
 		FbxGeometryElementNormal* leNormal = fbxMesh->GetElementNormal(layer);
 		// FBXSDK_sprintf(header, 100, "            Normal: ");
@@ -449,7 +449,7 @@ bool MeshBuilder::BuildTangent(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
 	mesh.tangentChannelCount = std::min(fbxMesh->GetElementTangentCount(), NUM_TANGENTS);
-	for (int layer = 0; layer < fbxMesh->GetElementTangentCount() && layer < NUM_TANGENTS; ++layer)
+	for (int layer = 0; layer < mesh.tangentChannelCount; ++layer)
 	{
 		FbxGeometryElementTangent* leTangent = fbxMesh->GetElementTangent(layer);
 		// FBXSDK_sprintf(header, 100, "            Tangent: ");
@@ -512,7 +512,7 @@ bool MeshBuilder::BuildBinormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, in
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
 	mesh.binormalChannelCount = std::min(fbxMesh->GetElementBinormalCount(), NUM_BINORMALS);
-	for (int layer = 0; layer < fbxMesh->GetElementBinormalCount() && layer < NUM_BINORMALS; ++layer)
+	for (int layer = 0; layer < mesh.binormalChannelCount; ++layer)
 	{
 		FbxGeometryElementBinormal* leBinormal = fbxMesh->GetElementBinormal(layer);
 

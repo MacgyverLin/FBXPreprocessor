@@ -26,7 +26,22 @@ Vertex::Vertex(const Vector3& position, const Vector3& normal, const Vector2& uv
 
 Vertex::Vertex(const Vertex& other)
 {
-	memcpy(this, &other, sizeof(Vertex));
+	position = other.position;
+
+	for (size_t i = 0; i < NUM_COLORS; i++)
+		colors[i] = other.colors[i];
+
+	for (size_t i = 0; i < NUM_UVS; i++)
+		uvs[i] = other.uvs[i];
+
+	for (size_t i = 0; i < NUM_NORMALS; i++)
+		normals[i] = other.normals[i];
+
+	for (size_t i = 0; i < NUM_TANGENTS; i++)
+		tangents[i] = other.tangents[i];
+
+	for (size_t i = 0; i < NUM_BINORMALS; i++)
+		binormals[i] = other.binormals[i];
 }
 
 Vertex& Vertex::operator = (const Vertex& other)

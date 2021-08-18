@@ -24,7 +24,7 @@ Mesh::Mesh(const Mesh& other)
 	uvChannelCount = other.uvChannelCount;
 	normalChannelCount = other.normalChannelCount;
 	tangentChannelCount = other.tangentChannelCount;
-	binormalChannelCount = other.colorChannelCount;
+	binormalChannelCount = other.binormalChannelCount;
 
 	aabb1 = other.aabb1;
 	polygons1 = other.polygons1;
@@ -38,7 +38,7 @@ Mesh& Mesh::operator = (const Mesh& other)
 	uvChannelCount = other.uvChannelCount;
 	normalChannelCount = other.normalChannelCount;
 	tangentChannelCount = other.tangentChannelCount;
-	binormalChannelCount = other.colorChannelCount;
+	binormalChannelCount = other.binormalChannelCount;
 
 	aabb1 = other.aabb1;
 	polygons1 = other.polygons1;
@@ -144,8 +144,6 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 		a.Invert();			// ~(~A | ~B)
 
 		// output
-		a.ToPolygons(result.polygons1);
-
 		result.maxMaterialIdx = m0.maxMaterialIdx;
 		result.colorChannelCount = m0.colorChannelCount;
 		result.uvChannelCount = m0.uvChannelCount;
@@ -153,6 +151,7 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 		result.tangentChannelCount = m0.tangentChannelCount;
 		result.binormalChannelCount = m0.binormalChannelCount;
 		result.aabb1 = m0.aabb1;
+		a.ToPolygons(result.polygons1);
 	}
 	else if (m0.IsEmpty() && !m1.IsEmpty())
 	{

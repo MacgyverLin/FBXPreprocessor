@@ -120,36 +120,36 @@ FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, cons
 
 	////////////////////////////////////////////////////////
 	// fill position
-	FillPosition(dstMesh, mesh);
-
-	bool useBatch = false;
+	bool useBatch = true;
+	bool useChannelCount = true;
 	////////////////////////////////////////////////////////
 	// fill color
-	for (size_t ch = 0; ch < NUM_COLORS; ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.colorChannelCount : NUM_COLORS); ch++)
 		FillColor(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill normal
-	for (size_t ch = 0; ch < NUM_NORMALS; ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.normalChannelCount : NUM_NORMALS); ch++)
 		FillNormal(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill uv
-	for (size_t ch = 0; ch < NUM_UVS; ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.uvChannelCount : NUM_UVS); ch++)
 		FillUV(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill tangent
-	for (size_t ch = 0; ch < NUM_TANGENTS; ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.tangentChannelCount : NUM_TANGENTS); ch++)
 		FillTangent(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill binormal
-	for (size_t ch = 0; ch < NUM_BINORMALS; ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.binormalChannelCount : NUM_BINORMALS); ch++)
 		FillBinormal(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill polygons
+	FillPosition(dstMesh, mesh);
 	FillPolygon(dstMesh, mesh);
 
 	////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ void FBXMeshBuilder::FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh
 
 	FbxGeometryElementVertexColor* geometryElementVertexColor = dstMesh->CreateElementVertexColor();
 	geometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
-	geometryElementVertexColor->SetReferenceMode(useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect);
+	geometryElementVertexColor->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)
 	{
@@ -214,35 +214,13 @@ void FBXMeshBuilder::FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh
 		geometryElementVertexColor->GetDirectArray().Add(FbxColor(c[0], c[1], c[2], c[3]));
 	}
 
-	for (size_t i = 0; i < batcher.indices.size(); i++)
+	if (useBatch)
 	{
-		int idx = batcher.indices[i];
-		geometryElementVertexColor->GetIndexArray().Add(idx);
-	}
-}
-
-void FBXMeshBuilder::FillNormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch)
-{
-	VertexBatcher<Vector3> batcher(useBatch);
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-			batcher.Add(mesh.GetPolygon(i).GetVertex(k).normals[ch]);
-
-
-	FbxGeometryElementNormal* geometryElementNormal = dstMesh->CreateElementNormal();
-	geometryElementNormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
-	geometryElementNormal->SetReferenceMode(useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect);
-
-	for (size_t i = 0; i < batcher.vertices.size(); i++)
-	{
-		const Vector3& n = batcher.vertices[i];
-		geometryElementNormal->GetDirectArray().Add(FbxVector4(n.X(), n.Y(), n.Z(), 0.0f));
-	}
-
-	for (size_t i = 0; i < batcher.indices.size(); i++)
-	{
-		int idx = batcher.indices[i];
-		geometryElementNormal->GetIndexArray().Add(idx);
+		for (size_t i = 0; i < batcher.indices.size(); i++)
+		{
+			int idx = batcher.indices[i];
+			geometryElementVertexColor->GetIndexArray().Add(idx);
+		}
 	}
 }
 
@@ -254,8 +232,8 @@ void FBXMeshBuilder::FillUV(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, i
 			batcher.Add(mesh.GetPolygon(i).GetVertex(k).uvs[ch]);
 
 	FbxGeometryElementUV* geometryElementUV = dstMesh->CreateElementUV(FbxString("UV") + ((int)(ch + 1)));
-	geometryElementUV->SetMappingMode(FbxGeometryElement::eByControlPoint);
-	geometryElementUV->SetReferenceMode(useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect);
+	geometryElementUV->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+	geometryElementUV->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)
 	{
@@ -263,10 +241,42 @@ void FBXMeshBuilder::FillUV(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, i
 		geometryElementUV->GetDirectArray().Add(FbxVector2(uv.X(), uv.Y()));
 	}
 
-	for (size_t i = 0; i < batcher.indices.size(); i++)
+	if (useBatch)
 	{
-		int idx = batcher.indices[i];
-		geometryElementUV->GetIndexArray().Add(idx);
+		for (size_t i = 0; i < batcher.indices.size(); i++)
+		{
+			int idx = batcher.indices[i];
+			geometryElementUV->GetIndexArray().Add(idx);
+		}
+	}
+}
+
+void FBXMeshBuilder::FillNormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch)
+{
+	VertexBatcher<Vector3> batcher(useBatch);
+	int v = mesh.GetVerticesCount();
+	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
+		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
+			batcher.Add(mesh.GetPolygon(i).GetVertex(k).normals[ch]);
+
+
+	FbxGeometryElementNormal* geometryElementNormal = dstMesh->CreateElementNormal();
+	geometryElementNormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
+	geometryElementNormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
+
+	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	{
+		const Vector3& n = batcher.vertices[i];
+		geometryElementNormal->GetDirectArray().Add(FbxVector4(n.X(), n.Y(), n.Z(), 0.0f));
+	}
+
+	if (useBatch)
+	{
+		for (size_t i = 0; i < batcher.indices.size(); i++)
+		{
+			int idx = batcher.indices[i];
+			geometryElementNormal->GetIndexArray().Add(idx);
+		}
 	}
 }
 
@@ -279,7 +289,7 @@ void FBXMeshBuilder::FillTangent(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 
 	FbxGeometryElementTangent* geometryElementTangent = dstMesh->CreateElementTangent();
 	geometryElementTangent->SetMappingMode(FbxGeometryElement::eByControlPoint);
-	geometryElementTangent->SetReferenceMode(useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect);
+	geometryElementTangent->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)
 	{
@@ -287,10 +297,13 @@ void FBXMeshBuilder::FillTangent(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 		geometryElementTangent->GetDirectArray().Add(FbxVector4(t.X(), t.Y(), t.Z(), 0.0f));
 	}
 
-	for (size_t i = 0; i < batcher.indices.size(); i++)
+	if (useBatch)
 	{
-		int idx = batcher.indices[i];
-		geometryElementTangent->GetIndexArray().Add(idx);
+		for (size_t i = 0; i < batcher.indices.size(); i++)
+		{
+			int idx = batcher.indices[i];
+			geometryElementTangent->GetIndexArray().Add(idx);
+		}
 	}
 }
 
@@ -304,7 +317,7 @@ void FBXMeshBuilder::FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 
 	FbxGeometryElementBinormal* geometryElementBinormal = dstMesh->CreateElementBinormal();
 	geometryElementBinormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
-	geometryElementBinormal->SetReferenceMode(useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect);
+	geometryElementBinormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)
 	{
@@ -312,10 +325,13 @@ void FBXMeshBuilder::FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 		geometryElementBinormal->GetDirectArray().Add(FbxVector4(b.X(), b.Y(), b.Z(), 0.0f));
 	}
 
-	for (size_t i = 0; i < batcher.indices.size(); i++)
+	if (useBatch)
 	{
-		int idx = batcher.indices[i];
-		geometryElementBinormal->GetIndexArray().Add(idx);
+		for (size_t i = 0; i < batcher.indices.size(); i++)
+		{
+			int idx = batcher.indices[i];
+			geometryElementBinormal->GetIndexArray().Add(idx);
+		}
 	}
 }
 
