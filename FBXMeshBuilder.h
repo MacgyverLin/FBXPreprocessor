@@ -28,9 +28,7 @@ private:
 	void FillTangent(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 	void FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 
-	void FillPosition(FbxMesh* dstMesh, const Mesh& mesh);
-	void FillPolygon(FbxMesh* dstMesh, const Mesh& mesh);
-	void FillPolygon2(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh);
+	void FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh);
 
 	void FillMaterial(FbxMesh* dstMesh, FbxNode* dstNode);
 	

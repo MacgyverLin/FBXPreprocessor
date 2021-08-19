@@ -10,17 +10,19 @@ int main(int argc, const char** argv)
 	{
 		"1.fbx",
 		"2.fbx",
-		"3.fbx"
+		"3.fbx",
+		"4.fbx"
 	};
 
 	const char* fileout[] =
 	{
 		"1out.fbx",
 		"2out.fbx",
-		"3out.fbx"
+		"3out.fbx",
+		"4out.fbx"
 	};
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 3; i < 4; i++)
 	{
 		// Prepare the FBX SDK.
 		FbxManager* sdkManager = NULL;

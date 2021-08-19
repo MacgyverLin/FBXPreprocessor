@@ -245,6 +245,7 @@ void BSP::GetPolygonsType(const Plane& splitPlane, const Polygon& polygon, int& 
 	spanCount = 0;
 
 	int polygonType = 0;
+	std::vector<int> types(polygon.vertices.size());
 	for (int i = 0; i < polygon.vertices.size(); i++)
 	{
 		float d = splitPlane.DistanceTo(polygon.vertices[i].position);
@@ -257,33 +258,32 @@ void BSP::GetPolygonsType(const Plane& splitPlane, const Polygon& polygon, int& 
 			type = PolygonType::Coplanar;
 
 		polygonType |= type;
+		types[i] = type;
 	}
 
+	Plane p = GetPlane(polygon);
 	switch (polygonType)
 	{
 	case PolygonType::Coplanar:
 		coplanerCount++;
 		break;
-
 	case PolygonType::Front:
 		frontCount++;
 		break;
-
 	case PolygonType::Back:
 		backCount++;
 		break;
-
 	case PolygonType::Spanning:
 		spanCount++;
 		break;
 	}
 }
 
+
 int BSP::GetSplitPlaneIdx(const std::vector<Polygon>& polygons) const
 {
 	return (int)Math::RangeRandom(0,  polygons.size()-1);
 	
-	/*
 	int coplanerCount = 0;
 	int frontCount = 0;
 	int backCount = 0;
@@ -293,15 +293,21 @@ int BSP::GetSplitPlaneIdx(const std::vector<Polygon>& polygons) const
 	int minSpanIdx = 0;
 	int minDiff = 0x7fffffff;
 	int minDiffIdx = 0;
-	for (int i = 0; i < polygons.size(); i++)
+	for (int i = 0; i < polygons.size()-1; i++)
 	{
-		for (int j = 0; j < polygons.size(); j++)
+		Plane p = GetPlane(polygons[i]);
+		for (int j = i+1; j < polygons.size(); j++)
 		{
-			GetPolygonsType(polygons[i].GetPlane(), polygons[j], coplanerCount, frontCount, backCount, spanCount);
+			GetPolygonsType(p, polygons[j], coplanerCount, frontCount, backCount, spanCount);
 			if (minSpan > spanCount)
 			{
 				minSpanIdx = i;
 				minSpan = spanCount;
+
+				if (minSpanIdx != 0)
+				{
+					minSpanIdx = minSpanIdx;
+				}
 			}
 
 			int diff = abs(frontCount - backCount);
@@ -314,6 +320,5 @@ int BSP::GetSplitPlaneIdx(const std::vector<Polygon>& polygons) const
 	}
 
 	return minSpanIdx;
-	return minDiffIdx;
-	*/
+	// return minDiffIdx;
 }

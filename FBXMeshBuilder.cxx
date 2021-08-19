@@ -83,8 +83,7 @@ bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& 
 			name += FbxString("_");
 			name += (int)j;
 
-			FbxNode* newMeshNode = BuildFbxMesh(fbxScene, fbxNodes[i], precutMeshArrays[i][j], name);
-			fbxNodes[i]->AddChild(newMeshNode);
+			BuildFbxMesh(fbxScene, fbxNodes[i], precutMeshArrays[i][j], name);
 		}
 	}
 
@@ -149,37 +148,36 @@ FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, cons
 
 	////////////////////////////////////////////////////////
 	// fill polygons
-	//FillPosition(dstMesh, mesh);
-	//FillPolygon(dstMesh, mesh);
-	FillPolygon2(useBatch, dstMesh, mesh);
+	FillPolygon(useBatch, dstMesh, mesh);
 
 	////////////////////////////////////////////////////////
-	// fill material
+	// fill material 
 	FbxNode* dstNode = FbxNode::Create(fbxScene, name);
-	dstNode->SetNodeAttribute(dstMesh);
+	dstNode->SetNodeAttribute(dstMesh); 
+
+	fbxNode->AddChild(dstNode);
+	
+	auto t1 = fbxNode->GeometricTranslation.Get();
+	auto r1 = fbxNode->GeometricRotation.Get();
+	auto s1 = fbxNode->GeometricScaling.Get();
+	auto t2 = fbxNode->LclTranslation.Get();
+	auto r2 = fbxNode->LclRotation.Get();
+	auto s2 = fbxNode->LclScaling.Get();
+	t2 = FbxDouble3(0.0f, 0.0f, 0.0f);
+	r2 = FbxDouble3(0.0f, 0.0f, 0.0f);
+	s2 = FbxDouble3(1.0f, 1.0f, 1.0f);
+
+	//dstNode->GeometricTranslation.Set(t1);
+	//dstNode->GeometricRotation.Set(r1);
+	//dstNode->GeometricScaling.Set(s1);
+	//dstNode->LclTranslation.Set(t2);
+	//dstNode->LclRotation.Set(r2);
+	//dstNode->LclScaling.Set(s2);
 
 	FillMaterial(dstMesh, fbxNode);
 
 	return dstNode;
 }
-
-/*
-void FBXMeshBuilder::FillColor(FbxMesh* dstMesh, const Mesh& mesh, int ch)
-{
-	FbxGeometryElementVertexColor* geometryElementVertexColor = dstMesh->CreateElementVertexColor();
-	geometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
-	geometryElementVertexColor->SetReferenceMode(FbxGeometryElement::eDirect);
-
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-	{
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-		{
-			const Color& c = mesh.GetPolygon(i).GetVertex(k).colors[ch];
-			geometryElementVertexColor->GetDirectArray().Add(FbxColor(c[0], c[1], c[2], c[3]));
-		}
-	}
-}
-*/
 
 void FBXMeshBuilder::FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch)
 {
@@ -319,42 +317,7 @@ void FBXMeshBuilder::FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 	}
 }
 
-void FBXMeshBuilder::FillPosition(FbxMesh* dstMesh, const Mesh& mesh)
-{
-	int vertexIdx = 0;
-
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-	{
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-		{
-			const Vector3& p = mesh.GetPolygon(i).GetVertex(k).position;
-
-			dstMesh->mControlPoints.Add(FbxVector4(p.X(), p.Y(), p.Z(), 0.0));
-
-			vertexIdx++;
-		}
-	}
-}
-
-void FBXMeshBuilder::FillPolygon(FbxMesh* dstMesh, const Mesh& mesh)
-{
-	int vertexIdx = 0;
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-	{
-		dstMesh->BeginPolygon(mesh.GetPolygon(i).materialIdx);
-
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-		{
-			dstMesh->AddPolygon(vertexIdx);
-
-			vertexIdx++;
-		}
-
-		dstMesh->EndPolygon();
-	}
-}
-
-void FBXMeshBuilder::FillPolygon2(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh)
+void FBXMeshBuilder::FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh)
 {
 	VertexBatcher<Vector3> batcher(useBatch);
 	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
@@ -366,7 +329,6 @@ void FBXMeshBuilder::FillPolygon2(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 		const Vector3& p = batcher.vertices[i];
 		dstMesh->mControlPoints.Add(FbxVector4(p.X(), p.Y(), p.Z(), 0.0));
 	}
-
 
 
 	int vertexIdx = 0;
@@ -388,8 +350,8 @@ void FBXMeshBuilder::FillPolygon2(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 void FBXMeshBuilder::FillMaterial(FbxMesh* dstMesh, FbxNode* fbxNode)
 {
 	FbxMesh* srcMesh = fbxNode->GetMesh();
-	for (size_t i = 0; i < srcMesh->GetNode()->GetMaterialCount(); i++)
-		dstMesh->GetNode()->AddMaterial(srcMesh->GetNode()->GetMaterial(i));
+	for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
+		dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
 }
 
 /////////////////////////////////////////////////////////////////////////////////

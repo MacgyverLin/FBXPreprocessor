@@ -1,2 +1,43 @@
-﻿  main.cxx
+﻿  FBXMeshBuilder.cxx
+..\FBXMeshBuilder.cxx(127,40): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(132,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(137,37): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(142,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(147,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(186,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(187,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(187,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(213,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(214,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(214,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(241,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(242,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(242,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(239,6): warning C4189: 'v': local variable is initialized but not referenced
+..\FBXMeshBuilder.cxx(269,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(270,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(270,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(296,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(297,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(297,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(324,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(325,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(325,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(337,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(339,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(354,57): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(352,11): warning C4189: 'srcMesh': local variable is initialized but not referenced
+..\FBXMeshBuilder.cxx(26,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(18): message : while compiling class template member function 'void VertexBatcher<Vector3>::Add(const T &)'
+          with
+          [
+              T=Vector3
+          ]
+..\FBXMeshBuilder.cxx(242): message : see reference to function template instantiation 'void VertexBatcher<Vector3>::Add(const T &)' being compiled
+          with
+          [
+              T=Vector3
+          ]
+..\FBXMeshBuilder.cxx(238): message : see reference to class template instantiation 'VertexBatcher<Vector3>' being compiled
+..\FBXMeshBuilder.cxx(40,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   ImportScene.vcxproj -> D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\ImportScene.exe
