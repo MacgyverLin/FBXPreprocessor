@@ -44,20 +44,23 @@ public class Destruction : MonoBehaviour
         meshCollider.convex = true;
     }
 
-    public void Destruct(bool doFading, float timeout, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    public void Destruct(bool doFading, float rigidBodyTime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
-        StartCoroutine(DestructionCoroutine(doFading, timeout, explosionForce, explosionRadius, upwardsModifier, mode));
+        StartCoroutine(DestructionCoroutine(doFading, rigidBodyTime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
     }
 
-    private IEnumerator DestructionCoroutine(bool doFading, float timeout, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
+    private IEnumerator DestructionCoroutine(bool doFading, float rigidBodyTime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
     {
         BeginDestruct(explosionForce, explosionRadius, upwardsModifier, mode);
 
-        yield return WaitAllRigidBodySleptOrTimeOut(timeout);
+        yield return WaitAllRigidBodySleptOrTimeOut(Random.Range(1.0f, rigidBodyTime));
+        //yield return new WaitForSeconds(Random.Range(1.0f, rigidBodyTime));
+
+        yield return new WaitForSeconds(1.0f);
 
         if (doFading)
         {
-            yield return FadeChild();
+            yield return FadeChild(Random.Range(1.0f, fadeTime));
 
             yield return HideChild();
         }
@@ -118,26 +121,52 @@ public class Destruction : MonoBehaviour
         }
     }
 
-    public virtual float ChangeAlpha(Material material)
-    {
-        return 0.0f;
-    }
-
-    IEnumerator FadeChild()
-    {
-        yield return null;
-    }
-
-    IEnumerator HideChild()
+    IEnumerator FadeChild(float timeout)
     {
         // can cache component?
         List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
         for (int i = 0; i < transform.childCount; i++)
             meshRenderers.Add(transform.GetChild(i).GetComponent<MeshRenderer>());
 
+        float startTime = Time.time;
+        while ( (Time.time - startTime) < timeout)
+        {
+            float alpha = 1.0f - ((Time.time - startTime) / timeout);
+            if (alpha < 0.0f)
+                yield break;
+
+            foreach (var meshRenderer in meshRenderers)
+            {
+                // ChangeAlpha(meshRenderer.materials, "_Alpha", alpha);
+
+                foreach (var material in meshRenderer.materials)
+                {
+                    material.SetFloat("_Alpha", alpha);
+                }
+            }
+
+            yield return null;
+        }
+    }
+
+    public void ChangeAlpha(Material[] materials, string name, float alpha)
+    {
+        foreach (var material in materials)
+        {
+            material.SetFloat("_Alpha", alpha);
+            material.SetInt("MySrcMode", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            material.SetInt("MyDstMode", (int)UnityEngine.Rendering.BlendMode.Zero);
+        }
+    }
+
+    IEnumerator HideChild()
+    {
+        List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
+        for (int i = 0; i < transform.childCount; i++)
+            meshRenderers.Add(transform.GetChild(i).GetComponent<MeshRenderer>());
+
         foreach (var meshRenderer in meshRenderers)
         {
-            // Debug.Log(transform.GetChild(i).gameObject.name);
             meshRenderer.enabled = false;
         }
 

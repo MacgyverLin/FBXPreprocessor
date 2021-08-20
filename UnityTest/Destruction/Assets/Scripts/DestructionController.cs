@@ -11,7 +11,8 @@ public class DestructionController : MonoBehaviour
     public float upwardsModifier = 10.0f;
     public ForceMode mode = ForceMode.Force;
     public bool doFading = true;
-    public float timeout = 4.0f;
+    public float rigidBodyTime = 4.0f;
+    public float fadeTime = 1.0f;
 
     // Start is void called before the first frame update
     void Start()
@@ -25,7 +26,7 @@ public class DestructionController : MonoBehaviour
         {
             Debug.Log("space key was pressed");
             foreach (var d in destructables)
-                d.GetComponent<Destruction>().Destruct(doFading, timeout, explosionForce, explosionRadius, upwardsModifier, mode);
+                d.GetComponent<Destruction>().Destruct(doFading, rigidBodyTime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
         }
     }
 }

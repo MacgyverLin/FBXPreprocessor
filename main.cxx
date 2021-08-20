@@ -3,18 +3,20 @@
 #include "FBXMeshBuilder.h"
 
 // Todo: 
-// 2) Face Material Order
 /*
 TODO:
-	1) Done!!!!!!!!!!! checked indexed
+	1) Done!!!!!!!!!!! indexed color, uv, tangent, binormal
 
-	2) Done!!!!!!!!!!! checked mesh.colorChannelCount, mesh.normalChannelCount
-		for (size_t ch = 0; ch < NUM_COLORS; ch++)...
-		for (size_t ch = 0; ch < NUM_NORMALS; ch++)...
+	2) Done!!!!!!!!!!! 
+		mesh.colorChannelCount, mesh.normalChannelCount
+			for (size_t ch = 0; ch < NUM_COLORS; ch++)...
+			for (size_t ch = 0; ch < NUM_NORMALS; ch++)...
 
 	3) Done!!!!!!!!!!! indexed position
 
-	4) Split plane Selection
+	4) Done!!!!!!!!!!!!, Face Material Order
+
+	5) Split plane Selection
 */
 
 int main(int argc, const char** argv)
@@ -59,8 +61,8 @@ int main(int argc, const char** argv)
 		/////////////////////////////////////////////////////////////////////
 		MeshBuilder meshBuilder;
 		std::vector<FbxNode*> fbxNodes;
-		std::vector<Mesh> meshes;
-		if (!meshBuilder.Build(fbxScene, fbxNodes, meshes))
+		std::vector<Mesh> originalMeshes;
+		if (!meshBuilder.Build(fbxScene, fbxNodes, originalMeshes))
 		{
 			FBXSDK_printf("\n\nAn error in collect Mesh Nodes...");
 			return -1;
@@ -77,8 +79,8 @@ int main(int argc, const char** argv)
 		}
 #else
 		BSPMeshSlicer meshSlicer;
-		std::vector<MeshArray> precutMeshArrays;
-		if (!meshSlicer.Slice(meshes, precutMeshArrays))
+		std::vector<MeshArray> resultMeshArrays;
+		if (!meshSlicer.Slice(originalMeshes, resultMeshArrays))
 		{
 			FBXSDK_printf("\n\nAn error in slicing Mesh Nodes...");
 			return -1;
@@ -87,13 +89,19 @@ int main(int argc, const char** argv)
 
 		/////////////////////////////////////////////////////////////////////
 		FBXMeshBuilder fbxMeshBuilder;
-		if (!fbxMeshBuilder.TriangulateMeshArrays(precutMeshArrays))
+		if (!fbxMeshBuilder.FixMaterialOrderMeshArrays(resultMeshArrays))
 		{
 			FBXSDK_printf("\n\nAn error in building fbxNodes...");
 			return -1;
 		}
 
-		if (!fbxMeshBuilder.Build(fbxScene, fbxNodes, precutMeshArrays))
+		if (!fbxMeshBuilder.TriangulateMeshArrays(resultMeshArrays))
+		{
+			FBXSDK_printf("\n\nAn error in building fbxNodes...");
+			return -1;
+		}
+
+		if (!fbxMeshBuilder.Build(fbxScene, fbxNodes, resultMeshArrays))
 		{
 			FBXSDK_printf("\n\nAn error in building fbxNodes...");
 			return -1;
