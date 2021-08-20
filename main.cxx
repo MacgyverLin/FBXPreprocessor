@@ -2,6 +2,10 @@
 #include "BSPMeshSlicer.h"
 #include "FBXMeshBuilder.h"
 
+// Todo: 
+// 1) Require reset transform
+// 2) Face Material Order
+
 int main(int argc, const char** argv)
 {
 	Arguments args(argc, argv);
@@ -47,14 +51,23 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 
+// #define NO_SLICE
+#ifdef NO_SLICE
+		std::vector<MeshArray> precutMeshArrays;
+		if (!meshBuilder.Copy(meshes, precutMeshArrays))
+		{
+			FBXSDK_printf("\n\nAn error in copying Mesh Nodes...");
+			return -1;
+		}
+#else
 		BSPMeshSlicer meshSlicer;
 		std::vector<MeshArray> precutMeshArrays;
-		//if (!meshSlicer.Copy(meshes, precutMeshArrays))
 		if (!meshSlicer.Slice(meshes, precutMeshArrays))
 		{
 			FBXSDK_printf("\n\nAn error in slicing Mesh Nodes...");
 			return -1;
 		}
+#endif
 
 		FBXMeshBuilder fbxMeshBuilder;
 		if (!fbxMeshBuilder.Build(fbxScene, fbxNodes, precutMeshArrays))
@@ -65,7 +78,7 @@ int main(int argc, const char** argv)
 		
 		remove(fileout[i]);
 		//if (!SaveScene(sdkManager, fbxScene, args.outputPath, args.binary))
-		if (!SaveScene(sdkManager, fbxScene, fileout[i], true))
+		if (!SaveScene(sdkManager, fbxScene, fileout[i], args.binary))
 		{
 			FBXSDK_printf("\n\nAn error occurred while saving the fbxScene...");
 			return -1;

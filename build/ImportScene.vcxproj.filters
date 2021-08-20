@@ -115,6 +115,9 @@
     <ClInclude Include="..\Common.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\MeshConvexSeparator.h">
+      <Filter>Source Files\Processor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\ImportScene\CMakeLists.txt" />

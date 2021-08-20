@@ -63,8 +63,8 @@ FBXMeshBuilder::~FBXMeshBuilder()
 /////////////////////////////////////////////////////////////////////////////////
 bool FBXMeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, std::vector<MeshArray>& precutMeshArrays)
 {
-	//if (!ConvertMeshesTriangleFanToTriangles(precutMeshArrays))
-		//return false;
+	if (!ConvertMeshesTriangleFanToTriangles(precutMeshArrays))
+		return false;
 
 	if (!BuildFbxMeshes(fbxScene, fbxNodes, precutMeshArrays))
 		return false;
@@ -157,26 +157,20 @@ FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, cons
 
 	fbxNode->AddChild(dstNode);
 	
-	auto t1 = fbxNode->GeometricTranslation.Get();
-	auto r1 = fbxNode->GeometricRotation.Get();
-	auto s1 = fbxNode->GeometricScaling.Get();
-	auto t2 = fbxNode->LclTranslation.Get();
-	auto r2 = fbxNode->LclRotation.Get();
-	auto s2 = fbxNode->LclScaling.Get();
-	t2 = FbxDouble3(0.0f, 0.0f, 0.0f);
-	r2 = FbxDouble3(0.0f, 0.0f, 0.0f);
-	s2 = FbxDouble3(1.0f, 1.0f, 1.0f);
+	auto t1 = fbxNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+	auto r1 = fbxNode->GetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+	auto s1 = fbxNode->GetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+	dstNode->SetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, t1);
+	dstNode->SetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, r1);
+	dstNode->SetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot, s1);
 
-	//dstNode->GeometricTranslation.Set(t1);
-	//dstNode->GeometricRotation.Set(r1);
-	//dstNode->GeometricScaling.Set(s1);
-	//dstNode->LclTranslation.Set(t2);
-	//dstNode->LclRotation.Set(r2);
-	//dstNode->LclScaling.Set(s2);
+	auto t2 = dstNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+	auto r2 = dstNode->GetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+	auto s2 = dstNode->GetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
 
 	FillMaterial(dstMesh, fbxNode);
 
-	return dstNode;
+	return dstNode; 
 }
 
 void FBXMeshBuilder::FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch)
@@ -187,7 +181,7 @@ void FBXMeshBuilder::FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh
 			batcher.Add(mesh.GetPolygon(i).GetVertex(k).colors[ch]);
 
 	FbxGeometryElementVertexColor* geometryElementVertexColor = dstMesh->CreateElementVertexColor();
-	geometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
+	geometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementVertexColor->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)
@@ -243,7 +237,7 @@ void FBXMeshBuilder::FillNormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mes
 
 
 	FbxGeometryElementNormal* geometryElementNormal = dstMesh->CreateElementNormal();
-	geometryElementNormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
+	geometryElementNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementNormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)
@@ -270,7 +264,7 @@ void FBXMeshBuilder::FillTangent(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 			batcher.Add(mesh.GetPolygon(i).GetVertex(k).tangents[ch]);
 
 	FbxGeometryElementTangent* geometryElementTangent = dstMesh->CreateElementTangent();
-	geometryElementTangent->SetMappingMode(FbxGeometryElement::eByControlPoint);
+	geometryElementTangent->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementTangent->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)
@@ -298,7 +292,7 @@ void FBXMeshBuilder::FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 
 
 	FbxGeometryElementBinormal* geometryElementBinormal = dstMesh->CreateElementBinormal();
-	geometryElementBinormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
+	geometryElementBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementBinormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
 	for (size_t i = 0; i < batcher.vertices.size(); i++)

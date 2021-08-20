@@ -252,6 +252,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\Math.h" />
     <ClInclude Include="..\Matrix4.h" />
     <ClInclude Include="..\Mesh.h" />
+    <ClInclude Include="..\MeshConvexSeparator.h" />
     <ClInclude Include="..\MeshBuilder.h" />
     <ClInclude Include="..\Plane.h" />
     <ClInclude Include="..\Polygon.h" />

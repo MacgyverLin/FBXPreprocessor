@@ -9,6 +9,19 @@ MeshBuilder::~MeshBuilder()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
+bool MeshBuilder::Copy(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays)
+{
+	precutMeshArrays.resize(meshes.size());
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		precutMeshArrays[i].resize(1);
+		precutMeshArrays[i][0] = meshes[i];
+	}
+
+	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 bool MeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, std::vector<Mesh>& meshes)
 {
 	CollectMeshNode(fbxScene, fbxNodes);
@@ -206,6 +219,7 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int l
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
+	int a = fbxMesh->GetElementVertexColorCount();
 	mesh.colorChannelCount = std::min(fbxMesh->GetElementVertexColorCount(), NUM_COLORS);
 	for (int layer = 0; layer < mesh.colorChannelCount; layer++)
 	{
