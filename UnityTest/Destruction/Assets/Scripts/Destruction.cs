@@ -87,7 +87,7 @@ public class Destruction : MonoBehaviour
 
         // do some physics
         Rigidbody rigidbody = child.GetComponent<Rigidbody>();
-        Vector3 torque = new Vector3(Random.RandomRange(-1.0f, 1.0f), Random.RandomRange(-1.0f, 1.0f), Random.RandomRange(-1.0f, 1.0f)) * explosionForce * 100;
+        Vector3 torque = new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)) * explosionForce * 100;
         rigidbody.AddTorque(torque, mode);
         rigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius, upwardsModifier, mode);
     }

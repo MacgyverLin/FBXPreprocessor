@@ -26,7 +26,8 @@ int main(int argc, const char** argv)
 		"1.fbx",
 		"2.fbx",
 		"3.fbx",
-		"4.fbx"
+		"4.fbx",
+		"5.fbx"
 	};
 
 	const char* fileout[] =
@@ -34,11 +35,12 @@ int main(int argc, const char** argv)
 		"1out.fbx",
 		"2out.fbx",
 		"3out.fbx",
-		"4out.fbx"
+		"4out.fbx",
+		"5out.fbx"
 	};
 
-	//for (int i = 0; i < 4; i++)
-	int i = 0;
+	for (int i = 0; i < 5; i++)
+	//int i = 0;
 	{
 		// Prepare the FBX SDK.
 		FbxManager* sdkManager = NULL;

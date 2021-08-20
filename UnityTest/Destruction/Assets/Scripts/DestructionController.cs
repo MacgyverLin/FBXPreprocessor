@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DestructionController : MonoBehaviour
 {
-    public List<GameObject> destructables = new List<GameObject>();
+    public List<Destruction> destructables = new List<Destruction>();
 
     public float explosionForce = 100.0f;
     public float explosionRadius = 10.0f;
