@@ -104,6 +104,11 @@ public:
 	Vector3 UnitCross(const Vector3& v) const;
 
 	friend Vector3 Lerp(const Vector3& v0, const Vector3& v1, float t);
+
+	static Vector3 Zero;
+	static Vector3 XAxis;
+	static Vector3 YAxis;
+	static Vector3 ZAxis;
 private:
 	float m[3];
 };

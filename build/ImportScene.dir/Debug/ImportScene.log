@@ -1,2 +1,78 @@
-﻿  main.cxx
+﻿  AABB.cxx
+  BSP.cxx
+..\BSP.cxx(285,51): warning C4244: 'argument': conversion from 'unsigned __int64' to 'float', possible loss of data
+  BSPMeshSlicer.cxx
+  FBXMeshBuilder.cxx
+..\FBXMeshBuilder.cxx(145,40): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(150,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(155,37): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(160,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(165,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(193,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(194,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(194,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(220,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(221,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(221,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(248,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(249,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(249,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(246,6): warning C4189: 'v': local variable is initialized but not referenced
+..\FBXMeshBuilder.cxx(275,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(276,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(276,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(302,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(303,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(303,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(329,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(330,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(330,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(341,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(343,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(359,57): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(357,6): warning C4189: 'a': local variable is initialized but not referenced
+..\FBXMeshBuilder.cxx(356,11): warning C4189: 'srcMesh': local variable is initialized but not referenced
+..\FBXMeshBuilder.cxx(26,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+..\FBXMeshBuilder.cxx(18): message : while compiling class template member function 'void VertexBatcher<Vector3>::Add(const T &)'
+          with
+          [
+              T=Vector3
+          ]
+..\FBXMeshBuilder.cxx(249): message : see reference to function template instantiation 'void VertexBatcher<Vector3>::Add(const T &)' being compiled
+          with
+          [
+              T=Vector3
+          ]
+..\FBXMeshBuilder.cxx(245): message : see reference to class template instantiation 'VertexBatcher<Vector3>' being compiled
+..\FBXMeshBuilder.cxx(40,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Matrix4.cxx
+  Mesh.cxx
+..\Mesh.cxx(75,24): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+..\Mesh.cxx(114,31): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  MeshBuilder.cxx
+..\MeshBuilder.cxx(96,46): warning C4100: 'fbxScene': unreferenced formal parameter
+..\MeshBuilder.cxx(147,41): warning C4100: 'fbxScene': unreferenced formal parameter
+..\MeshBuilder.cxx(206,107): warning C4100: 'vertexId': unreferenced formal parameter
+..\MeshBuilder.cxx(206,57): warning C4100: 'mesh': unreferenced formal parameter
+..\MeshBuilder.cxx(222,6): warning C4189: 'a': local variable is initialized but not referenced
+  MeshSeparator.cxx
+  Plane.cxx
+  Polygon.cxx
+..\Polygon.cxx(39,24): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+..\Polygon.cxx(72,32): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Vector2.cxx
+  Vector3.cxx
+  Vertex.cxx
+  main.cxx
+  Generating Code...
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(287): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(296): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(298): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(299): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(301): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(304): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(309): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(313): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(316): warning C4702: unreachable code
+D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\samples\FBXPreprocessor1\BSP.cxx(322): warning C4702: unreachable code
   ImportScene.vcxproj -> D:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\bin\vs2017-mt\Debug\ImportScene.exe

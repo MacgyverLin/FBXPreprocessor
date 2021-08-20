@@ -1,5 +1,9 @@
 #include "Vector2.h"
 
+Vector2 Vector2::Zero(0.0f, 0.0f);
+Vector2 Vector2::XAxis(1.0f, 0.0f);
+Vector2 Vector2::YAxis(0.0f, 1.0f);
+
 Vector2::Vector2()
 {
 }
