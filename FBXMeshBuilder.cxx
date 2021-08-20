@@ -61,11 +61,35 @@ FBXMeshBuilder::~FBXMeshBuilder()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool FBXMeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, std::vector<MeshArray>& precutMeshArrays)
+bool FBXMeshBuilder::FixMaterialOrderMeshArrays(std::vector<MeshArray>& slicedMeshArrays)
 {
-	if (!ConvertMeshesTriangleFanToTriangles(precutMeshArrays))
-		return false;
+	for (size_t i = 0; i < slicedMeshArrays.size(); i++)
+	{
+		for (size_t j = 0; j < slicedMeshArrays[i].size(); j++)
+		{
+			FixMaterialOrder(slicedMeshArrays[i][j]);
+		}
+	}
 
+	return true;
+}
+
+bool FBXMeshBuilder::TriangulateMeshArrays(std::vector<MeshArray>& slicedMeshArrays)
+{
+	for (size_t i = 0; i < slicedMeshArrays.size(); i++)
+	{
+		for (size_t j = 0; j < slicedMeshArrays[i].size(); j++)
+		{
+			FixMaterialOrder(slicedMeshArrays[i][j]);
+		}
+	}
+
+	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+bool FBXMeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& precutMeshArrays)
+{
 	if (!BuildFbxMeshes(fbxScene, fbxNodes, precutMeshArrays))
 		return false;
 
@@ -73,7 +97,7 @@ bool FBXMeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, 
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, std::vector<MeshArray>& precutMeshArrays)
+bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, const std::vector<MeshArray>& precutMeshArrays)
 {
 	for (size_t i = 0; i < fbxNodes.size(); i++)
 	{
@@ -90,20 +114,7 @@ bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& 
 	return true;
 }
 
-/*
-TODO:
-	1) checked indexed done
-
-	2) checked mesh.colorChannelCount, mesh.normalChannelCount
-		for (size_t ch = 0; ch < NUM_COLORS; ch++)...
-		for (size_t ch = 0; ch < NUM_NORMALS; ch++)...
-
-	3) indexed position
-
-	4) Split plane Selection
-*/
-
-FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name)
+void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name)
 {
 	////////////////////////////////////////////////////////
 	// create Mesh
@@ -154,7 +165,6 @@ FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, cons
 	// fill material 
 	FbxNode* dstNode = FbxNode::Create(fbxScene, name);
 	dstNode->SetNodeAttribute(dstMesh); 
-
 	fbxNode->AddChild(dstNode);
 	
 	auto t1 = fbxNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
@@ -164,14 +174,10 @@ FbxNode* FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, cons
 	dstNode->SetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, r1);
 	dstNode->SetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot, s1);
 
-	auto t2 = dstNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
-	auto r2 = dstNode->GetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
-	auto s2 = dstNode->GetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
-
 	FillMaterial(dstMesh, fbxNode);
-
-	return dstNode; 
 }
+
+#define TEST
 
 void FBXMeshBuilder::FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch)
 {
@@ -235,7 +241,6 @@ void FBXMeshBuilder::FillNormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mes
 		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
 			batcher.Add(mesh.GetPolygon(i).GetVertex(k).normals[ch]);
 
-
 	FbxGeometryElementNormal* geometryElementNormal = dstMesh->CreateElementNormal();
 	geometryElementNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementNormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
@@ -290,7 +295,6 @@ void FBXMeshBuilder::FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
 			batcher.Add(mesh.GetPolygon(i).GetVertex(k).binormals[ch]);
 
-
 	FbxGeometryElementBinormal* geometryElementBinormal = dstMesh->CreateElementBinormal();
 	geometryElementBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementBinormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
@@ -324,7 +328,6 @@ void FBXMeshBuilder::FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 		dstMesh->mControlPoints.Add(FbxVector4(p.X(), p.Y(), p.Z(), 0.0));
 	}
 
-
 	int vertexIdx = 0;
 	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
 	{
@@ -344,20 +347,7 @@ void FBXMeshBuilder::FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 void FBXMeshBuilder::FillMaterial(FbxMesh* dstMesh, FbxNode* fbxNode)
 {
 	FbxMesh* srcMesh = fbxNode->GetMesh();
+	int a = fbxNode->GetMaterialCount();
 	for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
 		dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-bool FBXMeshBuilder::ConvertMeshesTriangleFanToTriangles(std::vector<MeshArray>& slicedMeshArrays)
-{
-	for (size_t i = 0; i < slicedMeshArrays.size(); i++)
-	{
-		for (size_t j = 0; j < slicedMeshArrays[i].size(); j++)
-		{
-			ConvertTriangleFanToTriangles(slicedMeshArrays[i][j]);
-		}
-	}
-
-	return true;
 }

@@ -26,8 +26,8 @@ Mesh::Mesh(const Mesh& other)
 	tangentChannelCount = other.tangentChannelCount;
 	binormalChannelCount = other.binormalChannelCount;
 
-	aabb1 = other.aabb1;
-	polygons1 = other.polygons1;
+	aabb = other.aabb;
+	polygons = other.polygons;
 }
 
 Mesh& Mesh::operator = (const Mesh& other)
@@ -40,71 +40,90 @@ Mesh& Mesh::operator = (const Mesh& other)
 	tangentChannelCount = other.tangentChannelCount;
 	binormalChannelCount = other.binormalChannelCount;
 
-	aabb1 = other.aabb1;
-	polygons1 = other.polygons1;
+	aabb = other.aabb;
+	polygons = other.polygons;
 
 	return *this;
 }
 
 void Mesh::Flip()
 {
-	for (size_t i = 0; i < polygons1.size(); i++)
+	for (size_t i = 0; i < polygons.size(); i++)
 	{
-		polygons1[i].Flip();
+		polygons[i].Flip();
 	}
 }
 
 bool Mesh::IsEmpty() const
 {
-	return polygons1.size() == 0;
+	return polygons.size() == 0;
 }
 
-void Mesh::Transform(const Vector3& t, const Vector3& s)
-{
-	for (size_t i = 0; i < polygons1.size(); i++)
-	{
-		polygons1[i].Transform(t, s);
-	}
-}
 
 void Mesh::Add(const Polygon& polygon)
 {
-	polygons1.push_back(polygon);
+	polygons.push_back(polygon);
 }
 
 const AABB& Mesh::GetAABB() const
 {
-	return aabb1;
+	return aabb;
 }
 
 int Mesh::GetPolygonCount() const
 {
-	return polygons1.size();
+	return polygons.size();
 }
 
 const Polygon& Mesh::GetPolygon(int i) const
 {
-	return polygons1[i];
+	return polygons[i];
 }
 
 int Mesh::GetVerticesCount() const
 {
 	int verticesCount = 0;
-	for (size_t i = 0; i < polygons1.size(); i++)
+	for (size_t i = 0; i < polygons.size(); i++)
 	{
-		verticesCount += polygons1[i].GetVerticesCount();
+		verticesCount += polygons[i].GetVerticesCount();
 	}
 
 	return verticesCount;
 }
 
-void ConvertTriangleFanToTriangles(Mesh& mesh)
+void FixMaterialOrder(Mesh& mesh)
 {
-	std::vector<Polygon> oldPolygons = mesh.polygons1;
-	mesh.polygons1.clear();
+	std::vector<Vertex> vertices(3);
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		vertices[i] =
+			Vertex
+			(
+				Vector3(0.0f + Math::UnitRandom() * 0.01f, 0.0f + Math::UnitRandom() * 0.01f, 0.0f + Math::UnitRandom() * 0.01f),
+				// Vector3(0.0f, 0.0f, 0.0f),
+				Vector3(1.0f, 0.0f, 0.0f),
+				Vector2(0.0f, 0.0f)
+			);
+	}
+
+	std::vector<Polygon> oldPolygons = mesh.polygons;
+	
+	mesh.polygons.clear();
+
+	for (size_t i = 0; i < mesh.maxMaterialIdx + 1; i++)
+		mesh.Add(Polygon(i, vertices));
+
+	mesh.polygons.insert(mesh.polygons.end(), oldPolygons.begin(), oldPolygons.end());
+}
+
+void Triangulate(Mesh& mesh)
+{
+	std::vector<Polygon> oldPolygons = mesh.polygons;
+	
+	mesh.polygons.clear();
 
 	for (size_t i = 0; i < oldPolygons.size(); i++)
-		ConvertTriangleFanToTriangles(oldPolygons[i], mesh.polygons1);
+		Triangulate(oldPolygons[i], mesh.polygons);
 }
 
 Mesh Intersect(const Mesh& m0, const Mesh& m1)
@@ -125,8 +144,8 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 
 	if (!m0.IsEmpty() && !m1.IsEmpty())
 	{
-		BSP a(m0.polygons1);
-		BSP b(m1.polygons1);
+		BSP a(m0.polygons);
+		BSP b(m1.polygons);
 
 		a.Invert();
 		b.ClipBy(a);		// find polygon of b inside ~a
@@ -144,14 +163,14 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 		a.Invert();			// ~(~A | ~B)
 
 		// output
-		result.maxMaterialIdx = m0.maxMaterialIdx;
+		result.maxMaterialIdx = std::max(m0.maxMaterialIdx, m1.maxMaterialIdx);
 		result.colorChannelCount = m0.colorChannelCount;
 		result.uvChannelCount = m0.uvChannelCount;
 		result.normalChannelCount = m0.normalChannelCount;
 		result.tangentChannelCount = m0.tangentChannelCount;
 		result.binormalChannelCount = m0.binormalChannelCount;
-		result.aabb1 = m0.aabb1;
-		a.ToPolygons(result.polygons1);
+		result.aabb = m0.aabb;
+		a.ToPolygons(result.polygons);
 	}
 	else if (m0.IsEmpty() && !m1.IsEmpty())
 	{

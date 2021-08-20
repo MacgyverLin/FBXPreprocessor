@@ -3,8 +3,19 @@
 #include "FBXMeshBuilder.h"
 
 // Todo: 
-// 1) Require reset transform
 // 2) Face Material Order
+/*
+TODO:
+	1) Done!!!!!!!!!!! checked indexed
+
+	2) Done!!!!!!!!!!! checked mesh.colorChannelCount, mesh.normalChannelCount
+		for (size_t ch = 0; ch < NUM_COLORS; ch++)...
+		for (size_t ch = 0; ch < NUM_NORMALS; ch++)...
+
+	3) Done!!!!!!!!!!! indexed position
+
+	4) Split plane Selection
+*/
 
 int main(int argc, const char** argv)
 {
@@ -26,7 +37,8 @@ int main(int argc, const char** argv)
 		"4out.fbx"
 	};
 
-	for (int i = 3; i < 4; i++)
+	//for (int i = 0; i < 4; i++)
+	int i = 0;
 	{
 		// Prepare the FBX SDK.
 		FbxManager* sdkManager = NULL;
@@ -42,6 +54,7 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 
+		/////////////////////////////////////////////////////////////////////
 		MeshBuilder meshBuilder;
 		std::vector<FbxNode*> fbxNodes;
 		std::vector<Mesh> meshes;
@@ -51,6 +64,7 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 
+		/////////////////////////////////////////////////////////////////////
 // #define NO_SLICE
 #ifdef NO_SLICE
 		std::vector<MeshArray> precutMeshArrays;
@@ -69,7 +83,14 @@ int main(int argc, const char** argv)
 		}
 #endif
 
+		/////////////////////////////////////////////////////////////////////
 		FBXMeshBuilder fbxMeshBuilder;
+		if (!fbxMeshBuilder.TriangulateMeshArrays(precutMeshArrays))
+		{
+			FBXSDK_printf("\n\nAn error in building fbxNodes...");
+			return -1;
+		}
+
 		if (!fbxMeshBuilder.Build(fbxScene, fbxNodes, precutMeshArrays))
 		{
 			FBXSDK_printf("\n\nAn error in building fbxNodes...");

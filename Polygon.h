@@ -33,9 +33,7 @@ public:
 
 	bool IsEmpty() const;
 
-	void Transform(const Vector3& t, const Vector3& s);
-
-	friend void ConvertTriangleFanToTriangles(const Polygon& polygon, std::vector<Polygon>& polygons);
+	friend void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons);
 private:
 	int materialIdx;
 	std::vector<Vertex> vertices;

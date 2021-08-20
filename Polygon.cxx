@@ -64,15 +64,7 @@ bool Polygon::IsEmpty() const
 	return vertices.size() == 0;
 }
 
-void Polygon::Transform(const Vector3& t, const Vector3& s)
-{
-	for (size_t i = 0; i < vertices.size(); i++)
-	{
-		vertices[i].position = vertices[i].position * s + t;
-	}
-}
-
-void ConvertTriangleFanToTriangles(const Polygon& polygon, std::vector<Polygon>& polygons)
+void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
 {
 	if (polygon.vertices.size() < 3)
 		return;

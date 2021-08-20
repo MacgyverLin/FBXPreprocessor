@@ -590,13 +590,13 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 	FbxDouble3 aabbMin = fbxMesh->BBoxMin;
 	FbxDouble3 aabbMax = fbxMesh->BBoxMax;
 
-	mesh.aabb1 = AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2]));
-	mesh.polygons1.resize(fbxMesh->GetPolygonCount());
+	mesh.aabb = AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2]));
+	mesh.polygons.resize(fbxMesh->GetPolygonCount());
 
 	int vertexId = 0;
 	for (int polygonIndex = 0; polygonIndex < fbxMesh->GetPolygonCount(); polygonIndex++)
 	{
-		Polygon& polygon = mesh.polygons1[polygonIndex];
+		Polygon& polygon = mesh.polygons[polygonIndex];
 
 		if (!BuildMaterial(fbxNode, mesh, polygon, polygonIndex))
 			return false;

@@ -24,8 +24,6 @@ public:
 
 	bool IsEmpty() const;
 
-	void Transform(const Vector3& t, const Vector3& s);
-
 	void Add(const Polygon& polygon);
 
 	const AABB& GetAABB() const;
@@ -36,7 +34,9 @@ public:
 
 	int GetVerticesCount() const;
 
-	friend void ConvertTriangleFanToTriangles(Mesh& mesh);
+	friend void FixMaterialOrder(Mesh& mesh);
+
+	friend void Triangulate(Mesh& mesh);
 
 	friend Mesh Intersect(const Mesh& m0, const Mesh& m1);
 private:
@@ -47,8 +47,8 @@ private:
 	int normalChannelCount;
 	int tangentChannelCount;
 	int binormalChannelCount;
-	AABB aabb1;
-	std::vector<Polygon> polygons1;
+	AABB aabb;
+	std::vector<Polygon> polygons;
 };
 
 typedef std::vector<Mesh> MeshArray;
