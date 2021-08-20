@@ -16,7 +16,7 @@ public:
 	MeshBuilder();
 	~MeshBuilder();
 
-	bool Copy(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays);
+	bool Copy(const std::vector<Mesh>& meshes, std::vector<MeshArray>& meshArrays);
 
 	/////////////////////////////////////////////////////////////////////////////////
 	bool Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, std::vector<Mesh>& meshes);

@@ -10,35 +10,30 @@ BSPMeshSlicer::~BSPMeshSlicer()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-bool BSPMeshSlicer::Slice(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays)
+bool BSPMeshSlicer::Process(const std::vector<Mesh>& meshes, std::vector<MeshArray>& meshArrays)
 {
-	precutMeshArrays.resize(meshes.size());
+	meshArrays.resize(meshes.size());
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		MeshArray cutters;
 		MakeCutters(meshes[i], cutters, meshes[i].maxMaterialIdx+1, 1);
 
-		if (!Slice(meshes[i], cutters, precutMeshArrays[i]))
+		if (!Process(meshes[i], cutters, meshArrays[i]))
 			return false;
 	}
 
 	return true;
 }
 
-bool BSPMeshSlicer::Slice(const Mesh& mesh, const MeshArray& cutters, MeshArray& slicedMeshArray)
+bool BSPMeshSlicer::Process(const Mesh& mesh, const MeshArray& cutters, MeshArray& meshArrays)
 {
-	slicedMeshArray.resize(cutters.size());
+	meshArrays.resize(cutters.size());
 	for (size_t i = 0; i < cutters.size(); i++)
 	{
-		slicedMeshArray[i] = Slice(mesh, cutters[i]);
+		meshArrays[i] = Intersect(mesh, cutters[i]);
 	}
 
 	return true;
-}
-
-Mesh BSPMeshSlicer::Slice(const Mesh& mesh, const Mesh& cutter) const
-{
-	return Intersect(mesh, cutter);
 }
 
 //////////////////////////////////////////////////////////////////////////////////

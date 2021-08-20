@@ -252,8 +252,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\Math.h" />
     <ClInclude Include="..\Matrix4.h" />
     <ClInclude Include="..\Mesh.h" />
-    <ClInclude Include="..\MeshConvexSeparator.h" />
     <ClInclude Include="..\MeshBuilder.h" />
+    <ClInclude Include="..\MeshSeparator.h" />
     <ClInclude Include="..\Plane.h" />
     <ClInclude Include="..\Polygon.h" />
     <ClInclude Include="..\Vector2.h" />
@@ -303,6 +303,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="..\Matrix4.cxx" />
     <ClCompile Include="..\Mesh.cxx" />
     <ClCompile Include="..\MeshBuilder.cxx" />
+    <ClCompile Include="..\MeshSeparator.cxx" />
     <ClCompile Include="..\Plane.cxx" />
     <ClCompile Include="..\Polygon.cxx" />
     <ClCompile Include="..\Vector2.cxx" />

@@ -8,6 +8,7 @@ class Mesh
 {
 	friend class MeshBuilder;
 	friend class MeshSlicer;
+	friend class MeshSeparator;
 	friend class BSPMeshSlicer;
 	friend class FBXMeshBuilder;
 	friend class BSP;

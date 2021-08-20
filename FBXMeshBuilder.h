@@ -16,15 +16,15 @@ public:
 	~FBXMeshBuilder();
 
 	/////////////////////////////////////////////////////////////////////////////////
-	bool TriangulateMeshArrays(std::vector<MeshArray>& slicedMeshArrays);
+	bool TriangulateMeshArrays(std::vector<MeshArray>& meshArrays);
 
-	bool FixMaterialOrderMeshArrays(std::vector<MeshArray>& slicedMeshArrays);
+	bool FixMaterialOrderMeshArrays(std::vector<MeshArray>& meshArrays);
 
 	/////////////////////////////////////////////////////////////////////////////////
-	bool Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& precutMeshArrays);
+	bool Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& meshArrays);
 private:
 	/////////////////////////////////////////////////////////////////////////////////
-	bool BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, const std::vector<MeshArray>& precutMeshArrays);
+	bool BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, const std::vector<MeshArray>& meshArrays);
 	void BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name);
 
 	void FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch);

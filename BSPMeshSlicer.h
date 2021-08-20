@@ -12,11 +12,9 @@ public:
 	~BSPMeshSlicer();
 
 	/////////////////////////////////////////////////////////////////////////////////
-	bool Slice(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays);
-	bool Copy(const std::vector<Mesh>& meshes, std::vector<MeshArray>& precutMeshArrays);
+	bool Process(const std::vector<Mesh>& meshes, std::vector<MeshArray>& meshArrays);
 private:
-	bool Slice(const Mesh& mesh, const MeshArray& cutters, MeshArray& slicedMeshArray);
-	Mesh Slice(const Mesh& mesh, const Mesh& cutter) const;
+	bool Process(const Mesh& mesh, const MeshArray& cutters, MeshArray& meshArrays);
 
 	void MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int count);
 	Polygon MakeCutterPolygon(const Mesh& mesh, int materialID, bool randomizeNormal, bool randomizeCenter);

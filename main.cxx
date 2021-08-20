@@ -23,6 +23,8 @@ int main(int argc, const char** argv)
 {
 	Arguments args(argc, argv);
 
+#define TEST
+#ifdef TEST
 	const char* filein[] =
 	{
 		"1.fbx",
@@ -42,7 +44,9 @@ int main(int argc, const char** argv)
 	};
 
 	for (int i = 0; i < 5; i++)
-	//int i = 0;
+#else
+	int i = 0;
+#endif
 	{
 		// Prepare the FBX SDK.
 		FbxManager* sdkManager = NULL;
@@ -51,7 +55,11 @@ int main(int argc, const char** argv)
 		InitializeSdkObjects(sdkManager, fbxScene);
 
 		// Load the fbxScene.
-		lResult = LoadScene(sdkManager, fbxScene, filein[i]); // args.inputPath
+#ifdef TEST
+		lResult = LoadScene(sdkManager, fbxScene, filein[i]);
+#else
+		lResult = LoadScene(sdkManager, fbxScene, args.inputPath);
+#endif
 		if (lResult == false)
 		{
 			FBXSDK_printf("\n\nAn error occurred while loading the fbxScene...");
@@ -80,7 +88,7 @@ int main(int argc, const char** argv)
 #else
 		BSPMeshSlicer meshSlicer;
 		std::vector<MeshArray> resultMeshArrays;
-		if (!meshSlicer.Slice(originalMeshes, resultMeshArrays))
+		if (!meshSlicer.Process(originalMeshes, resultMeshArrays))
 		{
 			FBXSDK_printf("\n\nAn error in slicing Mesh Nodes...");
 			return -1;
@@ -107,9 +115,13 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 		
+#ifdef TEST
 		remove(fileout[i]);
-		//if (!SaveScene(sdkManager, fbxScene, args.outputPath, args.binary))
 		if (!SaveScene(sdkManager, fbxScene, fileout[i], args.binary))
+#else
+		remove(args.outputPath);
+		if (!SaveScene(sdkManager, fbxScene, args.outputPath, args.binary))
+#endif	
 		{
 			FBXSDK_printf("\n\nAn error occurred while saving the fbxScene...");
 			return -1;

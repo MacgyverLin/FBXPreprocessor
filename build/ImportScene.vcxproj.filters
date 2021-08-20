@@ -76,9 +76,6 @@
     <ClInclude Include="..\AABB.h">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClInclude>
-    <ClInclude Include="..\BSP.h">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClInclude>
     <ClInclude Include="..\Color.h">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClInclude>
@@ -94,13 +91,7 @@
     <ClInclude Include="..\Matrix4.h">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClInclude>
-    <ClInclude Include="..\Mesh.h">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClInclude>
     <ClInclude Include="..\Plane.h">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Polygon.h">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClInclude>
     <ClInclude Include="..\Vector2.h">
@@ -109,14 +100,23 @@
     <ClInclude Include="..\Vector3.h">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClInclude>
-    <ClInclude Include="..\Vertex.h">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\MeshConvexSeparator.h">
+    <ClInclude Include="..\MeshSeparator.h">
       <Filter>Source Files\Processor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Vertex.h">
+      <Filter>Source Files\Processor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Mesh.h">
+      <Filter>Source Files\Processor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Polygon.h">
+      <Filter>Source Files\Processor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BSP.h">
+      <Filter>Source Files\Processor\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -135,6 +135,9 @@
     <Filter Include="Source Files\Processor\Maths">
       <UniqueIdentifier>{c7e937cd-726a-4e02-a873-6aff535e06c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Processor\Geometry">
+      <UniqueIdentifier>{c9ef2610-7924-46a7-b8f2-f53ad983c7e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Argument.cxx">
@@ -144,9 +147,6 @@
       <Filter>Source Files\Processor</Filter>
     </ClCompile>
     <ClCompile Include="..\AABB.cxx">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BSP.cxx">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClCompile>
     <ClCompile Include="..\Color.cxx">
@@ -167,13 +167,7 @@
     <ClCompile Include="..\Matrix4.cxx">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClCompile>
-    <ClCompile Include="..\Mesh.cxx">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClCompile>
     <ClCompile Include="..\Plane.cxx">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Polygon.cxx">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClCompile>
     <ClCompile Include="..\Vector2.cxx">
@@ -182,11 +176,23 @@
     <ClCompile Include="..\Vector3.cxx">
       <Filter>Source Files\Processor\Maths</Filter>
     </ClCompile>
-    <ClCompile Include="..\Vertex.cxx">
-      <Filter>Source Files\Processor\Maths</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common.cxx">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MeshSeparator.cxx">
+      <Filter>Source Files\Processor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Mesh.cxx">
+      <Filter>Source Files\Processor\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Vertex.cxx">
+      <Filter>Source Files\Processor\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Polygon.cxx">
+      <Filter>Source Files\Processor\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BSP.cxx">
+      <Filter>Source Files\Processor\Geometry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
