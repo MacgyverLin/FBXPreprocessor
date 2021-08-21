@@ -106,9 +106,9 @@ public:
 	friend Vector3 Lerp(const Vector3& v0, const Vector3& v1, float t);
 
 	static Vector3 Zero;
-	static Vector3 XAxis;
-	static Vector3 YAxis;
-	static Vector3 ZAxis;
+	static Vector3 UnitX;
+	static Vector3 UnitY;
+	static Vector3 UnitZ;
 private:
 	float m[3];
 };

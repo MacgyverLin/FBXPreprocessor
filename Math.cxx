@@ -1,6 +1,11 @@
 #include "Math.h"
 
 ///////////////////////////////////////////////////////////////////
+void Math::RandSeed(int seed)
+{
+	srand(seed);
+}
+
 float Math::UnitRandom()
 {
 	return ((float)rand()) / RAND_MAX;

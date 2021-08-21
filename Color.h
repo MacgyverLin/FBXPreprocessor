@@ -104,6 +104,9 @@ public:
 	float Normalize();
 
 	friend Color Lerp(const Color& v0, const Color& v1, float t);
+
+	static Color Black;
+	static Color White;
 private:
 	float m[4];
 };

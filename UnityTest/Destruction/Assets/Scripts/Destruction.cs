@@ -19,27 +19,40 @@ public class Destruction : MonoBehaviour
 
     private void Init()
     {
+        // enable Parent
         this.gameObject.SetActive(true);
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
+        // init child
+        Material[] materials = new Material[meshRenderer.materials.Length+1];
+        for(int i=0; i<meshRenderer.materials.Length+1; i++)
+        {
+            if(i==meshRenderer.materials.Length)
+                materials[i] = crossSectionMaterial;
+            else
+                materials[i] = meshRenderer.materials[i];
+        }
+
         for (int i = 0; i < transform.childCount; i++)
         {
             // Debug.Log(transform.GetChild(i).gameObject.name);
-            InitChild(transform.GetChild(i).gameObject, meshRenderer.materials);
+            InitChild(transform.GetChild(i).gameObject, materials);
         }
     }
 
     private void InitChild(GameObject child, Material[] materials)
     {
+        // disable child
         child.SetActive(false);
         MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
         meshRenderer.enabled = false;
 
+        // uses parent material and cross section
         meshRenderer.materials = materials;
 
+        // child use physics
         Rigidbody rigidbody = child.AddComponent<Rigidbody>();
-
         MeshCollider meshCollider = child.AddComponent<MeshCollider>();
         meshCollider.convex = true;
     }

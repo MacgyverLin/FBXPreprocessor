@@ -13,14 +13,10 @@
 
 class Vertex
 {
-	friend class MeshBuilder;
-	friend class MeshSlicer;
-	friend class BSPMeshSlicer;
-	friend class FBXMeshBuilder;
-	friend class Polygon;
-	friend class BSP;
 public:
 	Vertex();
+
+	Vertex(const Vector3& position, const Color& color, const Vector2& uv, const Vector3& normal, const Vector3& tangent, const Vector3& binormal);
 
 	Vertex(const Vector3& position, const Vector3& normal, const Vector2& uv);
 
@@ -28,8 +24,36 @@ public:
 
 	Vertex& operator = (const Vertex& other);
 
+	// arithmetic operations
+	Vertex operator+ (const Vertex& v) const;
+
+	Vertex operator- (const Vertex& v) const;
+
+	Vertex operator* (const Vertex& v) const;
+
+	Vertex operator/ (const Vertex& v) const;
+
+	Vertex operator* (float fScalar) const;
+
+	Vertex operator/ (float fScalar) const;
+
+	Vertex operator- () const;
+
+	// arithmetic updates
+	Vertex& operator+= (const Vertex& v);
+
+	Vertex& operator-= (const Vertex& v);
+
+	Vertex& operator*= (const Vertex& v);
+
+	Vertex& operator*= (float fScalar);
+
+	Vertex& operator/= (float fScalar);
+
+	void Flip();
+
 	friend Vertex Lerp(const Vertex& v0, const Vertex& v1, float t);
-private:
+
 	Vector3 position;
 	Color colors[NUM_COLORS];
 	Vector2 uvs[NUM_UVS];

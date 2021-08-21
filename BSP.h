@@ -34,8 +34,6 @@ public:
 
 	void ToPolygons(std::vector<Polygon>& polygons) const;
 
-	Plane GetPlane(const Polygon& polygon) const;
-
 	void FromPolygons(const std::vector<Polygon>& polygons);
 protected:
 	void SplitPolygon(

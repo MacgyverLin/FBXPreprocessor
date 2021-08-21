@@ -116,11 +116,6 @@ void BSP::ToPolygons(std::vector<Polygon>& polygons) const
 		this->back->ToPolygons(polygons);
 }
 
-Plane BSP::GetPlane(const Polygon& polygon) const
-{
-	return Plane(polygon.vertices[0].position, polygon.vertices[1].position, polygon.vertices[2].position);
-}
-
 void BSP::FromPolygons(const std::vector<Polygon>& polygons)
 {
 	if (polygons.size() == 0)
@@ -130,7 +125,7 @@ void BSP::FromPolygons(const std::vector<Polygon>& polygons)
 	if (!this->nodeSplitPlane)
 	{
 		splitPlaneIdx = GetSplitPlaneIdx(polygons);
-		this->nodeSplitPlane = new Plane(GetPlane(polygons[splitPlaneIdx]));
+		this->nodeSplitPlane = new Plane(polygons[splitPlaneIdx].GetPlane());
 
 		this->nodePolygons.push_back(polygons[splitPlaneIdx]);
 	}
@@ -169,10 +164,10 @@ void BSP::SplitPolygon(
 	std::vector<Polygon>& backPolygons) const
 {
 	int polygonType = 0;
-	std::vector<int> types(polygon.vertices.size());
-	for (int i = 0; i < polygon.vertices.size(); i++)
+	std::vector<int> types(polygon.GetVerticesCount());
+	for (int i = 0; i < polygon.GetVerticesCount(); i++)
 	{
-		float d = splitPlane.DistanceTo(polygon.vertices[i].position);
+		float d = splitPlane.DistanceTo(polygon.GetVertex(i).position);
 		int type = 0;
 		if (d < -Math::ZeroTolerance)
 			type = PolygonType::Back;
@@ -188,11 +183,10 @@ void BSP::SplitPolygon(
 	std::vector<Vertex> frontVertices;
 	std::vector<Vertex> backVertices;
 
-	Plane p = GetPlane(polygon);
 	switch (polygonType)
 	{
 	case PolygonType::Coplanar:
-		(splitPlane.Normal().Dot(p.Normal()) > 0 ? coplanarFrontPolygons : coplanarBackPolygons).push_back(polygon);
+		(splitPlane.Normal().Dot(polygon.GetPlane().Normal()) > 0 ? coplanarFrontPolygons : coplanarBackPolygons).push_back(polygon);
 		break;
 	case PolygonType::Front:
 		frontPolygons.push_back(polygon);
@@ -201,13 +195,13 @@ void BSP::SplitPolygon(
 		backPolygons.push_back(polygon);
 		break;
 	case PolygonType::Spanning:
-		for (int i = 0; i < polygon.vertices.size(); i++)
+		for (int i = 0; i < polygon.GetVerticesCount(); i++)
 		{
-			int j = (i + 1) % polygon.vertices.size();
+			int j = (i + 1) % polygon.GetVerticesCount();
 			int ti = types[i];
 			int tj = types[j];
-			const Vertex& vi = polygon.vertices[i];
-			const Vertex& vj = polygon.vertices[j];
+			const Vertex& vi = polygon.GetVertex(i);
+			const Vertex& vj = polygon.GetVertex(j);
 			if (ti != PolygonType::Back)
 				frontVertices.push_back(vi);
 			if (ti != PolygonType::Front)
@@ -224,10 +218,10 @@ void BSP::SplitPolygon(
 		}
 
 		if (frontVertices.size() >= 3)
-			frontPolygons.push_back(Polygon(polygon.materialIdx, frontVertices));
+			frontPolygons.push_back(Polygon(polygon.GetMaterialIdx(), frontVertices));
 
 		if (backVertices.size() >= 3)
-			backPolygons.push_back(Polygon(polygon.materialIdx, backVertices));
+			backPolygons.push_back(Polygon(polygon.GetMaterialIdx(), backVertices));
 		break;
 	}
 }
@@ -245,10 +239,10 @@ void BSP::GetPolygonsType(const Plane& splitPlane, const Polygon& polygon, int& 
 	spanCount = 0;
 
 	int polygonType = 0;
-	std::vector<int> types(polygon.vertices.size());
-	for (int i = 0; i < polygon.vertices.size(); i++)
+	std::vector<int> types(polygon.GetVerticesCount());
+	for (int i = 0; i < polygon.GetVerticesCount(); i++)
 	{
-		float d = splitPlane.DistanceTo(polygon.vertices[i].position);
+		float d = splitPlane.DistanceTo(polygon.GetVertex(i).position);
 		int type = 0;
 		if (d < -Math::ZeroTolerance)
 			type = PolygonType::Back;
@@ -261,7 +255,6 @@ void BSP::GetPolygonsType(const Plane& splitPlane, const Polygon& polygon, int& 
 		types[i] = type;
 	}
 
-	Plane p = GetPlane(polygon);
 	switch (polygonType)
 	{
 	case PolygonType::Coplanar:
@@ -282,8 +275,8 @@ void BSP::GetPolygonsType(const Plane& splitPlane, const Polygon& polygon, int& 
 
 int BSP::GetSplitPlaneIdx(const std::vector<Polygon>& polygons) const
 {
-	return (int)Math::RangeRandom(0,  polygons.size()-1);
-	
+	return (int)Math::RangeRandom(0, (float)polygons.size()-1);
+	/*
 	int coplanerCount = 0;
 	int frontCount = 0;
 	int backCount = 0;
@@ -321,4 +314,5 @@ int BSP::GetSplitPlaneIdx(const std::vector<Polygon>& polygons) const
 
 	return minSpanIdx;
 	// return minDiffIdx;
+	*/
 }

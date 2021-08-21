@@ -48,6 +48,8 @@ int main(int argc, const char** argv)
 	int i = 0;
 #endif
 	{
+		Math::RandSeed();
+
 		// Prepare the FBX SDK.
 		FbxManager* sdkManager = NULL;
 		FbxScene* fbxScene = NULL;

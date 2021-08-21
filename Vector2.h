@@ -105,8 +105,8 @@ public:
 	friend Vector2 Lerp(const Vector2& v0, const Vector2& v1, float t);
 
 	static Vector2 Zero;
-	static Vector2 XAxis;
-	static Vector2 YAxis;
+	static Vector2 UnitX;
+	static Vector2 UnitY;
 private:
 	float m[2];
 };

@@ -157,7 +157,7 @@ bool MeshBuilder::BuildMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNod
 	return true;
 }
 
-bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, Mesh& mesh, Polygon& polygon, int polygonIndex)
+bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, int polygonIndex, int& materialIdx)
 {
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
@@ -174,9 +174,7 @@ bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, Mesh& mesh, Polygon& polygon, 
 			case FbxGeometryElement::eIndexToDirect:
 			case FbxGeometryElement::eDirect:
 			{
-				polygon.materialIdx = leMaterial->GetIndexArray().GetAt(polygonIndex);
-				if (mesh.maxMaterialIdx < polygon.materialIdx)
-					mesh.maxMaterialIdx = polygon.materialIdx;
+				materialIdx = leMaterial->GetIndexArray().GetAt(polygonIndex);
 			}
 			break;
 
@@ -219,7 +217,6 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int l
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
-	int a = fbxMesh->GetElementVertexColorCount();
 	mesh.colorChannelCount = std::min(fbxMesh->GetElementVertexColorCount(), NUM_COLORS);
 	for (int layer = 0; layer < mesh.colorChannelCount; layer++)
 	{
@@ -591,20 +588,20 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 	FbxDouble3 aabbMax = fbxMesh->BBoxMax;
 
 	mesh.aabb = AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2]));
-	mesh.polygons.resize(fbxMesh->GetPolygonCount());
+	// mesh.polygons.resize(fbxMesh->GetPolygonCount());
 
 	int vertexId = 0;
 	for (int polygonIndex = 0; polygonIndex < fbxMesh->GetPolygonCount(); polygonIndex++)
 	{
-		Polygon& polygon = mesh.polygons[polygonIndex];
+		Polygon polygon;
 
-		if (!BuildMaterial(fbxNode, mesh, polygon, polygonIndex))
+		int materialIdx = 0;
+		if (!BuildMaterial(fbxNode, polygonIndex, materialIdx))
 			return false;
 
 		for (int polygonVertexIndex = 0; polygonVertexIndex < fbxMesh->GetPolygonSize(polygonIndex); polygonVertexIndex++)
 		{
-			polygon.vertices.push_back(Vertex());
-			Vertex& vertex = polygon.vertices.back();
+			Vertex vertex;
 
 			int lControlPointIndex = fbxMesh->GetPolygonVertex(polygonIndex, polygonVertexIndex);
 			if (lControlPointIndex < 0)
@@ -644,8 +641,12 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 			if (!BuildBinormal(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
+			polygon.Add(vertex);
+
 			vertexId++;
 		}
+
+		mesh.Add(polygon);
 	}
 
 	/*

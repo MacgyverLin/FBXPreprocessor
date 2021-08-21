@@ -33,7 +33,7 @@ private:
 	bool BuildMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, std::vector<Mesh >& meshes);
 	bool BuildMesh(FbxNode* fbxNode, Mesh& mesh);
 
-	bool BuildMaterial(FbxNode* fbxNode, Mesh& mesh, Polygon& polygon, int polygonIndex);
+	bool BuildMaterial(FbxNode* fbxNode, int polygonIndex, int& materialIdx);
 	bool BuildPosition(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
 	bool BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
 	bool BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int polygonIndex, int polygonVertexIndex);

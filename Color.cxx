@@ -1,5 +1,8 @@
 #include "Color.h"
 
+Color Color::Black(0.0f, 0.0f, 0.0f, 1.0f);
+Color Color::White(1.0f, 1.0f, 1.0f, 1.0f);
+
 Color::Color()
 {
 }

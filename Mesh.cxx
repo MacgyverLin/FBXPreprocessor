@@ -59,9 +59,11 @@ bool Mesh::IsEmpty() const
 	return polygons.size() == 0;
 }
 
-
 void Mesh::Add(const Polygon& polygon)
 {
+	if (maxMaterialIdx < polygon.GetMaterialIdx())
+		maxMaterialIdx = polygon.GetMaterialIdx();
+
 	polygons.push_back(polygon);
 }
 
@@ -70,7 +72,7 @@ const AABB& Mesh::GetAABB() const
 	return aabb;
 }
 
-int Mesh::GetPolygonCount() const
+size_t Mesh::GetPolygonCount() const
 {
 	return polygons.size();
 }
@@ -80,7 +82,7 @@ const Polygon& Mesh::GetPolygon(int i) const
 	return polygons[i];
 }
 
-int Mesh::GetVerticesCount() const
+size_t Mesh::GetVerticesCount() const
 {
 	int verticesCount = 0;
 	for (size_t i = 0; i < polygons.size(); i++)

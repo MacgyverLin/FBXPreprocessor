@@ -64,15 +64,15 @@ Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID, bool 
 	Vector3 binormal = normal.Cross(tangent);
 
 	Matrix4 uvProjMatrix;
-	uvProjMatrix.Init(tangent, binormal, normal, center);
+	uvProjMatrix.Init(tangent, binormal, -normal, center);
 	Matrix4 uvProjMatrixInv = uvProjMatrix.Inverse();
 
 	/////////////////////////////////////////////////////////////
 	std::vector<Vertex> vertices;
-	vertices.push_back(MakeVertex(mesh, center, normal, tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(mesh, center, normal, tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(mesh, center, normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(mesh, center, normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, -normal, tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, -normal, tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
 
 	return Polygon(materialID, vertices);
 }

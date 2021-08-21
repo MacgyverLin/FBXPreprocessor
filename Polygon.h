@@ -2,14 +2,10 @@
 #define _Polygon_h_
 
 #include "Vertex.h"
+#include "Plane.h"
 
 class Polygon
 {
-	friend class MeshBuilder;
-	friend class MeshSlicer;
-	friend class BSPMeshSlicer;
-	friend class FBXMeshBuilder;
-	friend class BSP;
 public:
 	Polygon();
 
@@ -27,11 +23,19 @@ public:
 
 	const Vertex& GetVertex(int i) const;
 
+	const std::vector<Vertex>& GetVertices() const;
+
+	std::vector<Vertex>& GetVertices();
+
+	void Add(const Vertex& vertex);
+
 	void Clear();
 
 	void Flip();
 
 	bool IsEmpty() const;
+
+	Plane GetPlane() const;
 
 	friend void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons);
 private:

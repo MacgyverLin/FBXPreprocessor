@@ -243,7 +243,6 @@ void FBXMeshBuilder::FillUV(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, i
 void FBXMeshBuilder::FillNormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch)
 {
 	VertexBatcher<Vector3> batcher(useBatch);
-	int v = mesh.GetVerticesCount();
 	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
 		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
 			batcher.Add(mesh.GetPolygon(i).GetVertex(k).normals[ch]);
@@ -338,7 +337,7 @@ void FBXMeshBuilder::FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 	int vertexIdx = 0;
 	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
 	{
-		dstMesh->BeginPolygon(mesh.GetPolygon(i).materialIdx);
+		dstMesh->BeginPolygon(mesh.GetPolygon(i).GetMaterialIdx());
 
 		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
 		{

@@ -1,9 +1,9 @@
 #include "Vector3.h"
 
 Vector3 Vector3::Zero(0.0f, 0.0f, 0.0f);
-Vector3 Vector3::XAxis(1.0f, 0.0f, 0.0f);
-Vector3 Vector3::YAxis(0.0f, 1.0f, 0.0f);
-Vector3 Vector3::ZAxis(0.0f, 0.0f, 1.0f);
+Vector3 Vector3::UnitX(1.0f, 0.0f, 0.0f);
+Vector3 Vector3::UnitY(0.0f, 1.0f, 0.0f);
+Vector3 Vector3::UnitZ(0.0f, 0.0f, 1.0f);
 
 ///////////////////////////////////////////////////////////////////
 Vector3::Vector3()

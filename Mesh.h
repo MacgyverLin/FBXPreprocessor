@@ -21,19 +21,19 @@ public:
 
 	Mesh& operator = (const Mesh& other);
 
-	void Flip();
+	const AABB& GetAABB() const;
 
-	bool IsEmpty() const;
+	size_t GetPolygonCount() const;
+
+	const Polygon& GetPolygon(int i) const;
+
+	size_t GetVerticesCount() const;
 
 	void Add(const Polygon& polygon);
 
-	const AABB& GetAABB() const;
+	void Flip();
 
-	int GetPolygonCount() const;
-	
-	const Polygon& GetPolygon(int i) const;
-
-	int GetVerticesCount() const;
+	bool IsEmpty() const;
 
 	friend void FixMaterialOrder(Mesh& mesh);
 

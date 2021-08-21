@@ -10,6 +10,7 @@
 class Math
 {
 public:
+	static void RandSeed(int seed = 0);
 	static float UnitRandom();
 	static float RangeRandom(float min, float max);
 	static const float ZeroTolerance;

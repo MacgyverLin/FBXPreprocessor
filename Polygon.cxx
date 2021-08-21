@@ -44,6 +44,21 @@ const Vertex& Polygon::GetVertex(int i) const
 	return vertices[i];
 }
 
+const std::vector<Vertex>& Polygon::GetVertices() const
+{
+	return vertices;
+}
+
+std::vector<Vertex>& Polygon::GetVertices()
+{
+	return vertices;
+}
+
+void Polygon::Add(const Vertex& vertex)
+{
+	vertices.push_back(vertex);
+}
+
 void Polygon::Clear()
 {
 	materialIdx = 0;
@@ -56,12 +71,18 @@ void Polygon::Flip()
 	for (size_t i = 0; i < vertices.size(); i++)
 	{
 		vertices[i] = oldVertices[oldVertices.size() - 1 - i];
+		vertices[i].Flip();
 	}
 }
 
 bool Polygon::IsEmpty() const
 {
 	return vertices.size() == 0;
+}
+
+Plane Polygon::GetPlane() const
+{
+	return Plane(vertices[0].position, vertices[1].position, vertices[2].position);
 }
 
 void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
