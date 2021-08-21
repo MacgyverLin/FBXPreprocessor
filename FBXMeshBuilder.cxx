@@ -141,27 +141,27 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Me
 	bool useChannelCount = true;
 	////////////////////////////////////////////////////////
 	// fill color
-	for (size_t ch = 0; ch < (useChannelCount ? mesh.colorChannelCount : NUM_COLORS); ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.GetColorChannelCount() : NUM_COLORS); ch++)
 		FillColor(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill normal
-	for (size_t ch = 0; ch < (useChannelCount ? mesh.normalChannelCount : NUM_NORMALS); ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.GetNormalChannelCount() : NUM_NORMALS); ch++)
 		FillNormal(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill uv
-	for (size_t ch = 0; ch < (useChannelCount ? mesh.uvChannelCount : NUM_UVS); ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.GetUVChannelCount() : NUM_UVS); ch++)
 		FillUV(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill tangent
-	for (size_t ch = 0; ch < (useChannelCount ? mesh.tangentChannelCount : NUM_TANGENTS); ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.GetTangentChannelCount() : NUM_TANGENTS); ch++)
 		FillTangent(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////
 	// fill binormal
-	for (size_t ch = 0; ch < (useChannelCount ? mesh.binormalChannelCount : NUM_BINORMALS); ch++)
+	for (size_t ch = 0; ch < (useChannelCount ? mesh.GetBinormalChannelCount() : NUM_BINORMALS); ch++)
 		FillBinormal(useBatch, dstMesh, mesh, ch);
 
 	////////////////////////////////////////////////////////

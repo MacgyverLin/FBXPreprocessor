@@ -16,7 +16,7 @@ bool BSPMeshSlicer::Process(const std::vector<Mesh>& meshes, std::vector<MeshArr
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		MeshArray cutters;
-		MakeCutters(meshes[i], cutters, meshes[i].maxMaterialIdx+1, 1);
+		MakeCutters(meshes[i], cutters, meshes[i].GetMaxMaterialIdx()+1, 1);
 
 		if (!Process(meshes[i], cutters, meshArrays[i]))
 			return false;
@@ -45,12 +45,10 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 		Polygon p = MakeCutterPolygon(mesh, materialID, true, true);
 
 		cutters[i + 0].Add(p);
-		cutters[i + 0].maxMaterialIdx = materialID;
 
 		p.Flip();
 
 		cutters[i + 1].Add(p);
-		cutters[i + 0].maxMaterialIdx = materialID;
 	}
 }
 
@@ -84,19 +82,19 @@ Vertex BSPMeshSlicer::MakeVertex(const Mesh& mesh, const Vector3& center, const 
 	v.position = center + tangent * polygonSize + binormal * polygonSize;
 	Vector3 vProj = projMatrix.TimesPositionVector(v.position);
 
-	for (size_t i = 0; i < mesh.colorChannelCount; i++)
+	for (size_t i = 0; i < mesh.GetColorChannelCount(); i++)
 		v.colors[i] = Color(1.0, 1.0, 1.0, 1.0);
 
-	for (size_t i = 0; i < mesh.uvChannelCount; i++)
+	for (size_t i = 0; i < mesh.GetUVChannelCount(); i++)
 		v.uvs[i] = Vector2(vProj.X(), vProj.Y()) * uvScale;
 
-	for (size_t i = 0; i < mesh.normalChannelCount; i++)
+	for (size_t i = 0; i < mesh.GetNormalChannelCount(); i++)
 		v.normals[i] = normal;
 
-	for (size_t i = 0; i < mesh.tangentChannelCount; i++)
+	for (size_t i = 0; i < mesh.GetTangentChannelCount(); i++)
 		v.tangents[i] = tangent;
 
-	for (size_t i = 0; i < mesh.binormalChannelCount; i++)
+	for (size_t i = 0; i < mesh.GetBinormalChannelCount(); i++)
 		v.binormals[i] = binormal;
 
 	return v;

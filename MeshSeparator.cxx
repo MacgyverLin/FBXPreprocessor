@@ -56,9 +56,5 @@ bool MeshSeparator::Process(const Mesh& srcMesh, Mesh& resultMesh)
 {
 	resultMesh = srcMesh;
 
-	while (srcMesh.polygons.size())
-	{
-	};
-
 	return true;
 }

@@ -1,15 +1,9 @@
 #include "Mesh.h"
 #include "BSP.h"
 
-Mesh::Mesh()
+Mesh::Mesh(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
 {
-	maxMaterialIdx = 0;
-
-	colorChannelCount = 0;
-	uvChannelCount = 0;
-	normalChannelCount = 0;
-	tangentChannelCount = 0;
-	binormalChannelCount = 0;
+	Clear(colorChannelCount_, uvChannelCount_, normalChannelCount_, tangentChannelCount_, binormalChannelCount_);
 }
 
 Mesh::~Mesh()
@@ -46,25 +40,64 @@ Mesh& Mesh::operator = (const Mesh& other)
 	return *this;
 }
 
-void Mesh::Flip()
+int Mesh::GetMaxMaterialIdx() const
 {
-	for (size_t i = 0; i < polygons.size(); i++)
-	{
-		polygons[i].Flip();
-	}
+	return maxMaterialIdx;
 }
 
-bool Mesh::IsEmpty() const
+void Mesh::SetColorChannelCount(int colorChannelCount_)
 {
-	return polygons.size() == 0;
+	colorChannelCount = colorChannelCount_;
 }
 
-void Mesh::Add(const Polygon& polygon)
+void Mesh::SetUVChannelCount(int uvChannelCount_)
 {
-	if (maxMaterialIdx < polygon.GetMaterialIdx())
-		maxMaterialIdx = polygon.GetMaterialIdx();
+	uvChannelCount = uvChannelCount_;
+}
 
-	polygons.push_back(polygon);
+void Mesh::SetNormalChannelCount(int normalChannelCount_)
+{
+	normalChannelCount = normalChannelCount_;
+}
+
+void Mesh::SetTangentChannelCount(int tangentChannelCount_)
+{
+	tangentChannelCount = tangentChannelCount_;
+}
+
+void Mesh::SetBinormalChannelCount(int binormalChannelCount_)
+{
+	binormalChannelCount = binormalChannelCount_;
+}
+
+int Mesh::GetColorChannelCount() const
+{
+	return colorChannelCount;
+}
+
+int Mesh::GetUVChannelCount() const
+{
+	return uvChannelCount;
+}
+
+int Mesh::GetNormalChannelCount() const
+{
+	return normalChannelCount;
+}
+
+int Mesh::GetTangentChannelCount() const
+{
+	return tangentChannelCount;
+}
+
+int Mesh::GetBinormalChannelCount() const
+{
+	return binormalChannelCount;
+}
+
+void Mesh::SetAABB(const AABB& aabb_)
+{
+	aabb = aabb_;
 }
 
 const AABB& Mesh::GetAABB() const
@@ -82,6 +115,16 @@ const Polygon& Mesh::GetPolygon(int i) const
 	return polygons[i];
 }
 
+const std::vector<Polygon>& Mesh::GetPolygons() const
+{
+	return polygons;
+}
+
+std::vector<Polygon>& Mesh::GetPolygons()
+{
+	return polygons;
+}
+
 size_t Mesh::GetVerticesCount() const
 {
 	int verticesCount = 0;
@@ -91,6 +134,41 @@ size_t Mesh::GetVerticesCount() const
 	}
 
 	return verticesCount;
+}
+
+void Mesh::Add(const Polygon& polygon)
+{
+	if (maxMaterialIdx < polygon.GetMaterialIdx())
+		maxMaterialIdx = polygon.GetMaterialIdx();
+
+	polygons.push_back(polygon);
+}
+
+void Mesh::Clear(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
+{
+	maxMaterialIdx = 0;
+
+	colorChannelCount = colorChannelCount_;
+	uvChannelCount = uvChannelCount_;
+	normalChannelCount = normalChannelCount_;
+	tangentChannelCount = tangentChannelCount_;
+	binormalChannelCount = binormalChannelCount_;
+
+	aabb = AABB();
+	polygons.clear();
+}
+
+void Mesh::Flip()
+{
+	for (size_t i = 0; i < polygons.size(); i++)
+	{
+		polygons[i].Flip();
+	}
+}
+
+bool Mesh::IsEmpty() const
+{
+	return polygons.size() == 0;
 }
 
 void FixMaterialOrder(Mesh& mesh)
@@ -112,7 +190,7 @@ void FixMaterialOrder(Mesh& mesh)
 	
 	mesh.polygons.clear();
 
-	for (size_t i = 0; i < mesh.maxMaterialIdx + 1; i++)
+	for (size_t i = 0; i < mesh.GetMaxMaterialIdx() + 1; i++)
 		mesh.Add(Polygon(i, vertices));
 
 	mesh.polygons.insert(mesh.polygons.end(), oldPolygons.begin(), oldPolygons.end());

@@ -6,14 +6,8 @@
 
 class Mesh
 {
-	friend class MeshBuilder;
-	friend class MeshSlicer;
-	friend class MeshSeparator;
-	friend class BSPMeshSlicer;
-	friend class FBXMeshBuilder;
-	friend class BSP;
 public:
-	Mesh();
+	Mesh(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
 
 	~Mesh();
 
@@ -21,15 +15,36 @@ public:
 
 	Mesh& operator = (const Mesh& other);
 
+	int GetMaxMaterialIdx() const;
+
+	void SetColorChannelCount(int colorChannelCount_);
+	void SetUVChannelCount(int uvChannelCount_);
+	void SetNormalChannelCount(int normalChannelCount_);
+	void SetTangentChannelCount(int tangentChannelCount_);
+	void SetBinormalChannelCount(int binormalChannelCount_);
+	int GetColorChannelCount() const;
+	int GetUVChannelCount() const;
+	int GetNormalChannelCount() const;
+	int GetTangentChannelCount() const;
+	int GetBinormalChannelCount() const;
+
+	void SetAABB(const AABB& aabb_);
+
 	const AABB& GetAABB() const;
 
 	size_t GetPolygonCount() const;
 
 	const Polygon& GetPolygon(int i) const;
 
+	const std::vector<Polygon>& GetPolygons() const;
+
+	std::vector<Polygon>& GetPolygons();
+
 	size_t GetVerticesCount() const;
 
 	void Add(const Polygon& polygon);
+
+	void Clear(int colorChannelCount_=0, int uvChannelCount_=1, int normalChannelCount_=1, int tangentChannelCount_=1, int binormalChannelCount_=1);
 
 	void Flip();
 
