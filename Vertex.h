@@ -22,7 +22,23 @@ public:
 
 	Vertex(const Vertex& other);
 
+	// assignment
 	Vertex& operator = (const Vertex& other);
+
+	// comparison
+	int CompareArrays(const Vertex& v) const;
+
+	bool operator== (const Vertex& v) const;
+
+	bool operator!= (const Vertex& v) const;
+
+	bool operator<  (const Vertex& v) const;
+
+	bool operator<= (const Vertex& v) const;
+
+	bool operator>  (const Vertex& v) const;
+
+	bool operator>= (const Vertex& v) const;
 
 	// arithmetic operations
 	Vertex operator+ (const Vertex& v) const;

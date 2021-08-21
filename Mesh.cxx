@@ -322,11 +322,49 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 	return result;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+// comparison
+int Edge::CompareArrays(const Edge& v) const
+{
+	return memcmp(indices, v.indices, 2 * sizeof(indices[0]));
+}
+
+bool Edge::operator== (const Edge& v) const
+{
+	return CompareArrays(v) == 0;
+}
+
+bool Edge::operator!= (const Edge& v) const
+{
+	return CompareArrays(v) != 0;
+}
+
+bool Edge::operator<  (const Edge& v) const
+{
+	return CompareArrays(v) < 0;
+}
+
+bool Edge::operator<= (const Edge& v) const
+{
+	return CompareArrays(v) <= 0;
+}
+
+bool Edge::operator>  (const Edge& v) const
+{
+	return CompareArrays(v) > 0;
+}
+
+bool Edge::operator>= (const Edge& v) const
+{
+	return CompareArrays(v) >= 0;
+}
 
 //////////////////////////////////////////////////////////////////////////////
-IndexMesh::IndexMesh(const Mesh& mesh)
-	: MeshBase(mesh.GetColorChannelCount(), mesh.GetUVChannelCount(), 
-		mesh.GetNormalChannelCount(), mesh.GetTangentChannelCount(), mesh.GetBinormalChannelCount())
+IndexMesh::IndexMesh(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
+: MeshBase(colorChannelCount_, uvChannelCount_, normalChannelCount_, tangentChannelCount_, binormalChannelCount_)
+, positionOptimizer(true)
+, edgeOptimizer(true)
 {
 }
 
@@ -336,11 +374,29 @@ IndexMesh::~IndexMesh()
 
 IndexMesh::IndexMesh(const IndexMesh& other)
 	: MeshBase(other)
+	, positionOptimizer(true)
+	, edgeOptimizer(true)
 {
-	// polygons = other.polygons;
+	positionOptimizer = other.positionOptimizer;
+	edgeOptimizer = other.edgeOptimizer;
 }
 
 IndexMesh& IndexMesh::operator = (const IndexMesh& other)
+{
+	positionOptimizer = other.positionOptimizer;
+	edgeOptimizer = other.edgeOptimizer;
+
+	return *this;
+}
+
+IndexMesh::IndexMesh(const Mesh& other)
+	: MeshBase(other)
+	, positionOptimizer(true)
+	, edgeOptimizer(true)
+{
+}
+
+IndexMesh& IndexMesh::operator = (const Mesh& other)
 {
 	*((MeshBase*)this) = *((MeshBase*)&other);
 

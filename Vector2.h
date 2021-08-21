@@ -44,9 +44,9 @@ public:
 
 	Vector2& operator= (const Vector2& v);
 
+	// comparison
 	int CompareArrays(const Vector2& v) const;
 
-	// comparison
 	bool operator== (const Vector2& v) const;
 
 	bool operator!= (const Vector2& v) const;

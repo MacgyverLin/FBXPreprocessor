@@ -86,6 +86,41 @@ Vertex& Vertex::operator = (const Vertex& other)
 	return *this;
 }
 
+int Vertex::CompareArrays(const Vertex& v) const
+{
+	return memcmp(this, &v, sizeof(Vertex));
+}
+
+bool Vertex::operator == (const Vertex& v) const
+{
+	return CompareArrays(v) == 0;
+}
+
+bool Vertex::operator != (const Vertex& v) const
+{
+	return CompareArrays(v) != 0;
+}
+
+bool Vertex::operator<  (const Vertex& v) const
+{
+	return CompareArrays(v) < 0;
+}
+
+bool Vertex::operator<= (const Vertex& v) const
+{
+	return CompareArrays(v) <= 0;
+}
+
+bool Vertex::operator>  (const Vertex& v) const
+{
+	return CompareArrays(v) > 0;
+}
+
+bool Vertex::operator>= (const Vertex& v) const
+{
+	return CompareArrays(v) >= 0;
+}
+
 // arithmetic operations
 Vertex Vertex::operator+ (const Vertex& v) const
 {

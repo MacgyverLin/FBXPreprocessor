@@ -104,16 +104,53 @@ typedef std::vector<Mesh> MeshArray;
 
 
 ////////////////////////////////////////////////////////////////////////
+#include "DataOptimizer.h"
+
+class Edge
+{
+public:
+	Edge(int i0 = -1, int i1=-1)
+	{
+		indices[0] = i0;
+		indices[1] = i1;
+	}
+
+	~Edge()
+	{
+	}
+
+	// comparison
+	int CompareArrays(const Edge& v) const;
+
+	bool operator== (const Edge& v) const;
+
+	bool operator!= (const Edge& v) const;
+
+	bool operator<  (const Edge& v) const;
+
+	bool operator<= (const Edge& v) const;
+
+	bool operator>  (const Edge& v) const;
+
+	bool operator>= (const Edge& v) const;
+private:
+	int indices[2];
+};
+
 class IndexMesh : public MeshBase
 {
 public:
-	IndexMesh(const Mesh& mesh);
+	IndexMesh(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
 
 	~IndexMesh();
 
 	IndexMesh(const IndexMesh& other);
 
 	IndexMesh& operator = (const IndexMesh& other);
+
+	IndexMesh(const Mesh& mesh);
+
+	IndexMesh& operator = (const Mesh& other);
 
 	virtual size_t GetPolygonCount() const override;
 
@@ -133,7 +170,9 @@ public:
 
 	virtual bool IsEmpty() const override;
 private:
-	std::vector<Vertex> vertices;
+	DataOptimizer<Vector3> positionOptimizer;
+	DataOptimizer<Edge> edgeOptimizer;
+	std::vector<int> polygon;
 };
 
 #endif
