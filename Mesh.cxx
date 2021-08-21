@@ -116,7 +116,7 @@ void MeshBase::Begin(int colorChannelCount_, int uvChannelCount_, int normalChan
 	aabb = AABB();
 }
 
-void MeshBase::Add20(const std::vector<Polygon>& polys)
+void MeshBase::Add(const std::vector<Polygon>& polys)
 {
 	for(auto& polygon : polys)
 	{
@@ -125,7 +125,7 @@ void MeshBase::Add20(const std::vector<Polygon>& polys)
 	}
 }
 
-void MeshBase::Add20(const Polygon& polygon)
+void MeshBase::Add(const Polygon& polygon)
 {
 	if (maxMaterialIdx < polygon.GetMaterialIdx())
 		maxMaterialIdx = polygon.GetMaterialIdx();
@@ -207,16 +207,16 @@ void Mesh::Begin(int colorChannelCount_, int uvChannelCount_, int normalChannelC
 	polygons.clear();
 }
 
-void Mesh::Add20(const std::vector<Polygon>& polys)
+void Mesh::Add(const std::vector<Polygon>& polys)
 {
-	MeshBase::Add20(polys);
+	MeshBase::Add(polys);
 
 	polygons.insert(polygons.end(), polys.begin(), polys.end());
 }
 
-void Mesh::Add20(const Polygon& polygon)
+void Mesh::Add(const Polygon& polygon)
 {
-	MeshBase::Add20(polygon);
+	MeshBase::Add(polygon);
 
 	polygons.push_back(polygon);
 }
@@ -224,6 +224,13 @@ void Mesh::Add20(const Polygon& polygon)
 void Mesh::End()
 {
 	// update aabb
+	for (size_t i = 0; i < polygons.size(); i++)
+	{
+		if (i == 0)
+			aabb = polygons[i].GetAABB();
+		else
+			aabb += polygons[i].GetAABB();
+	}
 
 	MeshBase::End();
 }
@@ -275,12 +282,16 @@ bool FixMaterialOrder(Mesh& mesh)
 
 	mesh.Begin();
 
-	for (size_t i = 0; i <= oldMesh.GetMaxMaterialIdx(); i++)
-		mesh.Add20(Polygon(i, vertices));
+	for (size_t i = 0; i < oldMesh.GetMaxMaterialIdx() + 1; i++)
+	{
+		Polygon p;
+		p.Begin(i);
+		p.Add(vertices);
+		p.End();
 
-	// for (size_t i = 0; i < oldMesh.GetPolygonCount(); i++)
-	// 	mesh.Add20(oldMesh.GetPolygon(i));
-	mesh.Add20(oldMesh.GetPolygons());
+		mesh.Add(p);
+	}
+	mesh.Add(oldMesh.GetPolygons());
 
 	mesh.End();
 
@@ -331,7 +342,7 @@ void Triangulate(Mesh& mesh)
 		std::vector<Polygon> polygons;
 		Triangulate(oldMesh.GetPolygon(i), polygons);
 
-		mesh.Add20(polygons);
+		mesh.Add(polygons);
 	}
 	
 	mesh.End();
@@ -380,7 +391,7 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 					m0.GetNormalChannelCount(), m0.GetTangentChannelCount(), m0.GetBinormalChannelCount());
 		
 		// result.maxMaterialIdx = std::max(m0.maxMaterialIdx, m1.maxMaterialIdx);
-		result.Add20(resultPolygons);
+		result.Add(resultPolygons);
 		
 		result.SetAABB(m0.GetAABB());
 		result.End();

@@ -45,13 +45,13 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 		Polygon p = MakeCutterPolygon(mesh, materialID, true, true);
 
 		cutters[i + 0].Begin();
-		cutters[i + 0].Add20(p);
+		cutters[i + 0].Add(p);
 		cutters[i + 0].End();
 
 		p.Flip();
 
 		cutters[i + 1].Begin();
-		cutters[i + 1].Add20(p);
+		cutters[i + 1].Add(p);
 		cutters[i + 1].End();
 	}
 }
@@ -76,7 +76,12 @@ Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID, bool 
 	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
 	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
 
-	return Polygon(materialID, vertices);
+	Polygon result;
+	result.Begin(materialID);
+	result.Add(vertices);
+	result.End();
+
+	return result;
 }
 
 Vertex BSPMeshSlicer::MakeVertex(const Mesh& mesh, const Vector3& center, const Vector3& normal, const Vector3& tangent, const Vector3& binormal, float polygonSize,

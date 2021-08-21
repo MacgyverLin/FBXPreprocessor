@@ -1,14 +1,11 @@
 #include "Polygon.h"
 
 Polygon::Polygon(int materialIdx_)
+	: materialIdx(materialIdx_)
+	, plane()
+	, aabb()
+	, vertices()
 {
-	this->materialIdx = materialIdx_;
-}
-
-Polygon::Polygon(int materialIdx, const std::vector<Vertex>& vertices)
-{
-	this->materialIdx = materialIdx;
-	this->vertices = vertices;
 }
 
 Polygon::~Polygon()
@@ -18,12 +15,16 @@ Polygon::~Polygon()
 Polygon::Polygon(const Polygon& other)
 {
 	materialIdx = other.materialIdx;
+	plane = other.plane;
+	aabb = other.aabb;
 	vertices = other.vertices;
 }
 
 Polygon& Polygon::operator = (const Polygon& other)
 {
 	materialIdx = other.materialIdx;
+	plane = other.plane;
+	aabb = other.aabb;
 	vertices = other.vertices;
 
 	return *this;
@@ -32,6 +33,16 @@ Polygon& Polygon::operator = (const Polygon& other)
 int Polygon::GetMaterialIdx() const
 {
 	return materialIdx;
+}
+
+const Plane& Polygon::GetPlane() const
+{
+	return plane;
+}
+
+const AABB& Polygon::GetAABB() const
+{
+	return aabb;
 }
 
 int Polygon::GetVerticesCount() const
@@ -47,27 +58,38 @@ const Vertex& Polygon::GetVertex(int i) const
 void Polygon::Begin(int materialIdx_)
 {
 	materialIdx = materialIdx_;
-
+	plane = Plane();
+	aabb = AABB();
 	vertices.clear();
 }
 
-void Polygon::Add10(const std::vector<Vertex>& verts)
+void Polygon::Add(const std::vector<Vertex>& verts)
 {
-	vertices.insert(vertices.end(), verts.begin(), verts.end());
+	for (auto& v : verts)
+		Add(v);
 }
 
-void Polygon::Add10(const Vertex& vertex)
+void Polygon::Add(const Vertex& vertex)
 {
+	if (vertices.size() == 0)
+		aabb = AABB(vertex.position, vertex.position);
+	else
+		aabb += vertex.position;
+
 	vertices.push_back(vertex);
 }
 
 void Polygon::End()
 {
+	if(vertices.size()>=3)
+		plane = Plane(vertices[0].position, vertices[1].position, vertices[2].position);
 }
 
 void Polygon::Clear()
 {
 	materialIdx = 0;
+	plane = Plane();
+	aabb = AABB();
 	vertices.clear();
 }
 
@@ -86,11 +108,6 @@ bool Polygon::IsEmpty() const
 	return vertices.size() == 0;
 }
 
-Plane Polygon::GetPlane() const
-{
-	return Plane(vertices[0].position, vertices[1].position, vertices[2].position);
-}
-
 void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
 {
 	if (polygon.GetVerticesCount() < 3)
@@ -103,9 +120,9 @@ void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
 	{
 		polygons[startIdx + i].Begin(polygon.GetMaterialIdx());
 		
-		polygons[startIdx + i].Add10(polygon.GetVertex(0));
-		polygons[startIdx + i].Add10(polygon.GetVertex(i + 1));
-		polygons[startIdx + i].Add10(polygon.GetVertex(i + 2));
+		polygons[startIdx + i].Add(polygon.GetVertex(0));
+		polygons[startIdx + i].Add(polygon.GetVertex(i + 1));
+		polygons[startIdx + i].Add(polygon.GetVertex(i + 2));
 
 		polygons[startIdx + i].End();
 

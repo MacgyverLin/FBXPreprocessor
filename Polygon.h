@@ -3,13 +3,12 @@
 
 #include "Vertex.h"
 #include "Plane.h"
+#include "AABB.h"
 
 class Polygon
 {
 public:
 	Polygon(int materialIdx = 0);
-
-	Polygon(int materialIdx, const std::vector<Vertex>& vertices);
 
 	~Polygon();
 
@@ -18,16 +17,20 @@ public:
 	Polygon& operator = (const Polygon& other);
 
 	int GetMaterialIdx() const;
+
+	const Plane& GetPlane() const;
+
+	const AABB& GetAABB() const;
 	
 	int GetVerticesCount() const;
 
 	const Vertex& GetVertex(int i) const;
 
-	void Begin(int materialIdx = 0);
+	void Begin(int materialIdx);
 
-	void Add10(const std::vector<Vertex>& vertices);
+	void Add(const std::vector<Vertex>& vertices);
 
-	void Add10(const Vertex& vertex);
+	void Add(const Vertex& vertex);
 
 	void End();
 
@@ -36,10 +39,10 @@ public:
 	void Flip();
 
 	bool IsEmpty() const;
-
-	Plane GetPlane() const;
 private:
 	int materialIdx;
+	Plane plane;
+	AABB aabb;
 	std::vector<Vertex> vertices;
 };
 

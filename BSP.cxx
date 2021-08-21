@@ -218,10 +218,24 @@ void BSP::SplitPolygon(
 		}
 
 		if (frontVertices.size() >= 3)
-			frontPolygons.push_back(Polygon(polygon.GetMaterialIdx(), frontVertices));
+		{
+			Polygon frontPoly;
+			frontPoly.Begin(polygon.GetMaterialIdx());
+			frontPoly.Add(frontVertices);
+			frontPoly.End();
+
+			frontPolygons.push_back(frontPoly);
+		}
 
 		if (backVertices.size() >= 3)
-			backPolygons.push_back(Polygon(polygon.GetMaterialIdx(), backVertices));
+		{
+			Polygon backPoly;
+			backPoly.Begin(polygon.GetMaterialIdx());
+			backPoly.Add(backVertices);
+			backPoly.End();
+
+			backPolygons.push_back(backPoly);
+		}
 		break;
 	}
 }

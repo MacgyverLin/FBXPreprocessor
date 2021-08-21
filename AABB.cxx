@@ -35,15 +35,28 @@ Vector3 AABB::GetExtent() const
 	return maximun - minimun;
 }
 
-AABB AABB::operator + (const AABB& other)
+AABB AABB::operator + (const AABB& other) const
 {
 	return AABB(Min(minimun, other.minimun), Max(maximun, other.maximun));
 }
 
-AABB AABB::operator += (const AABB& aabb)
+AABB& AABB::operator += (const AABB& aabb)
 {
-	this->minimun = Min(minimun, aabb.minimun);
-	this->maximun = Max(maximun, aabb.maximun);
+	minimun = Min(minimun, aabb.minimun);
+	maximun = Max(maximun, aabb.maximun);
+
+	return *this;
+}
+
+AABB AABB::operator + (const Vector3& v) const
+{
+	return AABB(Min(minimun, v), Max(maximun, v));
+}
+
+AABB& AABB::operator += (const Vector3& v)
+{
+	minimun = Min(minimun, v);
+	maximun = Max(maximun, v);
 
 	return *this;
 }

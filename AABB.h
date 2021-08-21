@@ -20,9 +20,13 @@ public:
 	
 	const Vector3& GetMax() const;
 
-	AABB operator + (const AABB& other);
+	AABB operator + (const AABB& other) const;
 	
-	AABB operator += (const AABB& other);
+	AABB& operator += (const AABB& other);
+
+	AABB operator + (const Vector3& v) const;
+
+	AABB& operator += (const Vector3& v);
 
 	Vector3 GetExtent() const;
 	

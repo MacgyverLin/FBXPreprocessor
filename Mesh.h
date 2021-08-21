@@ -40,11 +40,11 @@ public:
 
 	virtual size_t GetVerticesCount() const = 0;
 
-	virtual void Begin(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
+	virtual void Begin(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_);
 
-	virtual void Add20(const std::vector<Polygon>& polygons);
+	virtual void Add(const std::vector<Polygon>& polygons);
 
-	virtual void Add20(const Polygon& polygon);
+	virtual void Add(const Polygon& polygon);
 
 	virtual void End();
 
@@ -86,9 +86,9 @@ public:
 
 	virtual void Begin(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1) override;
 
-	virtual void Add20(const std::vector<Polygon>& polygons) override;
+	virtual void Add(const std::vector<Polygon>& polygons) override;
 
-	virtual void Add20(const Polygon& polygon) override;
+	virtual void Add(const Polygon& polygon) override;
 
 	virtual void End() override;
 
