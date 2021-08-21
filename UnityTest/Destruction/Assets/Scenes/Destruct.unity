@@ -677,6 +677,7 @@ MonoBehaviour:
   - {fileID: 604604296}
   - {fileID: 1946116639}
   - {fileID: 143730475}
+  - {fileID: 1532051628}
   explosionForce: 10
   explosionRadius: 10
   upwardsModifier: 100
@@ -878,6 +879,11 @@ PrefabInstance:
     - target: {fileID: 7742780737561719692, guid: 9dbf8bf0e3494d04bbed18d138c01864,
         type: 3}
       propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8424073627695423409, guid: 9dbf8bf0e3494d04bbed18d138c01864,
+        type: 3}
+      propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8424073627695423409, guid: 9dbf8bf0e3494d04bbed18d138c01864,

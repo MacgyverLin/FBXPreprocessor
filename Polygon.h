@@ -23,11 +23,13 @@ public:
 
 	const Vertex& GetVertex(int i) const;
 
-	// const std::vector<Vertex>& GetVertices() const;
+	void Begin(int materialIdx = 0);
 
-	// std::vector<Vertex>& GetVertices();
+	void Add10(const std::vector<Vertex>& vertices);
 
-	void Add(const Vertex& vertex);
+	void Add10(const Vertex& vertex);
+
+	void End();
 
 	void Clear();
 
@@ -36,11 +38,11 @@ public:
 	bool IsEmpty() const;
 
 	Plane GetPlane() const;
-
-	friend void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons);
 private:
 	int materialIdx;
 	std::vector<Vertex> vertices;
 };
+
+extern void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons);
 
 #endif

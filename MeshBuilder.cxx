@@ -587,8 +587,13 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 	FbxDouble3 aabbMin = fbxMesh->BBoxMin;
 	FbxDouble3 aabbMax = fbxMesh->BBoxMax;
 
-	mesh.Clear();
-	mesh.SetAABB(AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2])));
+	int colorChannelCount = std::min(fbxMesh->GetElementVertexColorCount(), NUM_COLORS);
+	int uvChannelCount = std::min(fbxMesh->GetUVLayerCount(), NUM_UVS);
+	int normalChannelCount = std::min(fbxMesh->GetElementNormalCount(), NUM_NORMALS);
+	int tangentChannelCount = std::min(fbxMesh->GetElementTangentCount(), NUM_TANGENTS);
+	int binormalChannelCount = std::min(fbxMesh->GetElementBinormalCount(), NUM_BINORMALS);
+
+	mesh.Begin(colorChannelCount, uvChannelCount, normalChannelCount, tangentChannelCount, binormalChannelCount);
 
 	int vertexId = 0;
 	for (int polygonIndex = 0; polygonIndex < fbxMesh->GetPolygonCount(); polygonIndex++)
@@ -597,7 +602,8 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 		if (!BuildMaterial(fbxNode, polygonIndex, materialIdx))
 			return false;
 
-		Polygon polygon(materialIdx);
+		Polygon polygon;
+		polygon.Begin(materialIdx);
 
 		for (int polygonVertexIndex = 0; polygonVertexIndex < fbxMesh->GetPolygonSize(polygonIndex); polygonVertexIndex++)
 		{
@@ -641,13 +647,17 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 			if (!BuildBinormal(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
-			polygon.Add(vertex);
+			polygon.Add10(vertex);
 
 			vertexId++;
 		}
+		polygon.End();
 
-		mesh.Add(polygon);
+		mesh.Add20(polygon);
 	}
+
+	mesh.SetAABB(AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2])));
+	mesh.End();
 
 	/*
 	//check visibility for the edges of the fbxMesh

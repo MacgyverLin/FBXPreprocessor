@@ -44,21 +44,25 @@ const Vertex& Polygon::GetVertex(int i) const
 	return vertices[i];
 }
 
-/*
-const std::vector<Vertex>& Polygon::GetVertices() const
+void Polygon::Begin(int materialIdx_)
 {
-	return vertices;
+	materialIdx = materialIdx_;
+
+	vertices.clear();
 }
 
-std::vector<Vertex>& Polygon::GetVertices()
+void Polygon::Add10(const std::vector<Vertex>& verts)
 {
-	return vertices;
+	vertices.insert(vertices.end(), verts.begin(), verts.end());
 }
-*/
 
-void Polygon::Add(const Vertex& vertex)
+void Polygon::Add10(const Vertex& vertex)
 {
 	vertices.push_back(vertex);
+}
+
+void Polygon::End()
+{
 }
 
 void Polygon::Clear()
@@ -89,18 +93,29 @@ Plane Polygon::GetPlane() const
 
 void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
 {
-	if (polygon.vertices.size() < 3)
+	if (polygon.GetVerticesCount() < 3)
 		return;
 
 	int startIdx = polygons.size();
-	polygons.resize(polygons.size() + polygon.vertices.size() - 2);
-	for (size_t i = 0; i < polygon.vertices.size() - 2; i++)
+	polygons.resize(polygons.size() + polygon.GetVerticesCount() - 2);
+
+	for (size_t i = 0; i < polygon.GetVerticesCount() - 2; i++)
 	{
+		polygons[startIdx + i].Begin(polygon.GetMaterialIdx());
+		
+		polygons[startIdx + i].Add10(polygon.GetVertex(0));
+		polygons[startIdx + i].Add10(polygon.GetVertex(i + 1));
+		polygons[startIdx + i].Add10(polygon.GetVertex(i + 2));
+
+		polygons[startIdx + i].End();
+
+		/*
 		polygons[startIdx + i].materialIdx = polygon.materialIdx;
 
 		polygons[startIdx + i].vertices.resize(3);
 		polygons[startIdx + i].vertices[0] = polygon.vertices[0];
 		polygons[startIdx + i].vertices[1] = polygon.vertices[i + 1];
 		polygons[startIdx + i].vertices[2] = polygon.vertices[i + 2];
+		*/
 	}
 }

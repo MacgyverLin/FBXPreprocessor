@@ -19,6 +19,28 @@ public:
 	{
 	}
 
+	DataOptimizer(const DataOptimizer& other)
+	{
+		this->enabledOptimize = other.enabledOptimize;
+
+		this->datasMap = other.datasMap;
+
+		this->datas = other.datas;
+		this->indices = other.indices;
+	}
+
+	DataOptimizer& operator = (const DataOptimizer& other)
+	{
+		this->enabledOptimize = other.enabledOptimize;
+
+		this->datasMap = other.datasMap;
+
+		this->datas = other.datas;
+		this->indices = other.indices;
+
+		return *this;
+	}
+
 	int Add(const T& data)
 	{
 		if (enabledOptimize)
@@ -67,6 +89,11 @@ public:
 		return datas[i];
 	}
 
+	const std::vector<T>& GetDatas() const
+	{
+		return datas;
+	}
+
 	size_t GetIndicesCount() const
 	{
 		return indices.size();
@@ -84,6 +111,11 @@ public:
 			return -1;
 		else
 			return itr->second;
+	}
+
+	const std::vector<T>& GetIndices() const
+	{
+		return indices;
 	}
 private:
 	bool enabledOptimize;
