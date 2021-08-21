@@ -602,8 +602,7 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 		if (!BuildMaterial(fbxNode, polygonIndex, materialIdx))
 			return false;
 
-		Polygon polygon;
-		polygon.Begin(materialIdx);
+		mesh.BeginPolygon(materialIdx);
 
 		for (int polygonVertexIndex = 0; polygonVertexIndex < fbxMesh->GetPolygonSize(polygonIndex); polygonVertexIndex++)
 		{
@@ -647,13 +646,11 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 			if (!BuildBinormal(fbxNode, mesh, vertex, lControlPointIndex, vertexId))
 				return false;
 
-			polygon.Add(vertex);
+			mesh.AddPolygonVertex(vertex);
 
 			vertexId++;
 		}
-		polygon.End();
-
-		mesh.Add(polygon);
+		mesh.EndPolygon();
 	}
 
 	//mesh.SetAABB(AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2])));

@@ -5,6 +5,8 @@
 #include "Plane.h"
 #include "AABB.h"
 
+typedef std::pair<bool, int> FlipEdge;
+
 class Polygon
 {
 public:
@@ -44,6 +46,8 @@ private:
 	Plane plane;
 	AABB aabb;
 	std::vector<Vertex> vertices;
+
+	std::vector<FlipEdge> edges;
 };
 
 extern void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons);

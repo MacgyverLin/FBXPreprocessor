@@ -12,6 +12,9 @@ class DataOptimizer
 public:
 	DataOptimizer(bool enabledOptimize_ = true)
 	: enabledOptimize(enabledOptimize_)
+	, datasMap()
+	, datas()
+	, indices()
 	{
 	}
 
@@ -77,6 +80,14 @@ public:
 
 			return idx;
 		}
+	}
+
+	void Clear()
+	{
+		datasMap.clear();
+
+		datas.clear();
+		indices.clear();
 	}
 
 	size_t GetDataCount() const

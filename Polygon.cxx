@@ -81,6 +81,7 @@ void Polygon::Add(const Vertex& vertex)
 
 void Polygon::End()
 {
+	// Todo: handle degenerate polygon
 	if(vertices.size()>=3)
 		plane = Plane(vertices[0].position, vertices[1].position, vertices[2].position);
 }

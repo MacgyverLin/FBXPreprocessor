@@ -45,13 +45,19 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 		Polygon p = MakeCutterPolygon(mesh, materialID, true, true);
 
 		cutters[i + 0].Begin();
-		cutters[i + 0].Add(p);
+		{
+			cutters[i + 0].BeginPolygon(p);
+			cutters[i + 0].EndPolygon();
+		}
 		cutters[i + 0].End();
 
 		p.Flip();
 
 		cutters[i + 1].Begin();
-		cutters[i + 1].Add(p);
+		{
+			cutters[i + 1].BeginPolygon(p);
+			cutters[i + 1].EndPolygon();
+		}
 		cutters[i + 1].End();
 	}
 }
