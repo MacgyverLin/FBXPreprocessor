@@ -1,8 +1,8 @@
 #include "Polygon.h"
 
-Polygon::Polygon()
+Polygon::Polygon(int materialIdx_)
 {
-	materialIdx = 0;
+	this->materialIdx = materialIdx_;
 }
 
 Polygon::Polygon(int materialIdx, const std::vector<Vertex>& vertices)
@@ -44,6 +44,7 @@ const Vertex& Polygon::GetVertex(int i) const
 	return vertices[i];
 }
 
+/*
 const std::vector<Vertex>& Polygon::GetVertices() const
 {
 	return vertices;
@@ -53,6 +54,7 @@ std::vector<Vertex>& Polygon::GetVertices()
 {
 	return vertices;
 }
+*/
 
 void Polygon::Add(const Vertex& vertex)
 {

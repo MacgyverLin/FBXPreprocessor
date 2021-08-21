@@ -7,7 +7,7 @@
 class Polygon
 {
 public:
-	Polygon();
+	Polygon(int materialIdx = 0);
 
 	Polygon(int materialIdx, const std::vector<Vertex>& vertices);
 
@@ -23,9 +23,9 @@ public:
 
 	const Vertex& GetVertex(int i) const;
 
-	const std::vector<Vertex>& GetVertices() const;
+	// const std::vector<Vertex>& GetVertices() const;
 
-	std::vector<Vertex>& GetVertices();
+	// std::vector<Vertex>& GetVertices();
 
 	void Add(const Vertex& vertex);
 

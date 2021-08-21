@@ -593,11 +593,11 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 	int vertexId = 0;
 	for (int polygonIndex = 0; polygonIndex < fbxMesh->GetPolygonCount(); polygonIndex++)
 	{
-		Polygon polygon;
-
 		int materialIdx = 0;
 		if (!BuildMaterial(fbxNode, polygonIndex, materialIdx))
 			return false;
+
+		Polygon polygon(materialIdx);
 
 		for (int polygonVertexIndex = 0; polygonVertexIndex < fbxMesh->GetPolygonSize(polygonIndex); polygonVertexIndex++)
 		{

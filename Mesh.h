@@ -4,16 +4,17 @@
 #include "AABB.h"
 #include "Polygon.h"
 
-class Mesh
+////////////////////////////////////////////////////////////////////////
+class MeshBase
 {
 public:
-	Mesh(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
+	MeshBase(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
 
-	~Mesh();
+	~MeshBase();
 
-	Mesh(const Mesh& other);
+	MeshBase(const MeshBase& other);
 
-	Mesh& operator = (const Mesh& other);
+	MeshBase& operator = (const MeshBase& other);
 
 	int GetMaxMaterialIdx() const;
 
@@ -32,30 +33,24 @@ public:
 
 	const AABB& GetAABB() const;
 
-	size_t GetPolygonCount() const;
+	virtual size_t GetPolygonCount() const = 0;
 
-	const Polygon& GetPolygon(int i) const;
+	virtual const Polygon& GetPolygon(int i) const = 0;
 
-	const std::vector<Polygon>& GetPolygons() const;
+	// const std::vector<Polygon>& GetPolygons() const = 0;
 
-	std::vector<Polygon>& GetPolygons();
+	// std::vector<Polygon>& GetPolygons() = 0;
 
-	size_t GetVerticesCount() const;
+	virtual size_t GetVerticesCount() const = 0;
 
-	void Add(const Polygon& polygon);
+	virtual void Add(const Polygon& polygon);
 
-	void Clear(int colorChannelCount_=0, int uvChannelCount_=1, int normalChannelCount_=1, int tangentChannelCount_=1, int binormalChannelCount_=1);
+	virtual void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
 
-	void Flip();
+	virtual void Flip() = 0;
 
-	bool IsEmpty() const;
-
-	friend void FixMaterialOrder(Mesh& mesh);
-
-	friend void Triangulate(Mesh& mesh);
-
-	friend Mesh Intersect(const Mesh& m0, const Mesh& m1);
-private:
+	virtual bool IsEmpty() const = 0;
+protected:
 	int maxMaterialIdx;
 
 	int colorChannelCount;
@@ -64,9 +59,81 @@ private:
 	int tangentChannelCount;
 	int binormalChannelCount;
 	AABB aabb;
+};
+
+////////////////////////////////////////////////////////////////////////
+class Mesh : public MeshBase
+{
+public:
+	Mesh(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
+
+	~Mesh();
+
+	Mesh(const Mesh& other);
+
+	Mesh& operator = (const Mesh& other);
+
+	virtual size_t GetPolygonCount() const override;
+
+	virtual const Polygon& GetPolygon(int i) const override;
+
+	// virtual const std::vector<Polygon>& GetPolygons() const;
+
+	// virtual std::vector<Polygon>& GetPolygons();
+
+	virtual size_t GetVerticesCount() const override;
+
+	virtual void Add(const Polygon& polygon) override;
+
+	virtual void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1) override;
+
+	virtual void Flip() override;
+
+	virtual bool IsEmpty() const override;
+
+	friend bool FixMaterialOrder(Mesh& mesh);
+	
+	friend void Triangulate(Mesh& mesh);
+
+	friend Mesh Intersect(const Mesh& m0, const Mesh& m1);
+private:
 	std::vector<Polygon> polygons;
 };
 
 typedef std::vector<Mesh> MeshArray;
+
+
+////////////////////////////////////////////////////////////////////////
+class IndexMesh : public MeshBase
+{
+public:
+	IndexMesh(const Mesh& mesh);
+
+	~IndexMesh();
+
+	IndexMesh(const IndexMesh& other);
+
+	IndexMesh& operator = (const IndexMesh& other);
+
+	virtual size_t GetPolygonCount() const override;
+
+	virtual const Polygon& GetPolygon(int i) const override;
+
+	// virtual const std::vector<Polygon>& GetPolygons() const;
+
+	// virtual std::vector<Polygon>& GetPolygons();
+
+	virtual size_t GetVerticesCount() const override;
+
+	virtual void Add(const Polygon& polygon) override;
+
+	virtual void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1) override;
+
+	virtual void Flip() override;
+
+	virtual bool IsEmpty() const override;
+private:
+	std::vector<Vertex> vertices;
+};
 
 #endif

@@ -1,56 +1,5 @@
 #include "FBXMeshBuilder.h"
-
-template<class T>
-class VertexBatcher
-{
-friend class FBXMeshBuilder;
-public:
-	VertexBatcher(bool batch_)
-		: batch(batch_)
-	{
-	}
-
-	~VertexBatcher()
-	{
-	}
-
-	void Add(const T& v)
-	{
-		if (batch)
-		{
-			std::map<T, int>::iterator itr = verticesMap.find(v);
-
-			int idx;
-			if (itr == verticesMap.end())
-			{
-				idx = vertices.size();
-
-				verticesMap[v] = idx;
-				vertices.push_back(v);
-			}
-			else
-			{
-				idx = itr->second;
-			}
-
-			indices.push_back(idx);
-		}
-		else
-		{
-			int idx = vertices.size();
-
-			vertices.push_back(v);
-			indices.push_back(idx);
-		}
-	}
-private:
-	std::map<T, int> verticesMap;
-
-	std::vector<T> vertices;
-	std::vector<int> indices;
-
-	bool batch;
-};
+#include "VertexBatcher.h"
 
 FBXMeshBuilder::FBXMeshBuilder()
 {
@@ -69,7 +18,8 @@ bool FBXMeshBuilder::FixMaterialOrderMeshArrays(std::vector<MeshArray>& meshArra
 
 		for (size_t j = 0; j < meshes.size(); j++)
 		{
-			FixMaterialOrder(meshes[j]);
+			if (!FixMaterialOrder(meshes[j]))
+				return false;
 		}
 	}
 
@@ -197,17 +147,17 @@ void FBXMeshBuilder::FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh
 	geometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementVertexColor->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
-	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	for (size_t i = 0; i < batcher.GetVerticesCount(); i++)
 	{
-		const Color& c = batcher.vertices[i];
+		const Color& c = batcher.GetVertex(i);
 		geometryElementVertexColor->GetDirectArray().Add(FbxColor(c[0], c[1], c[2], c[3]));
 	}
 
 	if (useBatch)
 	{
-		for (size_t i = 0; i < batcher.indices.size(); i++)
+		for (size_t i = 0; i < batcher.GetIndicesCount(); i++)
 		{
-			int idx = batcher.indices[i];
+			int idx = batcher.GetIndex(i);
 			geometryElementVertexColor->GetIndexArray().Add(idx);
 		}
 	}
@@ -224,17 +174,17 @@ void FBXMeshBuilder::FillUV(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, i
 	geometryElementUV->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementUV->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
-	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	for (size_t i = 0; i < batcher.GetVerticesCount(); i++)
 	{
-		const Vector2& uv = batcher.vertices[i];
+		const Vector2& uv = batcher.GetVertex(i);
 		geometryElementUV->GetDirectArray().Add(FbxVector2(uv.X(), uv.Y()));
 	}
 
 	if (useBatch)
 	{
-		for (size_t i = 0; i < batcher.indices.size(); i++)
+		for (size_t i = 0; i < batcher.GetIndicesCount(); i++)
 		{
-			int idx = batcher.indices[i];
+			int idx = batcher.GetIndex(i);
 			geometryElementUV->GetIndexArray().Add(idx);
 		}
 	}
@@ -251,17 +201,17 @@ void FBXMeshBuilder::FillNormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mes
 	geometryElementNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementNormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
-	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	for (size_t i = 0; i < batcher.GetVerticesCount(); i++)
 	{
-		const Vector3& n = batcher.vertices[i];
+		const Vector3& n = batcher.GetVertex(i);
 		geometryElementNormal->GetDirectArray().Add(FbxVector4(n.X(), n.Y(), n.Z(), 0.0f));
 	}
 
 	if (useBatch)
 	{
-		for (size_t i = 0; i < batcher.indices.size(); i++)
+		for (size_t i = 0; i < batcher.GetIndicesCount(); i++)
 		{
-			int idx = batcher.indices[i];
+			int idx = batcher.GetIndex(i);
 			geometryElementNormal->GetIndexArray().Add(idx);
 		}
 	}
@@ -278,17 +228,17 @@ void FBXMeshBuilder::FillTangent(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 	geometryElementTangent->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementTangent->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
-	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	for (size_t i = 0; i < batcher.GetVerticesCount(); i++)
 	{
-		const Vector3& t = batcher.vertices[i];
+		const Vector3& t = batcher.GetVertex(i);
 		geometryElementTangent->GetDirectArray().Add(FbxVector4(t.X(), t.Y(), t.Z(), 0.0f));
 	}
 
 	if (useBatch)
 	{
-		for (size_t i = 0; i < batcher.indices.size(); i++)
+		for (size_t i = 0; i < batcher.GetIndicesCount(); i++)
 		{
-			int idx = batcher.indices[i];
+			int idx = batcher.GetIndex(i);
 			geometryElementTangent->GetIndexArray().Add(idx);
 		}
 	}
@@ -305,17 +255,17 @@ void FBXMeshBuilder::FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& m
 	geometryElementBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementBinormal->SetReferenceMode((useBatch ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
 
-	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	for (size_t i = 0; i < batcher.GetVerticesCount(); i++)
 	{
-		const Vector3& b = batcher.vertices[i];
+		const Vector3& b = batcher.GetVertex(i);
 		geometryElementBinormal->GetDirectArray().Add(FbxVector4(b.X(), b.Y(), b.Z(), 0.0f));
 	}
 
 	if (useBatch)
 	{
-		for (size_t i = 0; i < batcher.indices.size(); i++)
+		for (size_t i = 0; i < batcher.GetIndicesCount(); i++)
 		{
-			int idx = batcher.indices[i];
+			int idx = batcher.GetIndex(i);
 			geometryElementBinormal->GetIndexArray().Add(idx);
 		}
 	}
@@ -328,9 +278,9 @@ void FBXMeshBuilder::FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
 			batcher.Add(mesh.GetPolygon(i).GetVertex(k).position);
 
-	for (size_t i = 0; i < batcher.vertices.size(); i++)
+	for (size_t i = 0; i < batcher.GetVerticesCount(); i++)
 	{
-		const Vector3& p = batcher.vertices[i];
+		const Vector3& p = batcher.GetVertex(i);
 		dstMesh->mControlPoints.Add(FbxVector4(p.X(), p.Y(), p.Z(), 0.0));
 	}
 
@@ -341,7 +291,7 @@ void FBXMeshBuilder::FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& me
 
 		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
 		{
-			dstMesh->AddPolygon(batcher.indices[vertexIdx]);
+			dstMesh->AddPolygon(batcher.GetIndex(vertexIdx));
 
 			vertexIdx++;
 		}

@@ -101,13 +101,13 @@ int main(int argc, const char** argv)
 		FBXMeshBuilder fbxMeshBuilder;
 		if (!fbxMeshBuilder.FixMaterialOrderMeshArrays(resultMeshArrays))
 		{
-			FBXSDK_printf("\n\nAn error in building fbxNodes...");
+			FBXSDK_printf("\n\nAn error in FixMaterialOrderMeshArrays...");
 			return -1;
 		}
 
 		if (!fbxMeshBuilder.TriangulateMeshArrays(resultMeshArrays))
 		{
-			FBXSDK_printf("\n\nAn error in building fbxNodes...");
+			FBXSDK_printf("\n\nAn error in TriangulateMeshArrays...");
 			return -1;
 		}
 
