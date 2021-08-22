@@ -53,19 +53,19 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 Mesh BSPMeshSlicer::MakeCutterMesh(const Mesh& mesh, int materialID, const Vector3& normal, const Vector3& center)
 {
 	Vector3 rotateAxis(Math::UnitRandom(), Math::UnitRandom(), Math::UnitRandom()); rotateAxis.Normalize();
-	Vector3 tangent = Matrix4(rotateAxis, 90).TimesDirectionVector(normal);
-	Vector3 binormal = normal.Cross(tangent);
+	Vector3 tangent = Matrix4(rotateAxis, -90).TimesDirectionVector(normal);
+	Vector3 binormal = tangent.Cross(normal);
 
 	Matrix4 uvProjMatrix;
-	uvProjMatrix.Init(tangent, binormal, -normal, center);
+	uvProjMatrix.Init(tangent, binormal, normal, center);
 	Matrix4 uvProjMatrixInv = uvProjMatrix.Inverse();
 
 	/////////////////////////////////////////////////////////////
 	std::vector<Vertex> vertices;
-	vertices.push_back(MakeVertex(mesh, center, -normal, tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(mesh, center, -normal, tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
-	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
+	vertices.push_back(MakeVertex(mesh, center, normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
 
 	Mesh result;
 	result.Begin(mesh.GetColorChannelCount(), mesh.GetUVChannelCount(), mesh.GetNormalChannelCount(), mesh.GetTangentChannelCount(), mesh.GetBinormalChannelCount());

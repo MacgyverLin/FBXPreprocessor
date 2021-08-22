@@ -335,8 +335,7 @@ bool FixMaterialOrder(Mesh& mesh)
 	// Add GetMaxMaterialIdx() of dummy polygons at the beginning for enforce material order
 	Mesh oldMesh = mesh;
 
-	//mesh.Begin(oldMesh.GetColorChannelCount(), oldMesh.GetUVChannelCount(), oldMesh.GetNormalChannelCount(), oldMesh.GetTangentChannelCount(), oldMesh.GetBinormalChannelCount());
-	mesh.Begin();
+	mesh.Begin(oldMesh.GetColorChannelCount(), oldMesh.GetUVChannelCount(), oldMesh.GetNormalChannelCount(), oldMesh.GetTangentChannelCount(), oldMesh.GetBinormalChannelCount());
 	{
 		for (size_t matIdx = 0; matIdx < oldMesh.GetMaxMaterialIdx() + 1; matIdx++)
 		{
@@ -371,22 +370,27 @@ void Triangulate(Mesh& mesh)
 	}
 	*/
 
-	/*
 	Mesh oldMesh = mesh;
 
 	mesh.Begin(oldMesh.GetColorChannelCount(), oldMesh.GetUVChannelCount(), oldMesh.GetNormalChannelCount(), oldMesh.GetTangentChannelCount(), oldMesh.GetBinormalChannelCount());
 	{
 		for (size_t i = 0; i < oldMesh.GetPolygonCount(); i++)
 		{
-			std::vector<Polygon> polygons;
-			Triangulate(oldMesh.GetPolygon(i), polygons);
+			const Polygon& oldPolygon = oldMesh.GetPolygon(i);
 
-			mesh.BeginPolygon(polygons);
-			mesh.EndPolygon();
+			for (size_t j = 0; j < oldPolygon.GetVerticesCount() - 2; j++)
+			{
+				mesh.BeginPolygon(oldPolygon.GetMaterialIdx());
+
+				mesh.AddPolygonVertex(oldPolygon.GetVertex(0));
+				mesh.AddPolygonVertex(oldPolygon.GetVertex(j + 1));
+				mesh.AddPolygonVertex(oldPolygon.GetVertex(j + 2));
+
+				mesh.EndPolygon();
+			}
 		}
 	}
 	mesh.End();
-	*/
 }
 
 Mesh Intersect(const Mesh& m0, const Mesh& m1)

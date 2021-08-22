@@ -72,6 +72,4 @@ private:
 	std::vector<FlipEdge> flipEdges;
 };
 
-extern void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons);
-
 #endif

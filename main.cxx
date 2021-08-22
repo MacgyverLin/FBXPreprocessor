@@ -86,8 +86,8 @@ int main(int argc, const char** argv)
 		/////////////////////////////////////////////////////////////////////
 // #define NO_SLICE
 #ifdef NO_SLICE
-		std::vector<MeshArray> precutMeshArrays;
-		if (!meshBuilder.Copy(meshes, precutMeshArrays))
+		std::vector<MeshArray> resultMeshArrays;
+		if (!meshBuilder.Copy(originalMeshes, resultMeshArrays))
 		{
 			FBXSDK_printf("\n\nAn error in copying Mesh Nodes...");
 			return -1;

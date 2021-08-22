@@ -137,25 +137,3 @@ bool Polygon::IsEmpty() const
 {
 	return vertices.size() == 0;
 }
-
-/*
-void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
-{
-	if (polygon.GetVerticesCount() < 3)
-		return;
-
-	int startIdx = polygons.size();
-	polygons.resize(polygons.size() + polygon.GetVerticesCount() - 2);
-
-	for (size_t i = 0; i < polygon.GetVerticesCount() - 2; i++)
-	{
-		polygons[startIdx + i].Begin(polygon.GetMaterialIdx());
-		
-		polygons[startIdx + i].Add(polygon.GetVertex(0));
-		polygons[startIdx + i].Add(polygon.GetVertex(i + 1));
-		polygons[startIdx + i].Add(polygon.GetVertex(i + 2));
-
-		polygons[startIdx + i].End();
-	}
-}
-*/
