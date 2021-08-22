@@ -5,6 +5,7 @@ Polygon::Polygon(int materialIdx_)
 	, plane()
 	, aabb()
 	, vertices()
+	, directionEdges()
 {
 }
 
@@ -18,6 +19,7 @@ Polygon::Polygon(const Polygon& other)
 	plane = other.plane;
 	aabb = other.aabb;
 	vertices = other.vertices;
+	directionEdges = other.directionEdges;
 }
 
 Polygon& Polygon::operator = (const Polygon& other)
@@ -26,6 +28,7 @@ Polygon& Polygon::operator = (const Polygon& other)
 	plane = other.plane;
 	aabb = other.aabb;
 	vertices = other.vertices;
+	directionEdges = other.directionEdges;
 
 	return *this;
 }
@@ -55,12 +58,33 @@ const Vertex& Polygon::GetVertex(int i) const
 	return vertices[i];
 }
 
+const std::vector<Vertex>& Polygon::GetVertices() const
+{
+	return vertices;
+}
+
+int Polygon::GetDirectionEdgesCount() const
+{
+	return directionEdges.size();
+}
+
+const DirectionEdge& Polygon::GetDirectionEdge(int i) const
+{
+	return directionEdges[i];
+}
+
+const std::vector<DirectionEdge>& Polygon::GetDirectionEdges() const
+{
+	return directionEdges;
+}
+
 void Polygon::Begin(int materialIdx_)
 {
 	materialIdx = materialIdx_;
 	plane = Plane();
 	aabb = AABB();
 	vertices.clear();
+	directionEdges.clear();
 }
 
 void Polygon::Add(const std::vector<Vertex>& verts)
@@ -77,6 +101,11 @@ void Polygon::Add(const Vertex& vertex)
 		aabb += vertex.position;
 
 	vertices.push_back(vertex);
+}
+
+void Polygon::Add(const DirectionEdge& edge)
+{
+	directionEdges.push_back(edge);
 }
 
 void Polygon::End()

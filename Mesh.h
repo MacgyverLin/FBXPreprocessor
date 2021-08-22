@@ -17,18 +17,11 @@ public:
 	MeshBase& operator = (const MeshBase& other);
 
 	int GetMaxMaterialIdx() const;
-	void SetColorChannelCount(int colorChannelCount_);
-	void SetUVChannelCount(int uvChannelCount_);
-	void SetNormalChannelCount(int normalChannelCount_);
-	void SetTangentChannelCount(int tangentChannelCount_);
-	void SetBinormalChannelCount(int binormalChannelCount_);
 	int GetColorChannelCount() const;
 	int GetUVChannelCount() const;
 	int GetNormalChannelCount() const;
 	int GetTangentChannelCount() const;
 	int GetBinormalChannelCount() const;
-
-	void SetAABB(const AABB& aabb_);
 
 	const AABB& GetAABB() const;
 
@@ -56,12 +49,26 @@ class Edge
 public:
 	Edge(int i0 = -1, int i1 = -1)
 	{
-		indices[0] = i0;
-		indices[1] = i1;
+		indices[0] = std::min(i0, i1);
+		indices[1] = std::max(i0, i1);
 	}
 
 	~Edge()
 	{
+	}
+
+	Edge(const Edge& other)
+	{
+		indices[0] = other.indices[0];
+		indices[1] = other.indices[1];
+	}
+
+	Edge& operator = (const Edge& other)
+	{
+		indices[0] = other.indices[0];
+		indices[1] = other.indices[1];
+
+		return *this;
 	}
 
 	// comparison

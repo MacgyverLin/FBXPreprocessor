@@ -124,7 +124,7 @@ public:
 			return itr->second;
 	}
 
-	const std::vector<T>& GetIndices() const
+	const std::vector<int>& GetIndices() const
 	{
 		return indices;
 	}

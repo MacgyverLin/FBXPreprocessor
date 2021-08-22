@@ -43,31 +43,6 @@ int MeshBase::GetMaxMaterialIdx() const
 	return maxMaterialIdx;
 }
 
-void MeshBase::SetColorChannelCount(int colorChannelCount_)
-{
-	colorChannelCount = colorChannelCount_;
-}
-
-void MeshBase::SetUVChannelCount(int uvChannelCount_)
-{
-	uvChannelCount = uvChannelCount_;
-}
-
-void MeshBase::SetNormalChannelCount(int normalChannelCount_)
-{
-	normalChannelCount = normalChannelCount_;
-}
-
-void MeshBase::SetTangentChannelCount(int tangentChannelCount_)
-{
-	tangentChannelCount = tangentChannelCount_;
-}
-
-void MeshBase::SetBinormalChannelCount(int binormalChannelCount_)
-{
-	binormalChannelCount = binormalChannelCount_;
-}
-
 int MeshBase::GetColorChannelCount() const
 {
 	return colorChannelCount;
@@ -91,11 +66,6 @@ int MeshBase::GetTangentChannelCount() const
 int MeshBase::GetBinormalChannelCount() const
 {
 	return binormalChannelCount;
-}
-
-void MeshBase::SetAABB(const AABB& aabb_)
-{
-	aabb = aabb_;
 }
 
 const AABB& MeshBase::GetAABB() const
@@ -252,33 +222,66 @@ void Mesh::BeginPolygon(const Polygon& polygon)
 {
 	BeginPolygon(polygon.GetMaterialIdx());
 
-	for (size_t i = 0; i < polygon.GetVerticesCount(); i++)
-	{
-		AddPolygonVertex(polygon.GetVertex(i));
-	}
+	AddPolygonVertex(polygon.GetVertices());
 }
 
 void Mesh::AddPolygonVertex(const std::vector<Vertex>& vertices)
 {
-	polygons.back().Add(vertices);
+	for (auto& v : vertices)
+	{
+		AddPolygonVertex(v);
+	}
 }
 
 void Mesh::AddPolygonVertex(const Vertex& vertex)
 {
-	polygons.back().Add(vertex);
+	Polygon& polygon = polygons.back();
+
+	polygon.Add(vertex);
 }
 
 void Mesh::EndPolygon()
 {
-	polygons.back().End();
+	Polygon& polygon = polygons.back();
+
+	for (size_t i = 0; i < polygon.GetVerticesCount(); i++)
+	{
+		int i0 = (i + 0) % polygon.GetVerticesCount();
+		int i1 = (i + 1) % polygon.GetVerticesCount();
+
+		int vIdx0 = positionOptimizer.Add(polygon.GetVertex(i0).position);
+		int vIdx1 = positionOptimizer.Add(polygon.GetVertex(i1).position);
+		bool flip = (vIdx1 < vIdx0);
+		int edgeIdx = edgeOptimizer.Add(Edge(vIdx0, vIdx1));
+		
+		polygon.Add(DirectionEdge(flip, edgeIdx));
+	}
+
+	polygon.End();
 }
 
 void Mesh::End()
 {
+	std::map<int, int> counters;
+	for (size_t i = 0; i < polygons.size()-1; i++)
+	{
+		for (auto& edge : polygons[i].GetDirectionEdges())
+		{
+			counters[edge.edgeIdx] += (edge.flip ? -1 : 1);
+		}
+	}
+
+	std::vector<int> isolatedEdges;
+	for (auto& c : counters)
+	{
+		if (c.second != 0)
+			isolatedEdges.push_back(c.first);
+	}
+
 	// update aabb
 	for (size_t i = 0; i < polygons.size(); i++)
 	{
-		if (i == 0)
+		if(i == 0)
 			aabb = polygons[i].GetAABB();
 		else
 			aabb += polygons[i].GetAABB();

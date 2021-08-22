@@ -298,7 +298,7 @@ float Vector3::Normalize()
 {
 	float fLength = Length();
 
-	if (fLength > 0.000001)
+	if (fLength > Math::Epsilon)
 	{
 		float fInvLength = ((float)1.0) / fLength;
 		m[0] *= fInvLength;

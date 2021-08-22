@@ -176,7 +176,7 @@ Matrix4 Matrix4::Inverse() const
 	float fB5 = m[10] * m[15] - m[11] * m[14];
 
 	float fDet = fA0 * fB5 - fA1 * fB4 + fA2 * fB3 + fA3 * fB2 - fA4 * fB1 + fA5 * fB0;
-	if (abs(fDet) <= 0.000001)
+	if (abs(fDet) <= Math::Epsilon)
 	{
 		Matrix4 matZero;
 		matZero.InitZero();
