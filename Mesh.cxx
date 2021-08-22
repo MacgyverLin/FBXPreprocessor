@@ -263,7 +263,7 @@ void Mesh::EndPolygon()
 void Mesh::End()
 {
 	std::map<int, int> counters;
-	for (size_t i = 0; i < polygons.size()-1; i++)
+	for (size_t i = 0; i < polygons.size(); i++)
 	{
 		for (auto& edge : polygons[i].GetDirectionEdges())
 		{

@@ -683,8 +683,8 @@ MonoBehaviour:
   upwardsModifier: 100
   mode: 1
   doFading: 0
-  rigidBodyTime: 4
-  fadeTime: 2
+  rigidBodyMaxLifetime: 10
+  fadeTime: 3
 --- !u!1 &1488168911
 GameObject:
   m_ObjectHideFlags: 0

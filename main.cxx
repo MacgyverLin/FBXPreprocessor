@@ -43,7 +43,8 @@ int main(int argc, const char** argv)
 		"5out.fbx"
 	};
 
-	for (int i = 0; i < 5; i++)
+	//for (int i = 0; i < 5; i++)
+	int i = 4;
 #else
 	int i = 0;
 #endif
@@ -105,11 +106,11 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 
-		if (!fbxMeshBuilder.TriangulateMeshArrays(resultMeshArrays))
-		{
-			FBXSDK_printf("\n\nAn error in TriangulateMeshArrays...");
-			return -1;
-		}
+		//if (!fbxMeshBuilder.TriangulateMeshArrays(resultMeshArrays))
+		//{
+			//FBXSDK_printf("\n\nAn error in TriangulateMeshArrays...");
+		//	return -1;
+		//}
 
 		if (!fbxMeshBuilder.Build(fbxScene, fbxNodes, resultMeshArrays))
 		{

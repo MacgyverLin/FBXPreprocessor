@@ -57,17 +57,17 @@ public class Destruction : MonoBehaviour
         meshCollider.convex = true;
     }
 
-    public void Destruct(bool doFading, float rigidBodyTime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    public void Destruct(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
-        StartCoroutine(DestructionCoroutine(doFading, rigidBodyTime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
+        StartCoroutine(DestructionCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
     }
 
-    private IEnumerator DestructionCoroutine(bool doFading, float rigidBodyTime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
+    private IEnumerator DestructionCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
     {
         BeginDestruct(explosionForce, explosionRadius, upwardsModifier, mode);
 
-        yield return WaitAllRigidBodySleptOrTimeOut(Random.Range(1.0f, rigidBodyTime));
-        //yield return new WaitForSeconds(Random.Range(1.0f, rigidBodyTime));
+        // yield return WaitAllRigidBodySleptOrTimeOut(Random.Range((rigidBodyMaxLifetime - 1.0f)/2, rigidBodyMaxLifetime - 1.0f));
+        yield return WaitAllRigidBodySleptOrTimeOut(rigidBodyMaxLifetime - 1.0f);
 
         yield return new WaitForSeconds(1.0f);
 
