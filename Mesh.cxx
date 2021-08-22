@@ -254,7 +254,7 @@ void Mesh::EndPolygon()
 		bool flip = (vIdx1 < vIdx0);
 		int edgeIdx = edgeOptimizer.Add(Edge(vIdx0, vIdx1));
 		
-		polygon.Add(DirectionEdge(flip, edgeIdx));
+		polygon.Add(FlipEdge(flip, edgeIdx));
 	}
 
 	polygon.End();
@@ -265,9 +265,9 @@ void Mesh::End()
 	std::map<int, int> counters;
 	for (size_t i = 0; i < polygons.size(); i++)
 	{
-		for (auto& edge : polygons[i].GetDirectionEdges())
+		for (auto& e : polygons[i].GetFlipEdges())
 		{
-			counters[edge.edgeIdx] += (edge.flip ? -1 : 1);
+			counters[e.edge] += (e.flip ? -1 : 1);
 		}
 	}
 
@@ -359,6 +359,19 @@ bool FixMaterialOrder(Mesh& mesh)
 
 void Triangulate(Mesh& mesh)
 {
+	/*
+	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
+	{
+		int vcount = mesh.GetPolygon(i).GetVerticesCount();;
+
+		if (vcount > 3)
+		{
+			vcount = vcount;
+		}
+	}
+	*/
+
+	/*
 	Mesh oldMesh = mesh;
 
 	mesh.Begin(oldMesh.GetColorChannelCount(), oldMesh.GetUVChannelCount(), oldMesh.GetNormalChannelCount(), oldMesh.GetTangentChannelCount(), oldMesh.GetBinormalChannelCount());
@@ -373,6 +386,7 @@ void Triangulate(Mesh& mesh)
 		}
 	}
 	mesh.End();
+	*/
 }
 
 Mesh Intersect(const Mesh& m0, const Mesh& m1)

@@ -17,7 +17,7 @@ private:
 	bool Process(const Mesh& mesh, const MeshArray& cutters, MeshArray& meshArrays);
 
 	void MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int count);
-	Polygon MakeCutterPolygon(const Mesh& mesh, int materialID, bool randomizeNormal, bool randomizeCenter);
+	Mesh MakeCutterMesh(const Mesh& mesh, int materialID, const Vector3& normal, const Vector3& center);
 	Vertex MakeVertex(const Mesh& mesh, const Vector3& center, const Vector3& normal, const Vector3& tangent, const Vector3& binormal, float polygonSize,
 		const Matrix4& projMatrix, float uvScale);
 };

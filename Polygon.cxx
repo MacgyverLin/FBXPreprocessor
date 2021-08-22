@@ -5,7 +5,7 @@ Polygon::Polygon(int materialIdx_)
 	, plane()
 	, aabb()
 	, vertices()
-	, directionEdges()
+	, flipEdges()
 {
 }
 
@@ -19,7 +19,7 @@ Polygon::Polygon(const Polygon& other)
 	plane = other.plane;
 	aabb = other.aabb;
 	vertices = other.vertices;
-	directionEdges = other.directionEdges;
+	flipEdges = other.flipEdges;
 }
 
 Polygon& Polygon::operator = (const Polygon& other)
@@ -28,7 +28,7 @@ Polygon& Polygon::operator = (const Polygon& other)
 	plane = other.plane;
 	aabb = other.aabb;
 	vertices = other.vertices;
-	directionEdges = other.directionEdges;
+	flipEdges = other.flipEdges;
 
 	return *this;
 }
@@ -63,19 +63,19 @@ const std::vector<Vertex>& Polygon::GetVertices() const
 	return vertices;
 }
 
-int Polygon::GetDirectionEdgesCount() const
+int Polygon::GetFlipEdgesCount() const
 {
-	return directionEdges.size();
+	return flipEdges.size();
 }
 
-const DirectionEdge& Polygon::GetDirectionEdge(int i) const
+const FlipEdge& Polygon::GetFlipEdge(int i) const
 {
-	return directionEdges[i];
+	return flipEdges[i];
 }
 
-const std::vector<DirectionEdge>& Polygon::GetDirectionEdges() const
+const std::vector<FlipEdge>& Polygon::GetFlipEdges() const
 {
-	return directionEdges;
+	return flipEdges;
 }
 
 void Polygon::Begin(int materialIdx_)
@@ -84,7 +84,7 @@ void Polygon::Begin(int materialIdx_)
 	plane = Plane();
 	aabb = AABB();
 	vertices.clear();
-	directionEdges.clear();
+	flipEdges.clear();
 }
 
 void Polygon::Add(const std::vector<Vertex>& verts)
@@ -103,9 +103,9 @@ void Polygon::Add(const Vertex& vertex)
 	vertices.push_back(vertex);
 }
 
-void Polygon::Add(const DirectionEdge& edge)
+void Polygon::Add(const FlipEdge& edge)
 {
-	directionEdges.push_back(edge);
+	flipEdges.push_back(edge);
 }
 
 void Polygon::End()
@@ -138,6 +138,7 @@ bool Polygon::IsEmpty() const
 	return vertices.size() == 0;
 }
 
+/*
 void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
 {
 	if (polygon.GetVerticesCount() < 3)
@@ -155,14 +156,6 @@ void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons)
 		polygons[startIdx + i].Add(polygon.GetVertex(i + 2));
 
 		polygons[startIdx + i].End();
-
-		/*
-		polygons[startIdx + i].materialIdx = polygon.materialIdx;
-
-		polygons[startIdx + i].vertices.resize(3);
-		polygons[startIdx + i].vertices[0] = polygon.vertices[0];
-		polygons[startIdx + i].vertices[1] = polygon.vertices[i + 1];
-		polygons[startIdx + i].vertices[2] = polygon.vertices[i + 2];
-		*/
 	}
 }
+*/

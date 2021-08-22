@@ -42,32 +42,17 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 	cutters.resize(count * 2);
 	for (size_t i = 0; i < cutters.size(); i += 2)
 	{
-		Polygon p = MakeCutterPolygon(mesh, materialID, true, true);
+		Vector3 normal = mesh.GetAABB().GetMajorAxis(true);
+		Vector3 center = mesh.GetAABB().GetCenter(true);
 
-		cutters[i + 0].Begin();
-		{
-			cutters[i + 0].BeginPolygon(p);
-			cutters[i + 0].EndPolygon();
-		}
-		cutters[i + 0].End();
-
-		p.Flip();
-
-		cutters[i + 1].Begin();
-		{
-			cutters[i + 1].BeginPolygon(p);
-			cutters[i + 1].EndPolygon();
-		}
-		cutters[i + 1].End();
+		cutters[i + 0] = MakeCutterMesh(mesh, materialID, normal, center);
+		cutters[i + 1] = MakeCutterMesh(mesh, materialID, -normal, center);
 	}
 }
 
-Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID, bool randomizeNormal, bool randomizeCenter)
+Mesh BSPMeshSlicer::MakeCutterMesh(const Mesh& mesh, int materialID, const Vector3& normal, const Vector3& center)
 {
 	Vector3 rotateAxis(Math::UnitRandom(), Math::UnitRandom(), Math::UnitRandom()); rotateAxis.Normalize();
-
-	Vector3 normal = mesh.GetAABB().GetMajorAxis(randomizeNormal);
-	Vector3 center = mesh.GetAABB().GetCenter(randomizeCenter);
 	Vector3 tangent = Matrix4(rotateAxis, 90).TimesDirectionVector(normal);
 	Vector3 binormal = normal.Cross(tangent);
 
@@ -82,9 +67,11 @@ Polygon BSPMeshSlicer::MakeCutterPolygon(const Mesh& mesh, int materialID, bool 
 	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, -binormal, 1000.0f, uvProjMatrixInv, 1.0f));
 	vertices.push_back(MakeVertex(mesh, center, -normal, -tangent, binormal, 1000.0f, uvProjMatrixInv, 1.0f));
 
-	Polygon result;
-	result.Begin(materialID);
-	result.Add(vertices);
+	Mesh result;
+	result.Begin(mesh.GetColorChannelCount(), mesh.GetUVChannelCount(), mesh.GetNormalChannelCount(), mesh.GetTangentChannelCount(), mesh.GetBinormalChannelCount());
+		result.BeginPolygon(materialID);
+			result.AddPolygonVertex(vertices);
+		result.EndPolygon();
 	result.End();
 
 	return result;

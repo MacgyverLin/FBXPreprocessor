@@ -23,9 +23,7 @@ int main(int argc, const char** argv)
 {
 	Arguments args(argc, argv);
 
-#define TEST
-#ifdef TEST
-	const char* filein[] =
+	const char* fileins[] =
 	{
 		"1.fbx",
 		"2.fbx",
@@ -34,7 +32,7 @@ int main(int argc, const char** argv)
 		"5.fbx"
 	};
 
-	const char* fileout[] =
+	const char* fileouts[] =
 	{
 		"1out.fbx",
 		"2out.fbx",
@@ -43,12 +41,22 @@ int main(int argc, const char** argv)
 		"5out.fbx"
 	};
 
-	//for (int i = 0; i < 5; i++)
-	int i = 4;
+#define TEST
+#ifdef TEST
+	for (int i = 0; i < 5; i++)
+	//int i = 0;
 #else
-	int i = 0;
 #endif
 	{
+#ifdef TEST
+		const char* filein = fileins[i];
+		const char* fileout = fileouts[i];
+#else
+		const char* filein = args.inputPath;
+		const char* fileout = args.outputPath;
+#endif
+		remove(fileout);
+
 		Math::RandSeed();
 
 		// Prepare the FBX SDK.
@@ -58,11 +66,7 @@ int main(int argc, const char** argv)
 		InitializeSdkObjects(sdkManager, fbxScene);
 
 		// Load the fbxScene.
-#ifdef TEST
-		lResult = LoadScene(sdkManager, fbxScene, filein[i]);
-#else
-		lResult = LoadScene(sdkManager, fbxScene, args.inputPath);
-#endif
+		lResult = LoadScene(sdkManager, fbxScene, filein);
 		if (lResult == false)
 		{
 			FBXSDK_printf("\n\nAn error occurred while loading the fbxScene...");
@@ -118,13 +122,7 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 		
-#ifdef TEST
-		remove(fileout[i]);
-		if (!SaveScene(sdkManager, fbxScene, fileout[i], args.binary))
-#else
-		remove(args.outputPath);
-		if (!SaveScene(sdkManager, fbxScene, args.outputPath, args.binary))
-#endif	
+		if (!SaveScene(sdkManager, fbxScene, fileout, args.binary))
 		{
 			FBXSDK_printf("\n\nAn error occurred while saving the fbxScene...");
 			return -1;

@@ -5,22 +5,23 @@
 #include "Plane.h"
 #include "AABB.h"
 
-class DirectionEdge
+class FlipEdge
 {
 public:
-	DirectionEdge(bool flip_, int edgeIdx_)
+	FlipEdge(bool flip_, int edge_)
 		: flip(flip_)
-		, edgeIdx(edgeIdx_)
+		, edge(edge_)
 	{
 	}
 
 	bool flip;
-	int edgeIdx;
+	int edge;
 };
 
 class Polygon
 {
 	friend class Mesh;
+	friend class BSP;
 public:
 	Polygon(int materialIdx = 0);
 
@@ -42,19 +43,11 @@ public:
 
 	const std::vector<Vertex>& GetVertices() const;
 
-	int GetDirectionEdgesCount() const;
+	int GetFlipEdgesCount() const;
 
-	const DirectionEdge& GetDirectionEdge(int i) const;
+	const FlipEdge& GetFlipEdge(int i) const;
 
-	const std::vector<DirectionEdge>& GetDirectionEdges() const;
-
-	void Begin(int materialIdx);
-
-	void Add(const std::vector<Vertex>& vertices);
-
-	void Add(const Vertex& vertex);
-
-	void End();
+	const std::vector<FlipEdge>& GetFlipEdges() const;
 
 	void Clear();
 
@@ -62,13 +55,21 @@ public:
 
 	bool IsEmpty() const;
 private:
-	void Add(const DirectionEdge& edge);
+	void Begin(int materialIdx);
+
+	void Add(const std::vector<Vertex>& vertices);
+
+	void Add(const Vertex& vertex);
+
+	void Add(const FlipEdge& edge);
+
+	void End();
 
 	int materialIdx;
 	Plane plane;
 	AABB aabb;
 	std::vector<Vertex> vertices;
-	std::vector<DirectionEdge> directionEdges;
+	std::vector<FlipEdge> flipEdges;
 };
 
 extern void Triangulate(const Polygon& polygon, std::vector<Polygon>& polygons);
