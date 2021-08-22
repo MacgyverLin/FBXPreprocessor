@@ -14,6 +14,11 @@ public:
 	{
 	}
 
+	void Flip()
+	{
+		flip = !flip;
+	}
+
 	bool flip;
 	int edge;
 };

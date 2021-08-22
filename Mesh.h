@@ -3,93 +3,11 @@
 
 #include "AABB.h"
 #include "Polygon.h"
-
-////////////////////////////////////////////////////////////////////////
-class MeshBase
-{
-public:
-	MeshBase(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
-
-	~MeshBase();
-
-	MeshBase(const MeshBase& other);
-
-	MeshBase& operator = (const MeshBase& other);
-
-	int GetMaxMaterialIdx() const;
-	int GetColorChannelCount() const;
-	int GetUVChannelCount() const;
-	int GetNormalChannelCount() const;
-	int GetTangentChannelCount() const;
-	int GetBinormalChannelCount() const;
-
-	const AABB& GetAABB() const;
-
-	virtual void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
-
-	virtual void Flip() = 0;
-
-	virtual bool IsEmpty() const = 0;
-protected:
-	int maxMaterialIdx;
-
-	int colorChannelCount;
-	int uvChannelCount;
-	int normalChannelCount;
-	int tangentChannelCount;
-	int binormalChannelCount;
-	AABB aabb;
-};
-
-////////////////////////////////////////////////////////////////////////
 #include "DataOptimizer.h"
+#include "Edge.h"
 
-class Edge
-{
-public:
-	Edge(int i0 = -1, int i1 = -1)
-	{
-		indices[0] = std::min(i0, i1);
-		indices[1] = std::max(i0, i1);
-	}
-
-	~Edge()
-	{
-	}
-
-	Edge(const Edge& other)
-	{
-		indices[0] = other.indices[0];
-		indices[1] = other.indices[1];
-	}
-
-	Edge& operator = (const Edge& other)
-	{
-		indices[0] = other.indices[0];
-		indices[1] = other.indices[1];
-
-		return *this;
-	}
-
-	// comparison
-	int CompareArrays(const Edge& v) const;
-
-	bool operator== (const Edge& v) const;
-
-	bool operator!= (const Edge& v) const;
-
-	bool operator<  (const Edge& v) const;
-
-	bool operator<= (const Edge& v) const;
-
-	bool operator>  (const Edge& v) const;
-
-	bool operator>= (const Edge& v) const;
-private:
-	int indices[2];
-};
-
-class Mesh : public MeshBase
+////////////////////////////////////////////////////////////////////////
+class Mesh
 {
 public:
 	Mesh(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
@@ -99,6 +17,15 @@ public:
 	Mesh(const Mesh& other);
 
 	Mesh& operator = (const Mesh& other);
+
+	int GetMaxMaterialIdx() const;
+	int GetColorChannelCount() const;
+	int GetUVChannelCount() const;
+	int GetNormalChannelCount() const;
+	int GetTangentChannelCount() const;
+	int GetBinormalChannelCount() const;
+
+	const AABB& GetAABB() const;
 
 	size_t GetPolygonCount() const;	
 	
@@ -124,16 +51,24 @@ public:
 
 	void End();
 
-	virtual void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1) override;
+	void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
 
-	virtual void Flip() override;
+	void Flip();
 
-	virtual bool IsEmpty() const override;
+	bool IsEmpty() const;
 private:
-	DataOptimizer<Vector3> positionOptimizer;
-	DataOptimizer<Edge> edgeOptimizer;
+	int maxMaterialIdx;
+
+	int colorChannelCount;
+	int uvChannelCount;
+	int normalChannelCount;
+	int tangentChannelCount;
+	int binormalChannelCount;
+	AABB aabb;
 
 	std::vector<Polygon> polygons;
+	DataOptimizer<Vector3> positionOptimizer;
+	DataOptimizer<Edge> edgeOptimizer;
 };
 
 extern bool FixMaterialOrder(Mesh& mesh);

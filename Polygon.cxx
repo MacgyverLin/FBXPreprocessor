@@ -121,6 +121,7 @@ void Polygon::Clear()
 	plane = Plane();
 	aabb = AABB();
 	vertices.clear();
+	flipEdges.clear();
 }
 
 void Polygon::Flip()
@@ -130,6 +131,11 @@ void Polygon::Flip()
 	{
 		vertices[i] = oldVertices[oldVertices.size() - 1 - i];
 		vertices[i].Flip();
+	}
+
+	for (size_t i = 0; i < flipEdges.size(); i++)
+	{
+		flipEdges[i].Flip();
 	}
 }
 

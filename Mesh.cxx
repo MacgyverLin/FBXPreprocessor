@@ -1,135 +1,13 @@
 #include "Mesh.h"
 #include "BSP.h"
 
-MeshBase::MeshBase(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
-{
-	Clear(colorChannelCount_, uvChannelCount_, normalChannelCount_, tangentChannelCount_, binormalChannelCount_);
-}
-
-MeshBase::~MeshBase()
-{
-}
-
-MeshBase::MeshBase(const MeshBase& other)
-{
-	maxMaterialIdx = other.maxMaterialIdx;
-
-	colorChannelCount = other.colorChannelCount;
-	uvChannelCount = other.uvChannelCount;
-	normalChannelCount = other.normalChannelCount;
-	tangentChannelCount = other.tangentChannelCount;
-	binormalChannelCount = other.binormalChannelCount;
-
-	aabb = other.aabb;
-}
-
-MeshBase& MeshBase::operator = (const MeshBase& other)
-{
-	maxMaterialIdx = other.maxMaterialIdx;
-
-	colorChannelCount = other.colorChannelCount;
-	uvChannelCount = other.uvChannelCount;
-	normalChannelCount = other.normalChannelCount;
-	tangentChannelCount = other.tangentChannelCount;
-	binormalChannelCount = other.binormalChannelCount;
-
-	aabb = other.aabb;
-
-	return *this;
-}
-
-int MeshBase::GetMaxMaterialIdx() const
-{
-	return maxMaterialIdx;
-}
-
-int MeshBase::GetColorChannelCount() const
-{
-	return colorChannelCount;
-}
-
-int MeshBase::GetUVChannelCount() const
-{
-	return uvChannelCount;
-}
-
-int MeshBase::GetNormalChannelCount() const
-{
-	return normalChannelCount;
-}
-
-int MeshBase::GetTangentChannelCount() const
-{
-	return tangentChannelCount;
-}
-
-int MeshBase::GetBinormalChannelCount() const
-{
-	return binormalChannelCount;
-}
-
-const AABB& MeshBase::GetAABB() const
-{
-	return aabb;
-}
-
-void MeshBase::Clear(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
-{
-	maxMaterialIdx = 0;
-
-	colorChannelCount = colorChannelCount_;
-	uvChannelCount = uvChannelCount_;
-	normalChannelCount = normalChannelCount_;
-	tangentChannelCount = tangentChannelCount_;
-	binormalChannelCount = binormalChannelCount_;
-
-	aabb = AABB();
-}
-
-//////////////////////////////////////////////////////
-// comparison
-int Edge::CompareArrays(const Edge& v) const
-{
-	return memcmp(indices, v.indices, 2 * sizeof(indices[0]));
-}
-
-bool Edge::operator== (const Edge& v) const
-{
-	return CompareArrays(v) == 0;
-}
-
-bool Edge::operator!= (const Edge& v) const
-{
-	return CompareArrays(v) != 0;
-}
-
-bool Edge::operator<  (const Edge& v) const
-{
-	return CompareArrays(v) < 0;
-}
-
-bool Edge::operator<= (const Edge& v) const
-{
-	return CompareArrays(v) <= 0;
-}
-
-bool Edge::operator>  (const Edge& v) const
-{
-	return CompareArrays(v) > 0;
-}
-
-bool Edge::operator>= (const Edge& v) const
-{
-	return CompareArrays(v) >= 0;
-}
-
 //////////////////////////////////////////////////////
 Mesh::Mesh(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
-	: MeshBase(colorChannelCount_, uvChannelCount_, normalChannelCount_, tangentChannelCount_, binormalChannelCount_)
-	, positionOptimizer()
+	: positionOptimizer()
 	, edgeOptimizer()
 	, polygons()
 {
+	Clear(colorChannelCount_, uvChannelCount_, normalChannelCount_, tangentChannelCount_, binormalChannelCount_);
 }
 
 Mesh::~Mesh()
@@ -137,22 +15,74 @@ Mesh::~Mesh()
 }
 
 Mesh::Mesh(const Mesh& other)
-	: MeshBase(other)
 {
+	maxMaterialIdx = other.maxMaterialIdx;
+
+	colorChannelCount = other.colorChannelCount;
+	uvChannelCount = other.uvChannelCount;
+	normalChannelCount = other.normalChannelCount;
+	tangentChannelCount = other.tangentChannelCount;
+	binormalChannelCount = other.binormalChannelCount;
+
+	aabb = other.aabb;
+
+	polygons = other.polygons;
 	positionOptimizer = other.positionOptimizer;
 	edgeOptimizer = other.edgeOptimizer;
-	polygons = other.polygons;
 }
 
 Mesh& Mesh::operator = (const Mesh& other)
 {
-	*((MeshBase*)this) = *((MeshBase*)&other);
+	maxMaterialIdx = other.maxMaterialIdx;
 
+	colorChannelCount = other.colorChannelCount;
+	uvChannelCount = other.uvChannelCount;
+	normalChannelCount = other.normalChannelCount;
+	tangentChannelCount = other.tangentChannelCount;
+	binormalChannelCount = other.binormalChannelCount;
+
+	aabb = other.aabb;
+
+	polygons = other.polygons;
 	positionOptimizer = other.positionOptimizer;
 	edgeOptimizer = other.edgeOptimizer;
-	polygons = other.polygons;
 
 	return *this;
+}
+
+int Mesh::GetMaxMaterialIdx() const
+{
+	return maxMaterialIdx;
+}
+
+int Mesh::GetColorChannelCount() const
+{
+	return colorChannelCount;
+}
+
+int Mesh::GetUVChannelCount() const
+{
+	return uvChannelCount;
+}
+
+int Mesh::GetNormalChannelCount() const
+{
+	return normalChannelCount;
+}
+
+int Mesh::GetTangentChannelCount() const
+{
+	return tangentChannelCount;
+}
+
+int Mesh::GetBinormalChannelCount() const
+{
+	return binormalChannelCount;
+}
+
+const AABB& Mesh::GetAABB() const
+{
+	return aabb;
 }
 
 size_t Mesh::GetPolygonCount() const
@@ -192,7 +122,6 @@ void Mesh::Begin(int colorChannelCount_, int uvChannelCount_, int normalChannelC
 	binormalChannelCount = binormalChannelCount_;
 
 	aabb = AABB();
-
 
 	positionOptimizer.Clear();
 	edgeOptimizer.Clear();
@@ -290,7 +219,15 @@ void Mesh::End()
 
 void Mesh::Clear(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
 {
-	MeshBase::Clear(colorChannelCount_, uvChannelCount_, normalChannelCount_, tangentChannelCount_, binormalChannelCount_);
+	maxMaterialIdx = 0;
+
+	colorChannelCount = colorChannelCount_;
+	uvChannelCount = uvChannelCount_;
+	normalChannelCount = normalChannelCount_;
+	tangentChannelCount = tangentChannelCount_;
+	binormalChannelCount = binormalChannelCount_;
+
+	aabb = AABB();
 
 	positionOptimizer.Clear();
 	edgeOptimizer.Clear();

@@ -204,6 +204,7 @@
     <ClInclude Include="..\BSPMeshSlicer.h" />
     <ClInclude Include="..\Color.h" />
     <ClInclude Include="..\Common.h" />
+    <ClInclude Include="..\Edge.h" />
     <ClInclude Include="..\FBXMeshBuilder.h" />
     <ClInclude Include="..\Math.h" />
     <ClInclude Include="..\Matrix4.h" />
@@ -224,6 +225,7 @@
     <ClCompile Include="..\BSPMeshSlicer.cxx" />
     <ClCompile Include="..\Color.cxx" />
     <ClCompile Include="..\Common.cxx" />
+    <ClCompile Include="..\Edge.cxx" />
     <ClCompile Include="..\FBXMeshBuilder.cxx" />
     <ClCompile Include="..\main.cxx" />
     <ClCompile Include="..\Math.cxx" />
