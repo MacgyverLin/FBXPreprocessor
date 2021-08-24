@@ -43,8 +43,8 @@ int main(int argc, const char** argv)
 
 #define TEST
 #ifdef TEST
-	//for (int i = 0; i < 5; i++)
-	int i = 0;
+	for (int i = 0; i < 5; i++)
+	//int i = 0;
 #else
 #endif
 	{
