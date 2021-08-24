@@ -28,6 +28,8 @@ public:
 
 	AABB& operator += (const Vector3& v);
 
+	Vector3 GetCenter() const;
+
 	Vector3 GetExtent() const;
 	
 	Vector3 GetMajorAxis(bool randomize = false) const;

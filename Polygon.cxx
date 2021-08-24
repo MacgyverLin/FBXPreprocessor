@@ -5,7 +5,6 @@ Polygon::Polygon(int groupIdx_, int materialIdx_)
 	, vertices()
 
 	, groupIdx(groupIdx_)
-	, center()
 	, plane()
 	, aabb()
 	, adjacencies()
@@ -22,7 +21,6 @@ Polygon::Polygon(const Polygon& other)
 	vertices = other.vertices;
 
 	groupIdx = other.groupIdx;
-	center = other.center;
 	plane = other.plane;
 	aabb = other.aabb;
 	adjacencies = other.adjacencies;
@@ -34,7 +32,6 @@ Polygon& Polygon::operator = (const Polygon& other)
 	vertices = other.vertices;
 
 	groupIdx = other.groupIdx;
-	center = other.center;
 	plane = other.plane;
 	aabb = other.aabb;
 	adjacencies = other.adjacencies;
@@ -67,11 +64,6 @@ int Polygon::GetGroupIdx() const
 	return groupIdx;
 }
 
-const Vector3& Polygon::GetCenter() const
-{
-	return center;
-}
-
 const Plane& Polygon::GetPlane() const
 {
 	return plane;
@@ -98,7 +90,6 @@ void Polygon::Begin(int groupIdx_, int materialIdx_)
 	vertices.clear();
 
 	groupIdx = groupIdx_;
-	center = Vector3::Zero;
 	plane = Plane(Vector3::UnitY, 0);
 	aabb = AABB();
 	adjacencies.clear();
@@ -117,21 +108,6 @@ void Polygon::Add(const Vertex& vertex)
 
 void Polygon::End()
 {
-	//////////////////////////////////////
-	// compute Center
-	if (vertices.size()==0)
-	{
-		center = Vector3::Zero;
-	}
-	else
-	{
-		center = Vector3::Zero;
-		for (size_t i = 0; i < vertices.size(); i++)
-			center += vertices[i].position;
-
-		center /= vertices.size();
-	}
-
 	//////////////////////////////////////
 	// compute Plane
 	if (vertices.size() >= 3)
@@ -176,7 +152,6 @@ void Polygon::Clear()
 	vertices.clear();
 
 	groupIdx = 0;
-	center = Vector3::Zero;
 	plane = Plane(Vector3::UnitY, 0);
 	aabb = AABB(Vector3::Zero, Vector3::Zero);
 	adjacencies.clear();

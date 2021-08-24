@@ -86,8 +86,6 @@ public:
 
 	int GetGroupIdx() const;
 
-	const Vector3& GetCenter() const;
-
 	const Plane& GetPlane() const;
 
 	const AABB& GetAABB() const;
@@ -115,7 +113,6 @@ private:
 	std::vector<Vertex> vertices;
 
 	int groupIdx;
-	Vector3 center;
 	Plane plane;
 	AABB aabb;
 	std::vector<Adjacency> adjacencies;

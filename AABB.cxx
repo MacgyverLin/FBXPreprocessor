@@ -30,6 +30,11 @@ const Vector3& AABB::GetMax() const
 	return maximun;
 }
 
+Vector3 AABB::GetCenter() const
+{
+	return (maximun + minimun) * 0.5f;
+}
+
 Vector3 AABB::GetExtent() const
 {
 	return maximun - minimun;

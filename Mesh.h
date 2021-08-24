@@ -82,6 +82,7 @@ private:
 	int normalChannelCount;
 	int tangentChannelCount;
 	int binormalChannelCount;
+	
 	AABB aabb;
 
 	std::vector<Polygon> polygons;
