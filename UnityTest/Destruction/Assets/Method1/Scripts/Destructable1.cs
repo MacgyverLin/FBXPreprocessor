@@ -25,6 +25,7 @@ public class Destructable1 : MonoBehaviour
         meshRenderer.enabled = true;
 
         // init child
+        /*
         Material[] materials = new Material[meshRenderer.materials.Length+1];
         for(int i=0; i<meshRenderer.materials.Length+1; i++)
         {
@@ -33,23 +34,26 @@ public class Destructable1 : MonoBehaviour
             else
                 materials[i] = meshRenderer.materials[i];
         }
+        */
 
         for (int i = 0; i < transform.childCount; i++)
         {
             // Debug.Log(transform.GetChild(i).gameObject.name);
-            InitChild(transform.GetChild(i).gameObject, materials);
+            InitChild(transform.GetChild(i).gameObject);
         }
     }
 
-    private void InitChild(GameObject child, Material[] materials)
+    private void InitChild(GameObject child)
     {
         // disable child
         child.SetActive(false);
         MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
         meshRenderer.enabled = false;
 
-        // uses parent material and cross section
-        meshRenderer.materials = materials;
+        // last material must be crossSection Material
+        Material[] matArray = meshRenderer.materials;
+        matArray[matArray.Length - 1] = crossSectionMaterial;
+        meshRenderer.materials = matArray;
 
         // child use physics
         Rigidbody rigidbody = child.AddComponent<Rigidbody>();
