@@ -201,6 +201,50 @@ bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, int polygonIndex, int& materia
 	return true;
 }
 
+bool MeshBuilder::BuildPolygonGroup(FbxNode* fbxNode, int polygonIndex, int& polygonGroupIdx)
+{
+	FbxMesh* fbxMesh = fbxNode->GetMesh();
+
+	for (int groupIndex = 0; groupIndex < fbxMesh->GetElementPolygonGroupCount(); groupIndex++)
+	{
+		FbxGeometryElementPolygonGroup* geometryElementPolygonGroup = fbxMesh->GetElementPolygonGroup(groupIndex);
+		switch (geometryElementPolygonGroup->GetMappingMode())
+		{
+		case FbxGeometryElement::eByPolygon:
+		case FbxGeometryElement::eAllSame:
+		{
+			switch (geometryElementPolygonGroup->GetReferenceMode())
+			{
+			case FbxGeometryElement::eIndexToDirect:
+			case FbxGeometryElement::eDirect:
+			{
+				polygonGroupIdx = geometryElementPolygonGroup->GetIndexArray().GetAt(polygonIndex);
+			}
+			break;
+
+			case FbxGeometryElement::eIndex:
+			default:
+				break; // other reference modes not shown here!
+			}
+		}
+		break;
+
+		case FbxGeometryElement::eNone:
+		case FbxGeometryElement::eByControlPoint:
+		case FbxGeometryElement::eByPolygonVertex:
+		case FbxGeometryElement::eByEdge:
+		default:
+			// any other mapping modes don't make sense
+			// DisplayString("        \"unsupported group assignment\"");
+
+			ErrorMsg("unsupported PolygonGroup idx assignment");
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool MeshBuilder::BuildPosition(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId)
 {
 	assert(lControlPointIndex >= 0);
@@ -602,7 +646,11 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 		if (!BuildMaterial(fbxNode, polygonIndex, materialIdx))
 			return false;
 
-		mesh.BeginPolygon(materialIdx);
+		int polygonGroupIdx = 0;
+		if (!BuildPolygonGroup(fbxNode, polygonIndex, polygonGroupIdx))
+			return false;
+
+		mesh.BeginPolygon(polygonGroupIdx, materialIdx);
 
 		for (int polygonVertexIndex = 0; polygonVertexIndex < fbxMesh->GetPolygonSize(polygonIndex); polygonVertexIndex++)
 		{
@@ -653,7 +701,6 @@ bool MeshBuilder::BuildMesh(FbxNode* fbxNode, Mesh& mesh)
 		mesh.EndPolygon();
 	}
 
-	//mesh.SetAABB(AABB(Vector3((float)aabbMin[0], (float)aabbMin[1], (float)aabbMin[2]), Vector3((float)aabbMax[0], (float)aabbMax[1], (float)aabbMax[2])));
 	mesh.End();
 
 	/*

@@ -34,6 +34,7 @@ private:
 	bool BuildMesh(FbxNode* fbxNode, Mesh& mesh);
 
 	bool BuildMaterial(FbxNode* fbxNode, int polygonIndex, int& materialIdx);
+	bool BuildPolygonGroup(FbxNode* fbxNode, int polygonIndex, int& polygonGroupIdx);
 	bool BuildPosition(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
 	bool BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId);
 	bool BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int polygonIndex, int polygonVertexIndex);

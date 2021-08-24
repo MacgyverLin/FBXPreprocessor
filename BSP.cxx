@@ -220,7 +220,7 @@ void BSP::SplitPolygon(
 		if (frontVertices.size() >= 3)
 		{
 			Polygon frontPoly;
-			frontPoly.Begin(polygon.GetMaterialIdx());
+			frontPoly.Begin(polygon.GetGroupIdx(), polygon.GetMaterialIdx());
 			frontPoly.Add(frontVertices);
 			frontPoly.End();
 
@@ -230,7 +230,7 @@ void BSP::SplitPolygon(
 		if (backVertices.size() >= 3)
 		{
 			Polygon backPoly;
-			backPoly.Begin(polygon.GetMaterialIdx());
+			backPoly.Begin(polygon.GetGroupIdx(), polygon.GetMaterialIdx());
 			backPoly.Add(backVertices);
 			backPoly.End();
 

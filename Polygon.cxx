@@ -1,11 +1,14 @@
 #include "Polygon.h"
 
-Polygon::Polygon(int materialIdx_)
+Polygon::Polygon(int groupIdx_, int materialIdx_)
 	: materialIdx(materialIdx_)
+	, vertices()
+
+	, groupIdx(groupIdx_)
+	, center()
 	, plane()
 	, aabb()
-	, vertices()
-	, flipEdges()
+	, adjacencies()
 {
 }
 
@@ -16,19 +19,25 @@ Polygon::~Polygon()
 Polygon::Polygon(const Polygon& other)
 {
 	materialIdx = other.materialIdx;
+	vertices = other.vertices;
+
+	groupIdx = other.groupIdx;
+	center = other.center;
 	plane = other.plane;
 	aabb = other.aabb;
-	vertices = other.vertices;
-	flipEdges = other.flipEdges;
+	adjacencies = other.adjacencies;
 }
 
 Polygon& Polygon::operator = (const Polygon& other)
 {
 	materialIdx = other.materialIdx;
+	vertices = other.vertices;
+
+	groupIdx = other.groupIdx;
+	center = other.center;
 	plane = other.plane;
 	aabb = other.aabb;
-	vertices = other.vertices;
-	flipEdges = other.flipEdges;
+	adjacencies = other.adjacencies;
 
 	return *this;
 }
@@ -36,16 +45,6 @@ Polygon& Polygon::operator = (const Polygon& other)
 int Polygon::GetMaterialIdx() const
 {
 	return materialIdx;
-}
-
-const Plane& Polygon::GetPlane() const
-{
-	return plane;
-}
-
-const AABB& Polygon::GetAABB() const
-{
-	return aabb;
 }
 
 int Polygon::GetVerticesCount() const
@@ -63,28 +62,46 @@ const std::vector<Vertex>& Polygon::GetVertices() const
 	return vertices;
 }
 
-int Polygon::GetFlipEdgesCount() const
+int Polygon::GetGroupIdx() const
 {
-	return flipEdges.size();
+	return groupIdx;
 }
 
-const FlipEdge& Polygon::GetFlipEdge(int i) const
+const Vector3& Polygon::GetCenter() const
 {
-	return flipEdges[i];
+	return center;
 }
 
-const std::vector<FlipEdge>& Polygon::GetFlipEdges() const
+const Plane& Polygon::GetPlane() const
 {
-	return flipEdges;
+	return plane;
 }
 
-void Polygon::Begin(int materialIdx_)
+const AABB& Polygon::GetAABB() const
+{
+	return aabb;
+}
+
+const Adjacency& Polygon::GetAdjacency(int i) const
+{
+	return adjacencies[i];
+}
+
+const std::vector<Adjacency>& Polygon::GetAdjacencies() const
+{
+	return adjacencies;
+}
+
+void Polygon::Begin(int groupIdx_, int materialIdx_)
 {
 	materialIdx = materialIdx_;
-	plane = Plane();
-	aabb = AABB();
 	vertices.clear();
-	flipEdges.clear();
+
+	groupIdx = groupIdx_;
+	center = Vector3::Zero;
+	plane = Plane(Vector3::UnitY, 0);
+	aabb = AABB();
+	adjacencies.clear();
 }
 
 void Polygon::Add(const std::vector<Vertex>& verts)
@@ -95,33 +112,74 @@ void Polygon::Add(const std::vector<Vertex>& verts)
 
 void Polygon::Add(const Vertex& vertex)
 {
-	if (vertices.size() == 0)
-		aabb = AABB(vertex.position, vertex.position);
-	else
-		aabb += vertex.position;
-
 	vertices.push_back(vertex);
-}
-
-void Polygon::Add(const FlipEdge& edge)
-{
-	flipEdges.push_back(edge);
 }
 
 void Polygon::End()
 {
-	// Todo: handle degenerate polygon
-	if(vertices.size()>=3)
+	//////////////////////////////////////
+	// compute Center
+	if (vertices.size()==0)
+	{
+		center = Vector3::Zero;
+	}
+	else
+	{
+		center = Vector3::Zero;
+		for (size_t i = 0; i < vertices.size(); i++)
+			center += vertices[i].position;
+
+		center /= vertices.size();
+	}
+
+	//////////////////////////////////////
+	// compute Plane
+	if (vertices.size() >= 3)
 		plane = Plane(vertices[0].position, vertices[1].position, vertices[2].position);
+
+	//////////////////////////////////////
+	// compute AABB
+	if (vertices.size()==0)
+	{
+		aabb = AABB(Vector3::Zero, Vector3::Zero);
+	}
+	else
+	{
+		aabb = AABB(vertices[0].position, vertices[0].position);
+		for (size_t i = 0; i < vertices.size(); i++)
+			aabb += vertices[i].position;
+	}
+}
+
+void Polygon::End(DataOptimizer<Vector3>& positionOptimizer, DataOptimizer<Edge>& edgeOptimizer)
+{
+	End();
+
+	//////////////////////////////////////
+	// compute Adjacency
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		int i0 = (i + 0) % vertices.size();
+		int i1 = (i + 1) % vertices.size();
+
+		int vIdx0 = positionOptimizer.Add(vertices[i0].position);
+		int vIdx1 = positionOptimizer.Add(vertices[i1].position);
+		int edgeIdx = edgeOptimizer.Add(Edge(vIdx0, vIdx1));
+
+		adjacencies.push_back(Adjacency((vIdx1 > vIdx0), edgeIdx));
+	}
 }
 
 void Polygon::Clear()
 {
 	materialIdx = 0;
-	plane = Plane();
-	aabb = AABB();
 	vertices.clear();
-	flipEdges.clear();
+
+	groupIdx = 0;
+	center = Vector3::Zero;
+	plane = Plane(Vector3::UnitY, 0);
+	aabb = AABB(Vector3::Zero, Vector3::Zero);
+	adjacencies.clear();
 }
 
 void Polygon::Flip()
@@ -133,10 +191,8 @@ void Polygon::Flip()
 		vertices[i].Flip();
 	}
 
-	for (size_t i = 0; i < flipEdges.size(); i++)
-	{
-		flipEdges[i].Flip();
-	}
+	for (size_t i = 0; i < adjacencies.size(); i++)
+		adjacencies[i].FlipEdge();
 }
 
 bool Polygon::IsEmpty() const

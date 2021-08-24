@@ -4,23 +4,63 @@
 #include "Vertex.h"
 #include "Plane.h"
 #include "AABB.h"
+#include "DataOptimizer.h"
+#include "Edge.h"
 
-class FlipEdge
+class Adjacency
 {
 public:
-	FlipEdge(bool flip_, int edge_)
-		: flip(flip_)
-		, edge(edge_)
+	Adjacency(bool flipped_ = false, int edgeIdx_ = -1, int polygonIdx_ = -1)
+	{
+		flipped = flipped_;
+
+		edgeIdx = edgeIdx_;
+		
+		polygonIdx = polygonIdx_;
+	}
+
+	~Adjacency()
 	{
 	}
 
-	void Flip()
+	int& EdgeIndex()
 	{
-		flip = !flip;
+		return edgeIdx;
 	}
 
-	bool flip;
-	int edge;
+	int& PolygonIdx()
+	{
+		return polygonIdx;
+	}
+
+	bool& EdgeFlipped()
+	{
+		return flipped;
+	}
+
+	const int& EdgeIndex() const
+	{
+		return edgeIdx;
+	}
+
+	const int& PolygonIdx() const
+	{
+		return polygonIdx;
+	}
+
+	const bool& EdgeFlipped() const
+	{
+		return flipped;
+	}
+
+	void FlipEdge()
+	{
+		flipped = !flipped;
+	}
+
+	bool flipped;
+	int edgeIdx;
+	int polygonIdx;
 };
 
 class Polygon
@@ -28,7 +68,7 @@ class Polygon
 	friend class Mesh;
 	friend class BSP;
 public:
-	Polygon(int materialIdx = 0);
+	Polygon(int groupIdx_ = 0, int materialIdx_ = 0);
 
 	~Polygon();
 
@@ -38,21 +78,23 @@ public:
 
 	int GetMaterialIdx() const;
 
-	const Plane& GetPlane() const;
-
-	const AABB& GetAABB() const;
-	
 	int GetVerticesCount() const;
 
 	const Vertex& GetVertex(int i) const;
 
 	const std::vector<Vertex>& GetVertices() const;
 
-	int GetFlipEdgesCount() const;
+	int GetGroupIdx() const;
 
-	const FlipEdge& GetFlipEdge(int i) const;
+	const Vector3& GetCenter() const;
 
-	const std::vector<FlipEdge>& GetFlipEdges() const;
+	const Plane& GetPlane() const;
+
+	const AABB& GetAABB() const;
+
+	const Adjacency& GetAdjacency(int i) const;
+
+	const std::vector<Adjacency>& GetAdjacencies() const;
 
 	void Clear();
 
@@ -60,21 +102,23 @@ public:
 
 	bool IsEmpty() const;
 private:
-	void Begin(int materialIdx);
+	void Begin(int groupIdx_, int materialIdx_);
 
 	void Add(const std::vector<Vertex>& vertices);
 
 	void Add(const Vertex& vertex);
 
-	void Add(const FlipEdge& edge);
-
 	void End();
+	void End(DataOptimizer<Vector3>& positionOptimizer, DataOptimizer<Edge>& edgeOptimizer);
 
 	int materialIdx;
+	std::vector<Vertex> vertices;
+
+	int groupIdx;
+	Vector3 center;
 	Plane plane;
 	AABB aabb;
-	std::vector<Vertex> vertices;
-	std::vector<FlipEdge> flipEdges;
+	std::vector<Adjacency> adjacencies;
 };
 
 #endif

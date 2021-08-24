@@ -69,8 +69,8 @@ Mesh BSPMeshSlicer::MakeCutterMesh(const Mesh& mesh, int materialID, const Vecto
 
 	Mesh result;
 	result.Begin(mesh.GetColorChannelCount(), mesh.GetUVChannelCount(), mesh.GetNormalChannelCount(), mesh.GetTangentChannelCount(), mesh.GetBinormalChannelCount());
-		result.BeginPolygon(materialID);
-			result.AddPolygonVertex(vertices);
+		result.BeginPolygon(0, materialID);
+			result.AddPolygonVertices(vertices);
 		result.EndPolygon();
 	result.End();
 

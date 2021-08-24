@@ -18,11 +18,22 @@ public:
 
 	Mesh& operator = (const Mesh& other);
 
+	bool IsClosed() const;
+
+	int GetMaxGroupIdx() const;
+
 	int GetMaxMaterialIdx() const;
+
+	int GetVerticesCount() const;
+	
 	int GetColorChannelCount() const;
+	
 	int GetUVChannelCount() const;
+	
 	int GetNormalChannelCount() const;
+	
 	int GetTangentChannelCount() const;
+
 	int GetBinormalChannelCount() const;
 
 	const AABB& GetAABB() const;
@@ -33,17 +44,15 @@ public:
 
 	const std::vector<Polygon>& GetPolygons() const;
 
-	size_t GetVerticesCount() const;
-
 	void Begin(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
 
-	void BeginPolygon(int materialIdx);
+	void BeginPolygon(int groupIdx_, int materialIdx_);
 
-	void BeginPolygon(const std::vector<Polygon>& polys);
+	void BeginPolygons(const std::vector<Polygon>& polys);
 
 	void BeginPolygon(const Polygon& polygon);
 
-	void AddPolygonVertex(const std::vector<Vertex>& vertices);
+	void AddPolygonVertices(const std::vector<Vertex>& vertices);
 
 	void AddPolygonVertex(const Vertex& vertex);
 
@@ -57,7 +66,16 @@ public:
 
 	bool IsEmpty() const;
 private:
+	void UpdateAABB();
+	bool UpdatePolygonsAdjacency();
+	void UpdateIsolatedEdges();
+	void Test();
+
+	bool isClosed;
+
+	int maxGroupIdx;
 	int maxMaterialIdx;
+	int verticesCount;
 
 	int colorChannelCount;
 	int uvChannelCount;
