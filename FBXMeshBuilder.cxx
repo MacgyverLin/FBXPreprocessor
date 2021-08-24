@@ -10,22 +10,7 @@ FBXMeshBuilder::~FBXMeshBuilder()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool FBXMeshBuilder::FixMaterialOrderMeshArrays(std::vector<MeshArray>& meshArrays)
-{
-	for (size_t i = 0; i < meshArrays.size(); i++)
-	{
-		MeshArray& meshes = meshArrays[i];
-
-		for (size_t j = 0; j < meshes.size(); j++)
-		{
-			if (!FixMaterialOrder(meshes[j]))
-				return false;
-		}
-	}
-
-	return true;
-}
-
+/*
 bool FBXMeshBuilder::TriangulateMeshArrays(std::vector<MeshArray>& meshArrays)
 {
 	for (size_t i = 0; i < meshArrays.size(); i++)
@@ -40,6 +25,7 @@ bool FBXMeshBuilder::TriangulateMeshArrays(std::vector<MeshArray>& meshArrays)
 
 	return true;
 }
+*/
 
 /////////////////////////////////////////////////////////////////////////////////
 bool FBXMeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& meshArrays)

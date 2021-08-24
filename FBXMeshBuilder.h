@@ -16,9 +16,7 @@ public:
 	~FBXMeshBuilder();
 
 	/////////////////////////////////////////////////////////////////////////////////
-	bool TriangulateMeshArrays(std::vector<MeshArray>& meshArrays);
-
-	bool FixMaterialOrderMeshArrays(std::vector<MeshArray>& meshArrays);
+	// bool TriangulateMeshArrays(std::vector<MeshArray>& meshArrays);
 
 	/////////////////////////////////////////////////////////////////////////////////
 	bool Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& meshArrays);

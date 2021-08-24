@@ -66,6 +66,7 @@ public:
 
 	bool IsEmpty() const;
 private:
+	void SortPolygonsByMaterialIdx();
 	void UpdateAABB();
 	bool UpdatePolygonsAdjacency();
 	void UpdateIsolatedEdges();
@@ -90,59 +91,10 @@ private:
 	DataOptimizer<Edge> edgeOptimizer;
 };
 
-extern bool FixMaterialOrder(Mesh& mesh);
-
-extern void Triangulate(Mesh& mesh);
+// extern void Triangulate(Mesh& mesh);
 
 extern Mesh Intersect(const Mesh& m0, const Mesh& m1);
 
 typedef std::vector<Mesh> MeshArray;
-
-
-/*
-class Mesh : public MeshBase
-{
-public:
-	Mesh(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
-
-	~Mesh();
-
-	Mesh(const Mesh& other);
-
-	Mesh& operator = (const Mesh& other);
-
-	virtual size_t GetPolygonCount() const override;
-
-	virtual const Polygon& GetPolygon(int i) const override;
-
-	virtual const std::vector<Polygon>& GetPolygons() const override;
-
-	virtual size_t GetVerticesCount() const override;
-
-	virtual void Begin(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1) override;
-
-	virtual void Add(const std::vector<Polygon>& polygons) override;
-
-	virtual void Add(const Polygon& polygon) override;
-
-	virtual void End() override;
-
-	virtual void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1) override;
-
-	virtual void Flip() override;
-
-	virtual bool IsEmpty() const override;
-private:
-	std::vector<Polygon> polygons;
-};
-
-extern bool FixMaterialOrder(Mesh& mesh);
-
-extern void Triangulate(Mesh& mesh);
-
-extern Mesh Intersect(const Mesh& m0, const Mesh& m1);
-
-typedef std::vector<Mesh> MeshArray;
-*/
 
 #endif

@@ -2,23 +2,6 @@
 #include "BSPMeshSlicer.h"
 #include "FBXMeshBuilder.h"
 
-// Todo: 
-/*
-TODO:
-	1) Done!!!!!!!!!!! indexed color, uv, tangent, binormal
-
-	2) Done!!!!!!!!!!! 
-		mesh.colorChannelCount, mesh.normalChannelCount
-			for (size_t ch = 0; ch < NUM_COLORS; ch++)...
-			for (size_t ch = 0; ch < NUM_NORMALS; ch++)...
-
-	3) Done!!!!!!!!!!! indexed position
-
-	4) Done!!!!!!!!!!!!, Face Material Order
-
-	5) Split plane Selection
-*/
-
 int main(int argc, const char** argv)
 {
 	Arguments args(argc, argv);
@@ -69,7 +52,7 @@ int main(int argc, const char** argv)
 		lResult = LoadScene(sdkManager, fbxScene, filein);
 		if (lResult == false)
 		{
-			FBXSDK_printf("\n\nAn error occurred while loading the fbxScene...");
+			ErrorMsg("\n\nAn error occurred while loading the fbxScene...");
 			return -1;
 		}
 
@@ -79,7 +62,7 @@ int main(int argc, const char** argv)
 		std::vector<Mesh> originalMeshes;
 		if (!meshBuilder.Build(fbxScene, fbxNodes, originalMeshes))
 		{
-			FBXSDK_printf("\n\nAn error in collect Mesh Nodes...");
+			ErrorMsg("\n\nAn error in collect Mesh Nodes...");
 			return -1;
 		}
 
@@ -89,7 +72,7 @@ int main(int argc, const char** argv)
 		std::vector<MeshArray> resultMeshArrays;
 		if (!meshBuilder.Copy(originalMeshes, resultMeshArrays))
 		{
-			FBXSDK_printf("\n\nAn error in copying Mesh Nodes...");
+			ErrorMsg("\n\nAn error in copying Mesh Nodes...");
 			return -1;
 		}
 #else
@@ -97,34 +80,28 @@ int main(int argc, const char** argv)
 		std::vector<MeshArray> resultMeshArrays;
 		if (!meshSlicer.Process(originalMeshes, resultMeshArrays))
 		{
-			FBXSDK_printf("\n\nAn error in slicing Mesh Nodes...");
+			ErrorMsg("\n\nAn error in slicing Mesh Nodes...");
 			return -1;
 		}
 #endif
 
 		/////////////////////////////////////////////////////////////////////
 		FBXMeshBuilder fbxMeshBuilder;
-		if (!fbxMeshBuilder.FixMaterialOrderMeshArrays(resultMeshArrays))
-		{
-			FBXSDK_printf("\n\nAn error in FixMaterialOrderMeshArrays...");
-			return -1;
-		}
-
 		//if (!fbxMeshBuilder.TriangulateMeshArrays(resultMeshArrays))
 		//{
-			//FBXSDK_printf("\n\nAn error in TriangulateMeshArrays...");
+			//ErrorMsg("\n\nAn error in TriangulateMeshArrays...");
 		//	return -1;
 		//}
 
 		if (!fbxMeshBuilder.Build(fbxScene, fbxNodes, resultMeshArrays))
 		{
-			FBXSDK_printf("\n\nAn error in building fbxNodes...");
+			ErrorMsg("\n\nAn error in building fbxNodes...");
 			return -1;
 		}
 		
 		if (!SaveScene(sdkManager, fbxScene, fileout, args.binary))
 		{
-			FBXSDK_printf("\n\nAn error occurred while saving the fbxScene...");
+			ErrorMsg("\n\nAn error occurred while saving the fbxScene...");
 			return -1;
 		}
 

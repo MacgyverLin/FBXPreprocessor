@@ -200,13 +200,18 @@ void Mesh::EndPolygon()
 
 void Mesh::End()
 {
+	SortPolygonsByMaterialIdx();
+
 	UpdateAABB();
 
 	isClosed = UpdatePolygonsAdjacency();
 
 	UpdateIsolatedEdges();
+}
 
-	//Test();
+void Mesh::SortPolygonsByMaterialIdx()
+{
+	std::sort(polygons.begin(), polygons.end(), [&](const Polygon& p0, const Polygon& p1) -> bool { return p0.GetMaterialIdx() < p1.GetMaterialIdx();  });
 }
 
 void Mesh::UpdateAABB()
@@ -573,78 +578,9 @@ bool Mesh::IsEmpty() const
 	return polygons.size() == 0;
 }
 
-bool FixMaterialOrder(Mesh& mesh)
-{
-	////////////////////////////////////////////////////////////////
-	// check Polygon Vertex
-	if (mesh.GetPolygonCount() < 1)
-		return false;
-
-	const Polygon& polygon = mesh.GetPolygon(0);
-	if (polygon.GetVerticesCount() < 1)
-		return false;
-
-	////////////////////////////////////////////////////////////////
-	// prepare vertex
-	const Vertex& v = polygon.GetVertex(0);
-	std::vector<Vertex> vertices(3);
-	for (size_t i = 0; i < vertices.size(); i++)
-	{
-		vertices[i] = v;
-		vertices[i].position += Vector3(0.0f + Math::UnitRandom() * 0.01f, 0.0f + Math::UnitRandom() * 0.01f, 0.0f + Math::UnitRandom() * 0.01f);
-	}
-
-	////////////////////////////////////////////////////////////////
-	// Add GetMaxMaterialIdx() of dummy polygons at the beginning for enforce material order
-	Mesh oldMesh = mesh;
-
-	mesh.Begin(oldMesh.GetColorChannelCount(), oldMesh.GetUVChannelCount(), oldMesh.GetNormalChannelCount(), oldMesh.GetTangentChannelCount(), oldMesh.GetBinormalChannelCount());
-	{
-		for (size_t matIdx = 0; matIdx < oldMesh.GetMaxMaterialIdx() + 1; matIdx++)
-		{
-			mesh.BeginPolygon(0, matIdx);
-			{
-				mesh.AddPolygonVertices(vertices);
-			}
-			mesh.EndPolygon();
-		}
-
-		/*
-		add flipped polygon
-		for (size_t matIdx = 0; matIdx < oldMesh.GetMaxMaterialIdx() + 1; matIdx++)
-		{
-			mesh.BeginPolygon(0, matIdx);
-			{
-				mesh.AddPolygonVertex(vertices);
-			}
-			mesh.EndPolygon();
-		}
-		*/
-
-		{
-			mesh.BeginPolygons(oldMesh.GetPolygons());
-			mesh.EndPolygon();
-		}
-	}
-	mesh.End();
-
-	return true;
-}
-
+/*
 void Triangulate(Mesh& mesh)
 {
-	/*
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-	{
-		int vcount = mesh.GetPolygon(i).GetVerticesCount();;
-
-		if (vcount > 3)
-		{
-			vcount = vcount;
-		}
-	}
-	*/
-
 	Mesh oldMesh = mesh;
 
 	mesh.Begin(oldMesh.GetColorChannelCount(), oldMesh.GetUVChannelCount(), oldMesh.GetNormalChannelCount(), oldMesh.GetTangentChannelCount(), oldMesh.GetBinormalChannelCount());
@@ -667,6 +603,7 @@ void Triangulate(Mesh& mesh)
 	}
 	mesh.End();
 }
+*/
 
 Mesh Intersect(const Mesh& m0, const Mesh& m1)
 {
@@ -699,8 +636,7 @@ Mesh Intersect(const Mesh& m0, const Mesh& m1)
 
 		////////////////////////////////////////////
 		// output
-		result.Begin(m0.GetColorChannelCount(), m0.GetUVChannelCount(),
-			m0.GetNormalChannelCount(), m0.GetTangentChannelCount(), m0.GetBinormalChannelCount());
+		result.Begin(m0.GetColorChannelCount(), m0.GetUVChannelCount(), m0.GetNormalChannelCount(), m0.GetTangentChannelCount(), m0.GetBinormalChannelCount());
 
 		result.BeginPolygons(resultPolygons);
 		result.EndPolygon();
