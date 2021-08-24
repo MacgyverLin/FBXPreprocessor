@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DestructionController : MonoBehaviour
+public class Destructable1Controller : MonoBehaviour
 {
-    public List<Destruction> destructables = new List<Destruction>();
+    public List<Destructable1> destructables = new List<Destructable1>();
 
     public float explosionForce = 100.0f;
     public float explosionRadius = 10.0f;
@@ -26,7 +26,7 @@ public class DestructionController : MonoBehaviour
         {
             Debug.Log("space key was pressed");
             foreach (var d in destructables)
-                d.GetComponent<Destruction>().Destruct(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+                d.GetComponent<Destructable1>().Destruct(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
         }
     }
 }
