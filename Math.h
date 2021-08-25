@@ -2,9 +2,6 @@
 #define _Math_h_
 
 #include "Common.h"
-#include <vector>
-#include <map>
-#include <assert.h>
 
 ///////////////////////////////////////////////////////////////////
 class Math

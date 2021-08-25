@@ -7,66 +7,9 @@
 #include "DataOptimizer.h"
 #include "Edge.h"
 
-class Adjacency
-{
-public:
-	Adjacency(bool flipped_ = false, int edgeIdx_ = -1, int polygonIdx_ = -1)
-	{
-		flipped = flipped_;
-
-		edgeIdx = edgeIdx_;
-		
-		polygonIdx = polygonIdx_;
-	}
-
-	~Adjacency()
-	{
-	}
-
-	int& EdgeIndex()
-	{
-		return edgeIdx;
-	}
-
-	int& PolygonIdx()
-	{
-		return polygonIdx;
-	}
-
-	bool& EdgeFlipped()
-	{
-		return flipped;
-	}
-
-	const int& EdgeIndex() const
-	{
-		return edgeIdx;
-	}
-
-	const int& PolygonIdx() const
-	{
-		return polygonIdx;
-	}
-
-	const bool& EdgeFlipped() const
-	{
-		return flipped;
-	}
-
-	void FlipEdge()
-	{
-		flipped = !flipped;
-	}
-
-	bool flipped;
-	int edgeIdx;
-	int polygonIdx;
-};
-
 class Polygon
 {
 	friend class Mesh;
-	friend class BSP;
 public:
 	Polygon(int groupIdx_ = 0, int materialIdx_ = 0);
 
@@ -78,21 +21,19 @@ public:
 
 	int GetMaterialIdx() const;
 
-	int GetVerticesCount() const;
+	int GetEdgesCount() const;
 
-	const Vertex& GetVertex(int i) const;
+	const Edge& GetEdge(int i) const;
 
-	const std::vector<Vertex>& GetVertices() const;
+	const std::vector<Edge>& GetEdges() const;
 
-	int GetGroupIdx() const;
+	int GetGroupID() const;
 
 	const Plane& GetPlane() const;
 
 	const AABB& GetAABB() const;
 
-	const Adjacency& GetAdjacency(int i) const;
-
-	const std::vector<Adjacency>& GetAdjacencies() const;
+	void SetGroupID(int groupID_);
 
 	void Clear();
 
@@ -102,20 +43,18 @@ public:
 private:
 	void Begin(int groupIdx_, int materialIdx_);
 
-	void Add(const std::vector<Vertex>& vertices);
+	void Add(int vertexIdx, int edgeIdx, int adjacentPolygonIdx);
 
-	void Add(const Vertex& vertex);
+	void End(DataOptimizer<Vertex>& verticesOptimizer_, DataOptimizer<Vector3>& edgeVertexOptimizer_);
 
-	void End();
-	void End(DataOptimizer<Vector3>& positionOptimizer, DataOptimizer<Edge>& edgeOptimizer);
+	void SetEdgeAdjacentPolygonIdx(int edgeIdx, int adjacentPolygonIdx);
 
 	int materialIdx;
-	std::vector<Vertex> vertices;
+	std::vector<Edge> edges;
 
-	int groupIdx;
+	int groupID;
 	Plane plane;
 	AABB aabb;
-	std::vector<Adjacency> adjacencies;
 };
 
 #endif

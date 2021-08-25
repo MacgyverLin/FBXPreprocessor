@@ -122,12 +122,12 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Me
 	FillMaterial(dstMesh, fbxNode);
 }
 
-void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
+void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, size_t ch)
 {
 	DataOptimizer<Color> optimizer(useOptimizer);
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-			optimizer.Add(mesh.GetPolygon(i).GetVertex(k).colors[ch]);
+	for (size_t polyIdx = 0; polyIdx < mesh.GetPolygonCount(); polyIdx++)
+		for (size_t edgeIdx = 0; edgeIdx < mesh.GetPolygonEdgesCount(polyIdx); edgeIdx++)
+			optimizer.Add(mesh.GetPolygonVertex(polyIdx, edgeIdx).colors[ch]);
 
 	FbxGeometryElementVertexColor* geometryElementVertexColor = dstMesh->CreateElementVertexColor();
 	geometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
@@ -149,16 +149,17 @@ void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& 
 	}
 }
 
-void FBXMeshBuilder::FillUV(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
+void FBXMeshBuilder::FillUV(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, size_t ch)
 {
 	DataOptimizer<Vector2> optimizer(useOptimizer);
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-			optimizer.Add(mesh.GetPolygon(i).GetVertex(k).uvs[ch]);
+	for (size_t polyIdx = 0; polyIdx < mesh.GetPolygonCount(); polyIdx++)
+		for (size_t edgeIdx = 0; edgeIdx < mesh.GetPolygonEdgesCount(polyIdx); edgeIdx++)
+			optimizer.Add(mesh.GetPolygonVertex(polyIdx, edgeIdx).uvs[ch]);
 
 	FbxGeometryElementUV* geometryElementUV = dstMesh->CreateElementUV(FbxString("UV") + ((int)(ch + 1)));
 	geometryElementUV->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	geometryElementUV->SetReferenceMode((useOptimizer ? FbxGeometryElement::eIndexToDirect : FbxGeometryElement::eDirect));
+
 
 	for (size_t i = 0; i < optimizer.GetDataCount(); i++)
 	{
@@ -176,12 +177,13 @@ void FBXMeshBuilder::FillUV(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mes
 	}
 }
 
-void FBXMeshBuilder::FillNormal(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
+void FBXMeshBuilder::FillNormal(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, size_t ch)
 {
 	DataOptimizer<Vector3> optimizer(useOptimizer);
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-			optimizer.Add(mesh.GetPolygon(i).GetVertex(k).normals[ch]);
+	for (size_t polyIdx = 0; polyIdx < mesh.GetPolygonCount(); polyIdx++)
+		for (size_t edgeIdx = 0; edgeIdx < mesh.GetPolygonEdgesCount(polyIdx); edgeIdx++)
+			optimizer.Add(mesh.GetPolygonVertex(polyIdx, edgeIdx).normals[ch]);
+
 
 	FbxGeometryElementNormal* geometryElementNormal = dstMesh->CreateElementNormal();
 	geometryElementNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
@@ -203,12 +205,13 @@ void FBXMeshBuilder::FillNormal(bool useOptimizer, FbxMesh* dstMesh, const Mesh&
 	}
 }
 
-void FBXMeshBuilder::FillTangent(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
+void FBXMeshBuilder::FillTangent(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, size_t ch)
 {
 	DataOptimizer<Vector3> optimizer(useOptimizer);
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-			optimizer.Add(mesh.GetPolygon(i).GetVertex(k).tangents[ch]);
+	for (size_t polyIdx = 0; polyIdx < mesh.GetPolygonCount(); polyIdx++)
+		for (size_t edgeIdx = 0; edgeIdx < mesh.GetPolygonEdgesCount(polyIdx); edgeIdx++)
+			optimizer.Add(mesh.GetPolygonVertex(polyIdx, edgeIdx).tangents[ch]);
+
 
 	FbxGeometryElementTangent* geometryElementTangent = dstMesh->CreateElementTangent();
 	geometryElementTangent->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
@@ -230,12 +233,13 @@ void FBXMeshBuilder::FillTangent(bool useOptimizer, FbxMesh* dstMesh, const Mesh
 	}
 }
 
-void FBXMeshBuilder::FillBinormal(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
+void FBXMeshBuilder::FillBinormal(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, size_t ch)
 {
 	DataOptimizer<Vector3> optimizer(useOptimizer);
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-			optimizer.Add(mesh.GetPolygon(i).GetVertex(k).binormals[ch]);
+	for (size_t polyIdx = 0; polyIdx < mesh.GetPolygonCount(); polyIdx++)
+		for (size_t edgeIdx = 0; edgeIdx < mesh.GetPolygonEdgesCount(polyIdx); edgeIdx++)
+			optimizer.Add(mesh.GetPolygonVertex(polyIdx, edgeIdx).binormals[ch]);
+
 
 	FbxGeometryElementBinormal* geometryElementBinormal = dstMesh->CreateElementBinormal();
 	geometryElementBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
@@ -260,9 +264,9 @@ void FBXMeshBuilder::FillBinormal(bool useOptimizer, FbxMesh* dstMesh, const Mes
 void FBXMeshBuilder::FillPolygon(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh)
 {
 	DataOptimizer<Vector3> optimizer(useOptimizer);
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
-			optimizer.Add(mesh.GetPolygon(i).GetVertex(k).position);
+	for (size_t polyIdx = 0; polyIdx < mesh.GetPolygonCount(); polyIdx++)
+		for (size_t edgeIdx = 0; edgeIdx < mesh.GetPolygonEdgesCount(polyIdx); edgeIdx++)
+			optimizer.Add(mesh.GetPolygonVertex(polyIdx, edgeIdx).position);
 
 	for (size_t i = 0; i < optimizer.GetDataCount(); i++)
 	{
@@ -271,11 +275,11 @@ void FBXMeshBuilder::FillPolygon(bool useOptimizer, FbxMesh* dstMesh, const Mesh
 	}
 
 	int vertexIdx = 0;
-	for (size_t i = 0; i < mesh.GetPolygonCount(); i++)
+	for (size_t polyIdx = 0; polyIdx < mesh.GetPolygonCount(); polyIdx++)
 	{
-		dstMesh->BeginPolygon(mesh.GetPolygon(i).GetMaterialIdx());
+		dstMesh->BeginPolygon(mesh.GetPolygonMaterialIdx(polyIdx));
 
-		for (size_t k = 0; k < mesh.GetPolygon(i).GetVerticesCount(); k++)
+		for (size_t k = 0; k < mesh.GetPolygonEdgesCount(polyIdx); k++)
 		{
 			dstMesh->AddPolygon(optimizer.GetIndex(vertexIdx));
 

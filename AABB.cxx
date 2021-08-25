@@ -30,11 +30,6 @@ const Vector3& AABB::GetMax() const
 	return maximun;
 }
 
-Vector3 AABB::GetCenter() const
-{
-	return (maximun + minimun) * 0.5f;
-}
-
 Vector3 AABB::GetExtent() const
 {
 	return maximun - minimun;
@@ -89,15 +84,17 @@ Vector3 AABB::GetMajorAxis(bool randomize) const
 {
 	Vector3 extent(GetExtent());
 
+	// float minv = randomize ? -0.3f : 0.0f;
+	float minv = randomize ? 0.0f : 0.0f;
 	float maxv = randomize ? 0.3f : 0.0f;
 
 	Vector3 result;
 	if (extent.X() > extent.Y() && extent.X() > extent.Z()) // X
-		result = Vector3(1.0, Math::RangeRandom(0, maxv), Math::RangeRandom(0, maxv));
+		result = Vector3(1.0, Math::RangeRandom(minv, maxv), Math::RangeRandom(minv, maxv));
 	else if (extent.Y() > extent.X() && extent.Y() > extent.Z()) // Y
-		result = Vector3(Math::RangeRandom(0, maxv), 1.0, Math::RangeRandom(0, maxv));
+		result = Vector3(Math::RangeRandom(minv, maxv), 1.0, Math::RangeRandom(minv, maxv));
 	else // Z
-		result = Vector3(Math::RangeRandom(0, maxv), Math::RangeRandom(0, maxv), 1.0);
+		result = Vector3(Math::RangeRandom(minv, maxv), Math::RangeRandom(minv, maxv), 1.0);
 
 	result.Normalize();
 
@@ -106,18 +103,15 @@ Vector3 AABB::GetMajorAxis(bool randomize) const
 
 Vector3 AABB::GetCenter(bool randomize) const
 {
-	float minv;
-	float maxv;
-	if (randomize)
+	if (!randomize)
 	{
-		minv = 0.3f;
-		maxv = 0.7f;
+		return (maximun + minimun) * 0.5f;
 	}
 	else
 	{
-		minv = 0.5f;
-		maxv = 0.5f;
-	}
+		float minv = 0.3f;
+		float maxv = 0.7f;
 
-	return minimun + GetExtent() * Vector3(Math::RangeRandom(minv, maxv), Math::RangeRandom(minv, maxv), Math::RangeRandom(minv, maxv));
+		return minimun + GetExtent() * Vector3(Math::RangeRandom(minv, maxv), Math::RangeRandom(minv, maxv), Math::RangeRandom(minv, maxv));
+	}
 }

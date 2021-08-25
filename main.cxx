@@ -1,6 +1,7 @@
 #include "MeshBuilder.h"
-#include "BSPMeshSlicer.h"
 #include "FBXMeshBuilder.h"
+
+#define NO_SLICE
 
 int main(int argc, const char** argv)
 {
@@ -27,7 +28,7 @@ int main(int argc, const char** argv)
 #define TEST
 #ifdef TEST
 	for (int i = 0; i < 5; i++)
-	//int i = 0;
+	//int i = 1;
 #else
 #endif
 	{
@@ -52,7 +53,7 @@ int main(int argc, const char** argv)
 		lResult = LoadScene(sdkManager, fbxScene, filein);
 		if (lResult == false)
 		{
-			ErrorMsg("\n\nAn error occurred while loading the fbxScene...");
+			Debug::Error("\n\nAn error occurred while loading the fbxScene...");
 			return -1;
 		}
 
@@ -62,46 +63,32 @@ int main(int argc, const char** argv)
 		std::vector<Mesh> originalMeshes;
 		if (!meshBuilder.Build(fbxScene, fbxNodes, originalMeshes))
 		{
-			ErrorMsg("\n\nAn error in collect Mesh Nodes...");
+			Debug::Error("\n\nAn error in collect Mesh Nodes...");
 			return -1;
 		}
 
 		/////////////////////////////////////////////////////////////////////
-// #define NO_SLICE
 #ifdef NO_SLICE
 		std::vector<MeshArray> resultMeshArrays;
 		if (!meshBuilder.Copy(originalMeshes, resultMeshArrays))
 		{
-			ErrorMsg("\n\nAn error in copying Mesh Nodes...");
+			Debug::Error("\n\nAn error in copying Mesh Nodes...");
 			return -1;
 		}
 #else
-		BSPMeshSlicer meshSlicer;
-		std::vector<MeshArray> resultMeshArrays;
-		if (!meshSlicer.Process(originalMeshes, resultMeshArrays))
-		{
-			ErrorMsg("\n\nAn error in slicing Mesh Nodes...");
-			return -1;
-		}
 #endif
 
 		/////////////////////////////////////////////////////////////////////
 		FBXMeshBuilder fbxMeshBuilder;
-		//if (!fbxMeshBuilder.TriangulateMeshArrays(resultMeshArrays))
-		//{
-			//ErrorMsg("\n\nAn error in TriangulateMeshArrays...");
-		//	return -1;
-		//}
-
 		if (!fbxMeshBuilder.Build(fbxScene, fbxNodes, resultMeshArrays))
 		{
-			ErrorMsg("\n\nAn error in building fbxNodes...");
+			Debug::Error("\n\nAn error in building fbxNodes...");
 			return -1;
 		}
 		
 		if (!SaveScene(sdkManager, fbxScene, fileout, args.binary))
 		{
-			ErrorMsg("\n\nAn error occurred while saving the fbxScene...");
+			Debug::Error("\n\nAn error occurred while saving the fbxScene...");
 			return -1;
 		}
 

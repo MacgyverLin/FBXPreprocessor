@@ -124,7 +124,7 @@ bool MeshBuilder::ValidatePolygon(FbxMesh* fbxMesh)
 	{
 		if (fbxMesh->GetPolygonSize(polygonIndex) != NUM_VERTICES_PER_POLYGON)
 		{
-			ErrorMsg("Number of Vertices in Polygon must be %d, try re-export FBX with Triangulation on", NUM_VERTICES_PER_POLYGON);
+			Debug::Error("Number of Vertices in Polygon must be %d, try re-export FBX with Triangulation on", NUM_VERTICES_PER_POLYGON);
 			return false;
 		}
 	}
@@ -193,7 +193,7 @@ bool MeshBuilder::BuildMaterial(FbxNode* fbxNode, int polygonIndex, int& materia
 			// any other mapping modes don't make sense
 			// DisplayString("        \"unsupported group assignment\"");
 
-			ErrorMsg("unsupported material idx assignment");
+			Debug::Error("unsupported material idx assignment");
 			return false;
 		}
 	}
@@ -237,7 +237,7 @@ bool MeshBuilder::BuildPolygonGroup(FbxNode* fbxNode, int polygonIndex, int& pol
 			// any other mapping modes don't make sense
 			// DisplayString("        \"unsupported group assignment\"");
 
-			ErrorMsg("unsupported PolygonGroup idx assignment");
+			Debug::Error("unsupported PolygonGroup idx assignment");
 			return false;
 		}
 	}
@@ -296,7 +296,7 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int l
 					case FbxGeometryElement::eIndex:
 					default:
 					{
-						ErrorMsg("unsupported leVtxc->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+						Debug::Error("unsupported leVtxc->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
 					}
 					return false;
 				}
@@ -327,7 +327,7 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int l
 					case FbxGeometryElement::eIndex:
 					default:
 					{
-						ErrorMsg("unsupported leVtxc->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+						Debug::Error("unsupported leVtxc->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
 					}
 					return false;
 				}
@@ -340,7 +340,7 @@ bool MeshBuilder::BuildColor(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int l
 			case FbxGeometryElement::eAllSame:
 			default:
 			{
-				ErrorMsg("unsupported leVtxc->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
+				Debug::Error("unsupported leVtxc->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
 			return false;
 		}
@@ -389,7 +389,7 @@ bool MeshBuilder::BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lCon
 					case FbxGeometryElement::eIndex:
 					default:
 					{
-						ErrorMsg("unsupported leUV->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+						Debug::Error("unsupported leUV->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
 					}
 					return false;
 				}
@@ -413,7 +413,7 @@ bool MeshBuilder::BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lCon
 					case FbxGeometryElement::eIndex:
 					default:
 					{
-						ErrorMsg("unsupported leUV->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+						Debug::Error("unsupported leUV->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
 					}
 					return false;
 				}
@@ -426,7 +426,7 @@ bool MeshBuilder::BuildUV(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lCon
 			case FbxGeometryElement::eAllSame:
 			default:
 			{
-				ErrorMsg("unsupported leUV->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
+				Debug::Error("unsupported leUV->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
 			return false;
 		}
@@ -475,7 +475,7 @@ bool MeshBuilder::BuildNormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int 
 					case FbxGeometryElement::eIndex:
 					default:
 					{
-						ErrorMsg("unsupported leNormal->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+						Debug::Error("unsupported leNormal->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
 					}
 					return false;
 				}
@@ -489,7 +489,7 @@ bool MeshBuilder::BuildNormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int 
 			case FbxGeometryElement::eAllSame:
 			default:
 			{
-				ErrorMsg("unsupported leNormal->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
+				Debug::Error("unsupported leNormal->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
 			return false;
 		}
@@ -538,7 +538,7 @@ bool MeshBuilder::BuildTangent(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int
 					case FbxGeometryElement::eIndex:
 					default:
 					{
-						ErrorMsg("unsupported leTangent->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+						Debug::Error("unsupported leTangent->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
 					}
 					return false;
 				}
@@ -552,7 +552,7 @@ bool MeshBuilder::BuildTangent(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int
 			case FbxGeometryElement::eAllSame:
 			default:
 			{
-				ErrorMsg("unsupported leTangent->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
+				Debug::Error("unsupported leTangent->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
 			return false;
 		}
@@ -601,7 +601,7 @@ bool MeshBuilder::BuildBinormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, in
 					case FbxGeometryElement::eIndex:
 					default:
 					{
-						ErrorMsg("unsupported leBinormal->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
+						Debug::Error("unsupported leBinormal->GetReferenceMode() in %s, line: %s\n", __FILE__, __LINE__);
 					}
 					return false;
 				}
@@ -615,7 +615,7 @@ bool MeshBuilder::BuildBinormal(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, in
 			case FbxGeometryElement::eAllSame:
 			default:
 			{
-				ErrorMsg("unsupported leBinormal->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
+				Debug::Error("unsupported leBinormal->GetMappingMode() in %s, line: %s\n", __FILE__, __LINE__);
 			}
 			return false;
 		}

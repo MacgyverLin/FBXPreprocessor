@@ -1,9 +1,6 @@
 #ifndef _Argument_h_
 #define _Argument_h_
 
-#include <vector>
-#include <map>
-#include <assert.h>
 #include "Common.h"
 
 class Arguments
@@ -17,9 +14,5 @@ public:
 	bool unity;
 	bool unreal;
 };
-
-extern void InfoMsg(char* format, ...);
-extern void ErrorMsg(char* format, ...);
-extern void DisplayMaterialMapping1(FbxMesh* fbxMesh);
 
 #endif

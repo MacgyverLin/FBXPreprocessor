@@ -2,9 +2,6 @@
 #define _DataOptimizer_h_
 
 #include "Common.h"
-#include <vector>
-#include <map>
-#include <assert.h>
 
 template<class T>
 class DataOptimizer
@@ -117,7 +114,7 @@ public:
 
 	int GetIndex(const T& data) const
 	{
-		std::map<T, int>::iterator itr = datasMap.find(data);
+		std::map<T, int>::const_iterator itr = datasMap.find(data);
 		if (itr == datasMap.end())
 			return -1;
 		else

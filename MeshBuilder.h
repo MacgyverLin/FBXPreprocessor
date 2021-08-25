@@ -2,10 +2,6 @@
 #define _MeshBuilder_h_
 
 #include "Common.h"
-#include <vector>
-#include <map>
-#include <assert.h>
-
 #include "Argument.h"
 #include "Mesh.h"
 

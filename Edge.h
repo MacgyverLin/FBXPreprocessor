@@ -2,42 +2,115 @@
 #define _Edge_h_
 
 #include "AABB.h"
-#include <functional>
 
 class Edge
 {
 public:
-	Edge(int i0 = -1, int i1 = -1);
+	Edge(int vertexIdx_ = -1, int startIdx_ = -1, int adjPolyIdx_ = -1)
+	{
+		vertexIdx = vertexIdx_;
 
-	~Edge();
+		indices[0] = startIdx_;
+		indices[1] = -1;
 
-	Edge(const Edge& other);
+		adjacentPolygonIdx = adjPolyIdx_;
+	}
 
-	Edge& operator = (const Edge& other);
+	Edge& operator = (const Edge& other)
+	{
+		vertexIdx = other.vertexIdx;
 
-	int operator [] (int i) const;
+		indices[0] = other.indices[0];
+		indices[1] = other.indices[1];
 
-	int StartIdx() const;
+		adjacentPolygonIdx = other.adjacentPolygonIdx;
 
-	int EndIdx() const;
+		return *this;
+	}
 
-	int CompareArrays(const Edge& v) const;
+	int CompareArrays(const Edge& v) const
+	{
+		return memcmp(indices, v.indices, 2 * sizeof(indices[0]));
+	}
 
-	bool operator== (const Edge& v) const;
+	bool operator== (const Edge& v) const
+	{
+		return CompareArrays(v) == 0;
+	}
 
-	bool operator!= (const Edge& v) const;
+	bool operator!= (const Edge& v) const
+	{
+		return CompareArrays(v) != 0;
+	}
 
-	bool operator<  (const Edge& v) const;
+	bool operator<  (const Edge& v) const
+	{
+		return CompareArrays(v) < 0;
+	}
 
-	bool operator<= (const Edge& v) const;
+	bool operator<= (const Edge& v) const
+	{
+		return CompareArrays(v) <= 0;
+	}
 
-	bool operator>  (const Edge& v) const;
+	bool operator>  (const Edge& v) const
+	{
+		return CompareArrays(v) > 0;
+	}
 
-	bool operator>= (const Edge& v) const;
+	bool operator>= (const Edge& v) const
+	{
+		return CompareArrays(v) >= 0;
+	}
 
-	void Flip();
+	int GetVertexIdx() const
+	{
+		return vertexIdx;
+	}
+
+	int GetStartIdx() const
+	{
+		return indices[0];
+	}
+
+	int GetEndIdx() const
+	{
+		return indices[1];
+	}
+
+	int GetAdjacentPolygonIdx() const
+	{
+		return adjacentPolygonIdx;
+	}
+
+	void SetStartIdx(int idx)
+	{
+		indices[0] = idx;
+	}
+
+	void SetEndIdx(int idx)
+	{
+		indices[1] = idx;
+	}
+
+	void SetAdjacentPolygonIdx(int idx)
+	{
+		adjacentPolygonIdx = idx;
+	}
+
+	void Flip()
+	{
+		std::swap(indices[0], indices[1]);
+	}
+
+	bool IsNormalized() const
+	{
+		return indices[0] < indices[1];
+	}
 private:
+	int vertexIdx;
 	int indices[2];
+	int adjacentPolygonIdx;
 };
 
 #endif

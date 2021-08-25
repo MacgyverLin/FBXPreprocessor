@@ -258,3 +258,69 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
 
     return lStatus;
 }
+
+
+void Debug::Verbose(char* format, ...)
+{
+    static char buffer[4096];
+    va_list aptr;
+    int ret;
+
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+
+    FBXSDK_printf(buffer);
+}
+
+void Debug::Info(char* format, ...)
+{
+    static char buffer[4096];
+    va_list aptr;
+    int ret;
+
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+
+    FBXSDK_printf(buffer);
+}
+
+void Debug::Warning(char* format, ...)
+{
+    static char buffer[4096];
+    va_list aptr;
+    int ret;
+
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+
+    FBXSDK_printf(buffer);
+}
+
+void Debug::Error(char* format, ...)
+{
+    static char buffer[4096];
+    va_list aptr;
+    int ret;
+
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+
+    FBXSDK_printf(buffer);
+}
+
+void Debug::Fatal(char* format, ...)
+{
+    static char buffer[4096];
+    va_list aptr;
+    int ret;
+
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+
+    FBXSDK_printf(buffer);
+}
