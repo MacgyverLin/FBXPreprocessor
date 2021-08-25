@@ -51,6 +51,9 @@
     <ClCompile Include="..\Edge.cxx">
       <Filter>Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\BSP.cxx">
+      <Filter>Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Argument.h" />
@@ -100,6 +103,9 @@
       <Filter>Processor</Filter>
     </ClInclude>
     <ClInclude Include="..\Edge.h">
+      <Filter>Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BSP.h">
       <Filter>Geometry</Filter>
     </ClInclude>
   </ItemGroup>

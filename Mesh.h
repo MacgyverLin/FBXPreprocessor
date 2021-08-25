@@ -52,9 +52,9 @@ public:
 
 	const Vector3& GetPolygonEdgeEndPosition(size_t polyIdx, size_t edgeIdx) const;
 
-	const int& GetPolygonEdgeAdjacentPolygonIdx(size_t polyIdx, size_t edgeIdx) const;
+	int GetPolygonEdgeAdjacentPolygonIdx(size_t polyIdx, size_t edgeIdx) const;
 
-	const int& GetPolygonGroupID(size_t polyIdx) const;
+	int GetPolygonGroupID(size_t polyIdx) const;
 
 	const Plane& GetPolygonPlane(size_t polyIdx) const;
 
@@ -87,7 +87,7 @@ private:
 	bool ComputePolygonsAdjacency();
 	bool ComputePolygonsAdjacency(std::function<void(int, int, int)> setAdjacentCB);
 	bool ComputeClosed();
-	void Slice(const Plane& plane);
+	void TestSlice(const Plane& plane);
 
 	bool isClosed;
 

@@ -150,14 +150,14 @@ const Vector3& Mesh::GetPolygonEdgeEndPosition(size_t polyIdx, size_t edgeIdx) c
 	return edgeVertexOptimizer.GetData(edge.GetEndIdx());
 }
 
-const int& Mesh::GetPolygonEdgeAdjacentPolygonIdx(size_t polyIdx, size_t edgeIdx) const
+int Mesh::GetPolygonEdgeAdjacentPolygonIdx(size_t polyIdx, size_t edgeIdx) const
 {
 	const Edge& edge = GetPolygonEdge(polyIdx, edgeIdx);
 
 	return edge.GetAdjacentPolygonIdx();
 }
 
-const int& Mesh::GetPolygonGroupID(size_t polyIdx) const
+int Mesh::GetPolygonGroupID(size_t polyIdx) const
 {
 	return polygons[polyIdx].GetGroupID();
 }
@@ -255,7 +255,7 @@ void Mesh::End()
 
 	isClosed = ComputePolygonsAdjacency();
 
-	Slice(Plane());
+	//TestSlice(Plane());
 }
 
 void Mesh::SortPolygonsByMaterialIdx()
@@ -382,7 +382,7 @@ bool Mesh::ComputePolygonsAdjacency(std::function<void(int, int, int)> setAdjace
 	return meshClosed;
 }
 
-void Mesh::Slice(const Plane& plane)
+void Mesh::TestSlice(const Plane& plane)
 {
 	///////////////////////////////////////////////////
 	// assume mesh is closed
@@ -415,6 +415,34 @@ void Mesh::Slice(const Plane& plane)
 
 		std::multimap<int, Edge> isolatedEdges;
 		{
+#if 1
+			// if polygon neighbour ID is not myself, save the edge in the map
+			for (size_t polyIdx = 0; polyIdx < GetPolygonCount(); polyIdx++)
+			{
+				if (groupID != GetPolygonGroupID(polyIdx))
+					continue;
+
+				for (size_t edgeIdx = 0; edgeIdx < GetPolygonEdgesCount(polyIdx); edgeIdx++)
+				{
+					int polygonEdgeAdjacentPolygonIdx = GetPolygonEdgeAdjacentPolygonIdx(polyIdx, edgeIdx);
+					
+					const Polygon& polygon = polygons[polyIdx];
+					const Polygon& adjacentPolygon = polygons[polygonEdgeAdjacentPolygonIdx];
+
+					int id0 = GetPolygonGroupID(polyIdx);
+					int id1 = GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx);
+					int id2 = polygon.GetGroupID();
+					int id3 = adjacentPolygon.GetGroupID();
+
+					if(GetPolygonGroupID(polyIdx) != GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx))
+					//if (polygon.GetGroupID() != adjacentPolygon.GetGroupID())
+					{
+						const Edge& edge = GetPolygonEdge(polyIdx, edgeIdx);
+						isolatedEdges.insert(std::pair<int, Edge>(edge.GetStartIdx(), edge));
+					}
+				}
+			}
+#else
 			// if polygon neighbour ID is not myself, save the edge in the map
 			for (size_t polyIdx = 0; polyIdx < GetPolygonCount(); polyIdx++)
 			{
@@ -434,6 +462,7 @@ void Mesh::Slice(const Plane& plane)
 					}
 				}
 			}
+#endif
 		}
 
 		typedef std::vector<Edge> Loop;
