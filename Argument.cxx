@@ -7,6 +7,7 @@ Arguments::Arguments(int argc, const char** argv)
 	binary = true;
 	unity = true;
 	unreal = false;
+	crossSectionTextureScale = 1.0f;
 	 
 	for (int i = 1; i < argc; i++)
 	{
@@ -20,6 +21,11 @@ Arguments::Arguments(int argc, const char** argv)
 			else if (stricmp(&argv[i][1], "a") == 0 || stricmp(&argv[i][1], "ascii") == 0)
 			{
 				binary = false;
+			}
+			else if (stricmp(&argv[i][1], "cts") == 0 || stricmp(&argv[i][1], "cross_section_texture_scale") == 0)
+			{
+				i++;
+				crossSectionTextureScale = atof(argv[i]);
 			}
 			else if (stricmp(&argv[i][1], "engine") == 0)
 			{

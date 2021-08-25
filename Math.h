@@ -13,6 +13,8 @@ public:
 	static void RandSeed(int seed = 0);
 	static float UnitRandom();
 	static float RangeRandom(float min, float max);
+	static float Max(float v0, float v1);
+	static float Min(float v0, float v1);
 
 	static const float Epsilon;
 	static const float ZeroTolerance;

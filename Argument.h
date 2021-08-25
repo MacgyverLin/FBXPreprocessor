@@ -16,6 +16,7 @@ public:
 	bool binary;
 	bool unity;
 	bool unreal;
+	float crossSectionTextureScale;
 };
 
 extern void InfoMsg(char* format, ...);

@@ -31,7 +31,7 @@ int main(int argc, const char** argv)
 #define TEST
 #ifdef TEST
 	for (int i = 0; i < sizeof(fileouts)/ sizeof(fileouts[0]); i++)
-	//int i = 0;
+	//int i = 5;
 #else
 #endif
 	{
@@ -82,7 +82,7 @@ int main(int argc, const char** argv)
 #else
 		BSPMeshSlicer meshSlicer;
 		std::vector<MeshArray> resultMeshArrays;
-		if (!meshSlicer.Process(originalMeshes, resultMeshArrays))
+		if (!meshSlicer.Process(originalMeshes, resultMeshArrays, args.crossSectionTextureScale))
 		{
 			ErrorMsg("\n\nAn error in slicing Mesh Nodes...");
 			return -1;

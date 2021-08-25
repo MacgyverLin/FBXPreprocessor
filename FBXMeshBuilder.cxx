@@ -110,16 +110,19 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Me
 	dstNode->SetNodeAttribute(dstMesh); 
 	fbxNode->AddChild(dstNode);
 
+	FillMaterial(fbxScene, dstMesh, fbxNode);
+
 	////////////////////////////////////////////////////////
 	// copy Geometry Transform
+	auto t2 = fbxNode->LclTranslation.Get();
+	auto r2 = fbxNode->LclRotation.Get();
+	auto s2 = fbxNode->LclScaling.Get();
 	auto t1 = fbxNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
 	auto r1 = fbxNode->GetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
 	auto s1 = fbxNode->GetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
 	dstNode->SetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, t1);
 	dstNode->SetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, r1);
 	dstNode->SetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot, s1);
-
-	FillMaterial(fbxScene, dstMesh, fbxNode);
 }
 
 void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
