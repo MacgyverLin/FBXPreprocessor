@@ -42,20 +42,19 @@ void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materi
 	cutters.resize(count * 2);
 	for (size_t i = 0; i < cutters.size(); i += 2)
 	{
-		Vector3 normal = mesh.GetAABB().GetMajorAxis(true);
+		Vector3 rotateAxis(Math::UnitRandom(), Math::UnitRandom(), Math::UnitRandom()); rotateAxis.Normalize();
 		Vector3 center = mesh.GetAABB().GetCenter(true);
+		Vector3 normal = mesh.GetAABB().GetMajorAxis(true);
+		Vector3 tangent = Matrix4(rotateAxis, -90).TimesDirectionVector(normal);
+		Vector3 binormal = tangent.Cross(normal);
 
-		cutters[i + 0] = MakeCutterMesh(mesh, materialID, normal, center);
-		cutters[i + 1] = MakeCutterMesh(mesh, materialID, -normal, center);
+		cutters[i + 0] = MakeCutterMesh(mesh, materialID, center, tangent, binormal, normal);
+		cutters[i + 1] = MakeCutterMesh(mesh, materialID, center, -tangent, binormal, -normal);
 	}
 }
 
-Mesh BSPMeshSlicer::MakeCutterMesh(const Mesh& mesh, int materialID, const Vector3& normal, const Vector3& center)
+Mesh BSPMeshSlicer::MakeCutterMesh(const Mesh& mesh, int materialID, const Vector3& center, const Vector3& tangent, const Vector3& binormal, const Vector3& normal)
 {
-	Vector3 rotateAxis(Math::UnitRandom(), Math::UnitRandom(), Math::UnitRandom()); rotateAxis.Normalize();
-	Vector3 tangent = Matrix4(rotateAxis, -90).TimesDirectionVector(normal);
-	Vector3 binormal = tangent.Cross(normal);
-
 	Matrix4 uvProjMatrix;
 	uvProjMatrix.Init(tangent, binormal, normal, center);
 	Matrix4 uvProjMatrixInv = uvProjMatrix.Inverse();

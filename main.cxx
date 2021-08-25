@@ -12,7 +12,9 @@ int main(int argc, const char** argv)
 		"2.fbx",
 		"3.fbx",
 		"4.fbx",
-		"5.fbx"
+		"5.fbx",
+		"6.fbx",
+		"7.fbx",
 	};
 
 	const char* fileouts[] =
@@ -21,12 +23,14 @@ int main(int argc, const char** argv)
 		"2out.fbx",
 		"3out.fbx",
 		"4out.fbx",
-		"5out.fbx"
+		"5out.fbx",
+		"6out.fbx",
+		"7out.fbx",
 	};
 
 #define TEST
 #ifdef TEST
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < sizeof(fileouts)/ sizeof(fileouts[0]); i++)
 	//int i = 0;
 #else
 #endif

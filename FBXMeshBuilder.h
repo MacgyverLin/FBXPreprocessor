@@ -32,9 +32,8 @@ private:
 	void FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 
 	void FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh);
-
-	void FillMaterial(FbxMesh* dstMesh, FbxNode* dstNode);
-
+	void FillMaterial(FbxScene* fbxScene, FbxMesh* dstMesh, FbxNode* fbxNode);
+	FbxSurfaceMaterial* GetPhongMaterial(FbxScene* fbxScene, FbxString materialName);
 };
 
 #endif

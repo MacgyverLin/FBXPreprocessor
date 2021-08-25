@@ -119,7 +119,7 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Me
 	dstNode->SetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, r1);
 	dstNode->SetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot, s1);
 
-	FillMaterial(dstMesh, fbxNode);
+	FillMaterial(fbxScene, dstMesh, fbxNode);
 }
 
 void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
@@ -286,9 +286,31 @@ void FBXMeshBuilder::FillPolygon(bool useOptimizer, FbxMesh* dstMesh, const Mesh
 	}
 }
 
-void FBXMeshBuilder::FillMaterial(FbxMesh* dstMesh, FbxNode* fbxNode)
+void FBXMeshBuilder::FillMaterial(FbxScene* fbxScene, FbxMesh* dstMesh, FbxNode* fbxNode)
 {
 	FbxMesh* srcMesh = fbxNode->GetMesh();
 	for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
 		dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
+
+	dstMesh->GetNode()->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+}
+
+FbxSurfaceMaterial* FBXMeshBuilder::GetPhongMaterial(FbxScene* fbxScene, FbxString materialName)
+{
+	FbxString lMaterialName = materialName;
+	FbxString lShadingName = "Phong";
+	FbxDouble3 lBlack(0.0, 0.0, 0.0);
+	FbxDouble3 lRed(1.0, 0.0, 0.0);
+	FbxDouble3 lColor(1.0f, 1.0f, 1.0f);
+	FbxSurfacePhong* material = FbxSurfacePhong::Create(fbxScene, lMaterialName.Buffer());
+
+	// Generate primary and secondary colors.
+	material->Emissive.Set(lBlack);
+	material->Ambient.Set(lRed);
+	material->Diffuse.Set(lColor);
+	material->TransparencyFactor.Set(0.0);
+	material->ShadingModel.Set(lShadingName);
+	material->Shininess.Set(0.5);
+
+	return material;
 }

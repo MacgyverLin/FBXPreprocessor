@@ -206,7 +206,7 @@ void Mesh::End()
 
 	isClosed = UpdatePolygonsAdjacency();
 
-	UpdateIsolatedEdges();
+	//UpdateIsolatedEdges();
 }
 
 void Mesh::SortPolygonsByMaterialIdx()
