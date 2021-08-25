@@ -8,6 +8,7 @@ Arguments::Arguments(int argc, const char** argv)
 	unity = true;
 	unreal = false;
 	crossSectionTextureScale = 1.0f;
+	sliceCount = 1;
 	 
 	for (int i = 1; i < argc; i++)
 	{
@@ -26,6 +27,11 @@ Arguments::Arguments(int argc, const char** argv)
 			{
 				i++;
 				crossSectionTextureScale = atof(argv[i]);
+			}
+			else if (stricmp(&argv[i][1], "sc") == 0 || stricmp(&argv[i][1], "slice_count") == 0)
+			{
+				i++;
+				sliceCount = atof(argv[i]);
 			}
 			else if (stricmp(&argv[i][1], "engine") == 0)
 			{

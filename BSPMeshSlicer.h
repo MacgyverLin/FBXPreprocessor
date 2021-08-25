@@ -12,11 +12,11 @@ public:
 	~BSPMeshSlicer();
 
 	/////////////////////////////////////////////////////////////////////////////////
-	bool Process(const std::vector<Mesh>& meshes, std::vector<MeshArray>& meshArrays, float textureSize);
+	bool Process(const std::vector<Mesh>& meshes, std::vector<MeshArray>& meshArrays, int sliceCount, float textureSize);
 private:
 	bool Process(const Mesh& mesh, const MeshArray& cutters, MeshArray& meshArrays);
 
-	void MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int count, float textureSize);
+	void MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int sliceCount, float textureSize);
 	Mesh MakeCutterMesh(const Mesh& mesh, int materialID, 
 						const Vector3& center, const Vector3& tangent, const Vector3& binormal, const Vector3& normal, 
 						float polygonSize, float textureSize);

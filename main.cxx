@@ -82,7 +82,7 @@ int main(int argc, const char** argv)
 #else
 		BSPMeshSlicer meshSlicer;
 		std::vector<MeshArray> resultMeshArrays;
-		if (!meshSlicer.Process(originalMeshes, resultMeshArrays, args.crossSectionTextureScale))
+		if (!meshSlicer.Process(originalMeshes, resultMeshArrays, args.sliceCount, args.crossSectionTextureScale))
 		{
 			ErrorMsg("\n\nAn error in slicing Mesh Nodes...");
 			return -1;

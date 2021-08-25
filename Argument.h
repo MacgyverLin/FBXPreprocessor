@@ -17,6 +17,7 @@ public:
 	bool unity;
 	bool unreal;
 	float crossSectionTextureScale;
+	int sliceCount;
 };
 
 extern void InfoMsg(char* format, ...);

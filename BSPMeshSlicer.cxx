@@ -10,13 +10,13 @@ BSPMeshSlicer::~BSPMeshSlicer()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-bool BSPMeshSlicer::Process(const std::vector<Mesh>& meshes, std::vector<MeshArray>& meshArrays, float crossSectionTextureScale)
+bool BSPMeshSlicer::Process(const std::vector<Mesh>& meshes, std::vector<MeshArray>& meshArrays, int sliceCount, float crossSectionTextureScale)
 {
 	meshArrays.resize(meshes.size());
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		MeshArray cutters;
-		MakeCutters(meshes[i], cutters, meshes[i].GetMaxMaterialIdx()+1, 1, crossSectionTextureScale);
+		MakeCutters(meshes[i], cutters, meshes[i].GetMaxMaterialIdx()+1, sliceCount, crossSectionTextureScale);
 
 		if (!Process(meshes[i], cutters, meshArrays[i]))
 			return false;
@@ -37,9 +37,9 @@ bool BSPMeshSlicer::Process(const Mesh& mesh, const MeshArray& cutters, MeshArra
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int count, float crossSectionTextureScale)
+void BSPMeshSlicer::MakeCutters(const Mesh& mesh, MeshArray& cutters, int materialID, int sliceCount, float crossSectionTextureScale)
 {
-	cutters.resize(count * 2);
+	cutters.resize(sliceCount * 2);
 	for (size_t i = 0; i < cutters.size(); i += 2)
 	{
 		Vector3 rotateAxis(Math::UnitRandom(), Math::UnitRandom(), Math::UnitRandom()); rotateAxis.Normalize();
