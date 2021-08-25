@@ -3,9 +3,6 @@
   <ItemGroup>
     <ClCompile Include="..\Argument.cxx" />
     <ClCompile Include="..\main.cxx" />
-    <ClCompile Include="..\BSP.cxx">
-      <Filter>Geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\Math.cxx">
       <Filter>Math</Filter>
     </ClCompile>
@@ -28,9 +25,6 @@
       <Filter>Geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\Common.cxx">
-      <Filter>Processor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BSPMeshSlicer.cxx">
       <Filter>Processor</Filter>
     </ClCompile>
     <ClCompile Include="..\FBXMeshBuilder.cxx">
@@ -60,9 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Argument.h" />
-    <ClInclude Include="..\BSP.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\Math.h">
       <Filter>Math</Filter>
     </ClInclude>
@@ -83,9 +74,6 @@
     </ClInclude>
     <ClInclude Include="..\Mesh.h">
       <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BSPMeshSlicer.h">
-      <Filter>Processor</Filter>
     </ClInclude>
     <ClInclude Include="..\Common.h">
       <Filter>Processor</Filter>

@@ -200,8 +200,6 @@
   <ItemGroup>
     <ClInclude Include="..\AABB.h" />
     <ClInclude Include="..\Argument.h" />
-    <ClInclude Include="..\BSP.h" />
-    <ClInclude Include="..\BSPMeshSlicer.h" />
     <ClInclude Include="..\Color.h" />
     <ClInclude Include="..\Common.h" />
     <ClInclude Include="..\Edge.h" />
@@ -221,8 +219,6 @@
   <ItemGroup>
     <ClCompile Include="..\AABB.cxx" />
     <ClCompile Include="..\Argument.cxx" />
-    <ClCompile Include="..\BSP.cxx" />
-    <ClCompile Include="..\BSPMeshSlicer.cxx" />
     <ClCompile Include="..\Color.cxx" />
     <ClCompile Include="..\Common.cxx" />
     <ClCompile Include="..\Edge.cxx" />
