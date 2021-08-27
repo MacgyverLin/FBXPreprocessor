@@ -239,10 +239,15 @@ void Mesh::AddPolygonVertex(const Vertex& vertex)
 {
 	Polygon& polygon = polygons.back();
 
+	int idx0 = verticesOptimizer.Add(vertex);
+	int idx1 = edgeVertexOptimizer.Add(vertex.position);
+	idx0 = verticesOptimizer.Add(vertex);
+	idx1 = edgeVertexOptimizer.Add(vertex.position);
+
 	polygon.Add
 	(
-		verticesOptimizer.Add(vertex),
-		edgeVertexOptimizer.Add(vertex.position),
+		idx0,
+		idx1,
 		-1
 	);
 
@@ -434,7 +439,7 @@ void Mesh::TestSlice(const Plane& plane)
 				for (size_t edgeIdx = 0; edgeIdx < GetPolygonEdgesCount(polyIdx); edgeIdx++)
 				{
 					int polygonEdgeAdjacentPolygonIdx = GetPolygonEdgeAdjacentPolygonIdx(polyIdx, edgeIdx);
-					
+
 					const Polygon& polygon = polygons[polyIdx];
 					const Polygon& adjacentPolygon = polygons[polygonEdgeAdjacentPolygonIdx];
 
@@ -443,8 +448,8 @@ void Mesh::TestSlice(const Plane& plane)
 					int id2 = polygon.GetGroupID();
 					int id3 = adjacentPolygon.GetGroupID();
 
-					if(GetPolygonGroupID(polyIdx) != GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx))
-					//if (polygon.GetGroupID() != adjacentPolygon.GetGroupID())
+					if (GetPolygonGroupID(polyIdx) != GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx))
+						//if (polygon.GetGroupID() != adjacentPolygon.GetGroupID())
 					{
 						const Edge& edge = GetPolygonEdge(polyIdx, edgeIdx);
 						isolatedEdges.insert(std::pair<int, Edge>(edge.GetStartIdx(), edge));
@@ -549,237 +554,33 @@ void Mesh::TestSlice(const Plane& plane)
 	}
 }
 
-#if 0
-	void Mesh::UpdateIsolatedEdges()
-	{
-		Debug::Info("===================================================\n");
-		class EdgeVertex
-		{
-		public:
-			EdgeVertex(const Edge& edge_, const Vertex& v0_, const Vertex& v1_)
-			{
-				edge = edge_;
-				v0 = v0_;
-				v1 = v1_;
-			}
+void Mesh::Clear(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
+{
+	isClosed = false;
 
-			void Flip()
-			{
-				edge.Flip();
-				std::swap(v0, v1);
-			}
+	maxGroupIdx = 0;
+	maxMaterialIdx = 0;
+	verticesCount = 0;
 
-			void Print(const char* tab, int i)
-			{
-				Debug::Info("%sEdge %d:(%d->%d), (%.4f, %.4f, %.4f)->(%.4f, %.4f, %.4f)", tab, i, edge.StartIdx(), edge.EndIdx(),
-					v0.position.X(), v0.position.Y(), v0.position.Z(),
-					v1.position.X(), v1.position.Y(), v1.position.Z());
-			}
+	colorChannelCount = colorChannelCount_;
+	uvChannelCount = uvChannelCount_;
+	normalChannelCount = normalChannelCount_;
+	tangentChannelCount = tangentChannelCount_;
+	binormalChannelCount = binormalChannelCount_;
+	aabb = AABB(Vector3::Zero, Vector3::Zero);
 
-			Edge edge;
-			Vertex v0;
-			Vertex v1;
-		};
+	polygons.clear();
+	verticesOptimizer.Clear();
+	edgeVertexOptimizer.Clear();
+}
 
-		std::vector<EdgeVertex> isolatedEdges;
-		for (size_t i = 0; i < polygons.size(); i++)
-		{
-			const Polygon& polygon = polygons[i];
-			for (size_t j = 0; j < polygon.GetVerticesCount(); j++)
-			{
-				const Adjacency& adjacency = polygon.GetAdjacency(j);
+void Mesh::Flip()
+{
+	for (size_t i = 0; i < polygons.size(); i++)
+		polygons[i].Flip();
+}
 
-				bool notPairedEdge = ((adjacency.PolygonIdx() == -1) || (polygons[i].GetGroupIdx() != polygons[adjacency.PolygonIdx()].GetGroupIdx()));
-				if (notPairedEdge)
-				{
-					bool flipped = adjacency.EdgeFlipped();
-
-					const Vertex& v0 = polygon.GetVertex((j + 0) % polygon.GetVerticesCount());
-					const Vertex& v1 = polygon.GetVertex((j + 1) % polygon.GetVerticesCount());
-
-					EdgeVertex edge
-					(
-						edgeOptimizer.GetData(adjacency.EdgeIndex()),
-						flipped ? v0 : v1,
-						flipped ? v1 : v0
-					);
-					if (adjacency.EdgeFlipped())
-						edge.Flip();
-
-					isolatedEdges.push_back(edge);
-				}
-			}
-		}
-
-		typedef std::vector<EdgeVertex> Loop;
-		std::vector<Loop> loops;
-		if (isolatedEdges.size())
-		{
-			Debug::Info("Mesh with isolated Edges\n");
-			for (size_t i = 0; i < isolatedEdges.size(); i++)
-			{
-				isolatedEdges[i].Print("\t", i);
-				Debug::Info("\n");
-			}
-
-			bool newLoop = true;
-
-			int i = 0;
-			do
-			{
-				if (newLoop)
-				{
-					loops.push_back(Loop());
-					newLoop = false;
-					Debug::Info("\tBegin Loop %d\n", (int)loops.size());
-				}
-
-				Loop& currentLoop = loops.back();
-				if (currentLoop.empty() || (isolatedEdges[i].edge.StartIdx() == currentLoop.back().edge.EndIdx()))
-				{
-					currentLoop.push_back(isolatedEdges[i]);
-
-					isolatedEdges[i].Print("\t\t", (int)(currentLoop.size() - 1));
-
-					if (currentLoop.size() > 1)
-					{
-						if (currentLoop.back().edge.StartIdx() == currentLoop[currentLoop.size() - 2].edge.EndIdx())
-							Debug::Info(" *");
-					}
-					Debug::Info("\n");
-
-					isolatedEdges.erase(isolatedEdges.begin() + i);
-
-					if (currentLoop.front().edge.StartIdx() == currentLoop.back().edge.EndIdx())
-					{
-						Debug::Info("\tEnd Loop %d\n", (int)(loops.size()));
-						newLoop = true;
-					}
-				}
-				else
-				{
-					i++;
-				}
-
-				if (i >= isolatedEdges.size())
-					i = 0;
-			} while (isolatedEdges.size());
-		}
-		else
-		{
-			Debug::Info("Mesh without isolated Edge\n");
-		}
-	}
-
-	void Mesh::Test()
-	{
-		std::vector<int> counters(edgeOptimizer.GetDataCount());
-		for (size_t i = 0; i < polygons.size(); i++)
-		{
-			const Polygon& polygon = polygons[i];
-			for (auto& adjacency : polygon.GetAdjacencies())
-				counters[adjacency.EdgeIndex()] += (adjacency.EdgeFlipped() ? 1 : -1);
-		}
-
-		Debug::Info("================================================\n");
-		std::vector<Edge> isolatedEdges;
-		for (size_t i = 0; i < counters.size(); i++)
-		{
-			if (counters[i] != 0)
-			{
-				Edge edge = edgeOptimizer.GetData(i);
-				if (counters[i] < 0)
-					edge.Flip();
-
-				isolatedEdges.push_back(edge);
-			}
-		}
-
-		typedef std::vector<Edge> Loop;
-		std::vector<Loop> loops;
-		if (isolatedEdges.size())
-		{
-			Debug::Info("Mesh with isolated Edges\n");
-			for (size_t i = 0; i < isolatedEdges.size(); i++)
-			{
-				Debug::Info("\tEdge %d:(%d->%d)\n", i, isolatedEdges[i].StartIdx(), isolatedEdges[i].EndIdx());
-			}
-
-			bool newLoop = true;
-
-			int i = 0;
-			do
-			{
-				if (newLoop)
-				{
-					loops.push_back(Loop());
-					newLoop = false;
-					Debug::Info("\tBegin Loop %d\n", loops.size());
-				}
-
-				Loop& currentLoop = loops.back();
-				if (currentLoop.empty() || (isolatedEdges[i].StartIdx() == currentLoop.back().EndIdx()))
-				{
-					currentLoop.push_back(isolatedEdges[i]);
-					Debug::Info("\t\tEdge %d:(%d %d)", currentLoop.size() - 1, isolatedEdges[i].StartIdx(), isolatedEdges[i].EndIdx());
-					if (currentLoop.size() > 1)
-					{
-						if (currentLoop.back().StartIdx() == currentLoop[currentLoop.size() - 2].EndIdx())
-							Debug::Info(" *");
-					}
-					Debug::Info("\n");
-
-					isolatedEdges.erase(isolatedEdges.begin() + i);
-
-					if (currentLoop.front().StartIdx() == currentLoop.back().EndIdx())
-					{
-						Debug::Info("\tEnd Loop %d\n", loops.size());
-						newLoop = true;
-					}
-				}
-				else
-				{
-					i++;
-				}
-
-				if (i >= isolatedEdges.size())
-					i = 0;
-			} while (isolatedEdges.size());
-		}
-		else
-		{
-			Debug::Info("Mesh without isolated Edge\n");
-		}
-	}
-#endif
-
-	void Mesh::Clear(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
-	{
-		isClosed = false;
-
-		maxGroupIdx = 0;
-		maxMaterialIdx = 0;
-		verticesCount = 0;
-
-		colorChannelCount = colorChannelCount_;
-		uvChannelCount = uvChannelCount_;
-		normalChannelCount = normalChannelCount_;
-		tangentChannelCount = tangentChannelCount_;
-		binormalChannelCount = binormalChannelCount_;
-		aabb = AABB(Vector3::Zero, Vector3::Zero);
-
-		polygons.clear();
-		verticesOptimizer.Clear();
-		edgeVertexOptimizer.Clear();
-	}
-
-	void Mesh::Flip()
-	{
-		for (size_t i = 0; i < polygons.size(); i++)
-			polygons[i].Flip();
-	}
-
-	bool Mesh::IsEmpty() const
-	{
-		return polygons.size() == 0;
-	}
+bool Mesh::IsEmpty() const
+{
+	return polygons.size() == 0;
+}

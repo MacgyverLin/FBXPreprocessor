@@ -14,9 +14,7 @@ Shader "Mac/NormalMap"
 		_RimColor("Rim Color", Color) = (1.0, 1.0, 1.0, 1.0)
 		_RimPower("Rim Power", Range(0.1, 10.0)) = 3.0
 		_Alpha("Alpha", Range(0.0, 1.0)) = 1.0
-
-		MySrcMode("SrcMode", Float) = 0
-		MyDstMode("DstMode", Float) = 0
+		_Offset("Offset", Vector) = (0.0, 0.0, 0.0, 0.0)
 	}
 
 	SubShader
@@ -43,6 +41,7 @@ Shader "Mac/NormalMap"
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
+			uniform float4 _Offset;
 	
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -53,6 +52,7 @@ Shader "Mac/NormalMap"
 				float4 vertex: POSITION;
 				float3 normal: NORMAL;
 				float4 texcoord: TEXCOORD0;
+				float4 groupID: TEXCOORD1;
 				float4 tangent: TANGENT;
 			};
 		
@@ -70,6 +70,9 @@ Shader "Mac/NormalMap"
 			vertexOutput vert(vertexInput v) 
 			{
 				vertexOutput o;
+
+				v.vertex.xyz *= max((1.0 - v.groupID.y), _Offset.w); // hide vertex if 0
+				v.vertex.xyz += v.groupID.x * _Offset.xyz; // move part by group id
 	
 				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
 				o.tangentWorld = normalize(mul(unity_ObjectToWorld, v.tangent).xyz);
@@ -161,6 +164,7 @@ Shader "Mac/NormalMap"
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
+			uniform float4 _Offset;
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -171,6 +175,7 @@ Shader "Mac/NormalMap"
 				float4 vertex: POSITION;
 				float3 normal: NORMAL;
 				float4 texcoord: TEXCOORD0;
+				float4 groupID: TEXCOORD1;
 				float4 tangent: TANGENT;
 			};
 
@@ -192,6 +197,9 @@ Shader "Mac/NormalMap"
 				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
 				o.tangentWorld = normalize(mul(unity_ObjectToWorld, v.tangent).xyz);
 				o.binormalWorld = normalize(cross(o.normalWorld, o.tangentWorld));
+
+				v.vertex.xyz *= max((1.0 - v.groupID.y), _Offset.w); // hide vertex if 0
+				v.vertex.xyz += v.groupID.x * _Offset.xyz; // move part by group id
 
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 				o.pos = UnityObjectToClipPos(v.vertex);

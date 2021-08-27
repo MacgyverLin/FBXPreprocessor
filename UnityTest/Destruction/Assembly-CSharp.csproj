@@ -60,6 +60,7 @@
     <Compile Include="Assets\Method1\Scripts\Destructable1Controller.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Method1\Materials\1.txt" />
     <None Include="Assets\Method1\Materials\NormalMap.shader" />
   </ItemGroup>
   <ItemGroup>

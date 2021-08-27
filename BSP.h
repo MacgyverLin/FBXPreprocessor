@@ -84,7 +84,7 @@ public:
 		if (right)
 			right->DFS(cb);
 	}
-private:
+
 	Plane splitPlane;
 	BSP* left;
 	BSP* right;

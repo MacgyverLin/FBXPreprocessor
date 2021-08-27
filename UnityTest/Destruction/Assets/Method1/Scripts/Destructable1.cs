@@ -5,6 +5,7 @@ using UnityEngine;
 public class Destructable1 : MonoBehaviour
 {
     public Material crossSectionMaterial;
+    public bool showCrossSection = false;
 
     // Start is void called before the first frame update
     void Start()
@@ -15,6 +16,10 @@ public class Destructable1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+
+        foreach(var material in meshRenderer.materials)
+            material.SetVector("_Offset", new Vector4(-1.0f * Mathf.Abs(Mathf.Sin(Time.time / 5.0f * 3.14f * 2.0f)), 0.0f, 0.0f, showCrossSection ? 1.0f : 0.0f));
     }
 
     private void Init()
@@ -118,7 +123,7 @@ public class Destructable1 : MonoBehaviour
 
         // can cache component?
         List<Rigidbody> rigidbodies = new List<Rigidbody>();
-        for(int i = 0; i < transform.childCount; i++)
+        for (int i = 0; i < transform.childCount; i++)
             rigidbodies.Add(transform.GetChild(i).GetComponent<Rigidbody>());
 
         bool done = false;
@@ -133,7 +138,7 @@ public class Destructable1 : MonoBehaviour
                     break;
                 }
             }
-            
+
             yield return null;
         }
     }
@@ -146,7 +151,7 @@ public class Destructable1 : MonoBehaviour
             meshRenderers.Add(transform.GetChild(i).GetComponent<MeshRenderer>());
 
         float startTime = Time.time;
-        while ( (Time.time - startTime) < timeout)
+        while ((Time.time - startTime) < timeout)
         {
             float alpha = 1.0f - ((Time.time - startTime) / timeout);
             if (alpha < 0.0f)

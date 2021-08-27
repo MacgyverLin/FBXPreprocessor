@@ -2,6 +2,23 @@
 
 Vertex::Vertex()
 {
+	this->position = Vector3::Zero;
+
+	for (size_t i = 0; i < NUM_COLORS; i++)
+		this->colors[i] = Color::Black;
+
+	for (size_t i = 0; i < NUM_UVS; i++)
+		this->uvs[i] = Vector2::Zero;
+
+	for (size_t i = 0; i < NUM_NORMALS; i++)
+		this->normals[i] = Vector3::Zero;
+
+	for (size_t i = 0; i < NUM_TANGENTS; i++)
+		this->tangents[i] = Vector3::Zero;
+
+	for (size_t i = 0; i < NUM_BINORMALS; i++)
+		this->binormals[i] = Vector3::Zero;
+
 }
 
 Vertex::Vertex(const Vector3& position, const Color& color, const Vector2& uv, const Vector3& normal, const Vector3& tangent, const Vector3& binormal)

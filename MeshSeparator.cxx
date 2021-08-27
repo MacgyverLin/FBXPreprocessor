@@ -10,28 +10,36 @@ MeshSeparator::~MeshSeparator()
 {
 }
 
-bool MeshSeparator::Process(const std::vector<Mesh>& srcMeshes_, BSP* root_, std::vector<MeshArray>& resultMeshArrays_)
+bool MeshSeparator::Process(const std::vector<Mesh>& srcMeshes_, std::vector<MeshArray>& resultMeshArrays_)
 {
 	resultMeshArrays_.resize(srcMeshes_.size());
 	for (size_t i = 0; i < srcMeshes_.size(); i++)
 	{
 		resultMeshArrays_[i].resize(1);
 
-		if (!Process(srcMeshes_[i], root_, resultMeshArrays_[i][0]))
+		if (!Process(srcMeshes_[i], resultMeshArrays_[i][0]))
 			return false;
 	}
 
 	return true;
 }
 
-bool MeshSeparator::Process(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_)
+bool MeshSeparator::Process(const Mesh& srcMesh_, Mesh& resultMesh_)
 {
+	BSP bsp;
+	bsp.splitPlane = Plane(
+		//srcMesh_.GetAABB().GetMajorAxis(true),
+		//srcMesh_.GetAABB().GetCenter(true)
+		Vector3::UnitY,
+		srcMesh_.GetAABB().GetCenter(false)
+	);
+
 	// make sure src Mesh is closed
 	if (!srcMesh_.IsClosed())
 		return false;
 
 	// slice, use bsp to set groupID
-	if (!Slice(srcMesh_, root_, resultMesh_))
+	if (!Slice(srcMesh_, &bsp, resultMesh_))
 		return false;
 
 	std::vector<Loop> crossSectionLoops;
@@ -49,25 +57,22 @@ bool MeshSeparator::Process(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_)
 
 bool MeshSeparator::Slice(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_)
 {
-	Plane splitPlane
-	(
-		//srcMesh_.GetAABB().GetMajorAxis(true),
-		//srcMesh_.GetAABB().GetCenter(true)
-		Vector3::UnitY,
-		srcMesh_.GetAABB().GetCenter(true)
-	);
-
-	resultMesh_.Begin(srcMesh_.GetColorChannelCount(), srcMesh_.GetUVChannelCount(), srcMesh_.GetNormalChannelCount(), srcMesh_.GetTangentChannelCount(), srcMesh_.GetBinormalChannelCount());
-
+	int uvChannelCount = srcMesh_.GetUVChannelCount();
+	resultMesh_.Begin(srcMesh_.GetColorChannelCount(), uvChannelCount + 1, srcMesh_.GetNormalChannelCount(), srcMesh_.GetTangentChannelCount(), srcMesh_.GetBinormalChannelCount());
+	
+	int groupIDUVChannel = resultMesh_.GetUVChannelCount() - 1;
 	for (size_t polyIdx = 0; polyIdx < srcMesh_.GetPolygonCount(); polyIdx++)
 	{
 		const Vector3& center = srcMesh_.GetPolygonCenter(polyIdx);
-		int polygonGroupID = GetGroupIdx(srcMesh_, splitPlane, root_, center);
+		int groupID = GetGroupIdx(srcMesh_, root_, center);
 
-		resultMesh_.BeginPolygon(polygonGroupID, srcMesh_.GetPolygonMaterialIdx(polyIdx));
+		resultMesh_.BeginPolygon(groupID, srcMesh_.GetPolygonMaterialIdx(polyIdx));
 		for (size_t edgeIdx = 0; edgeIdx < srcMesh_.GetPolygonEdgesCount(polyIdx); edgeIdx++)
 		{
-			const Vertex& v = srcMesh_.GetPolygonVertex(polyIdx, edgeIdx);
+			Vertex v = srcMesh_.GetPolygonVertex(polyIdx, edgeIdx);
+			v.uvs[groupIDUVChannel].X() = groupID;
+			v.uvs[groupIDUVChannel].Y() = 0; // not crossection
+
 			resultMesh_.AddPolygonVertex(v);
 		}
 		resultMesh_.EndPolygon();
@@ -78,10 +83,10 @@ bool MeshSeparator::Slice(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_)
 	return true;
 }
 
-int MeshSeparator::GetGroupIdx(const Mesh& srcMesh_, const Plane& splitPlane_, BSP* root_, const Vector3& p_)
+int MeshSeparator::GetGroupIdx(const Mesh& srcMesh_, BSP* root_, const Vector3& p_)
 {
 	int polygonGroupID = 0;
-	if (splitPlane_.WhichSide(p_))
+	if (root_->GetPlane().WhichSide(p_))
 		polygonGroupID = 0;
 	else
 		polygonGroupID = 1;
@@ -121,7 +126,10 @@ bool MeshSeparator::BuildCrossSectionEdges(const Mesh& resultMesh_, int groupID_
 		{
 			int polygonEdgeAdjacentPolygonIdx = resultMesh_.GetPolygonEdgeAdjacentPolygonIdx(polyIdx, edgeIdx);
 
-			if (resultMesh_.GetPolygonGroupID(polyIdx) != resultMesh_.GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx))
+			int groupID = resultMesh_.GetPolygonGroupID(polyIdx);
+			int adjacentGroupID = resultMesh_.GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx);
+
+			if (groupID!=adjacentGroupID)
 			{
 				const Edge& edge = resultMesh_.GetPolygonEdge(polyIdx, edgeIdx);
 				crossSectionEdges_.insert(std::pair<int, Edge>(edge.GetStartIdx(), edge));
@@ -137,7 +145,6 @@ bool MeshSeparator::BuildCrossSectionLoopsFromEdges(const std::multimap<int, Edg
 	std::multimap<int, Edge> crossSectionEdges = crossSectionEdges_;
 
 	bool newLoop = true;
-
 	std::multimap<int, Edge>::iterator currentEdge = crossSectionEdges.begin();
 	while (crossSectionEdges.size())
 	{
@@ -169,19 +176,21 @@ bool MeshSeparator::BuildCrossSectionLoopsFromEdges(const std::multimap<int, Edg
 
 bool MeshSeparator::AddCrossSectionLoopsToMesh(const std::vector<Loop>& crossSectionLoops_, Mesh& resultMesh_)
 {
-	int maxMaterialIdx = resultMesh_.GetMaxMaterialIdx();
+	int groupIDUVChannel = resultMesh_.GetUVChannelCount() - 1;
 
 	resultMesh_.BeginAppend();
 
 	for (auto& crossSectionLoop : crossSectionLoops_)
 	{
-		resultMesh_.BeginPolygon(crossSectionLoop.groupID, maxMaterialIdx + 1);
+		resultMesh_.BeginPolygon(crossSectionLoop.groupID, resultMesh_.GetMaxMaterialIdx() + 1);
 		for (int i = 0; i < crossSectionLoop.size(); i++)
 		{
 			const Edge& edge = crossSectionLoop[i];
 
-			const Vertex& vertex = resultMesh_.GetVertex(edge.GetVertexIdx());
-			const Vector3& position = resultMesh_.GetEdgeVertex(edge.GetStartIdx());
+			Vertex vertex = resultMesh_.GetVertex(edge.GetVertexIdx());
+			// const Vector3& position = resultMesh_.GetEdgeVertex(edge.GetStartIdx());
+			vertex.uvs[groupIDUVChannel].X() = crossSectionLoop.groupID;
+			vertex.uvs[groupIDUVChannel].Y() = 1; // is cross section
 
 			resultMesh_.AddPolygonVertex(vertex);
 		}
