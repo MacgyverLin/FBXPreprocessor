@@ -29,7 +29,7 @@ int main(int argc, const char** argv)
 #define TEST
 #ifdef TEST
 	for (int i = 0; i < 5; i++)
-	//int i = 1;
+	//int i = 3;
 #else
 #endif
 	{
@@ -72,7 +72,8 @@ int main(int argc, const char** argv)
 #ifdef NO_SLICE
 		MeshSeparator meshSeparator;
 		std::vector<MeshArray> resultMeshArrays;
-		if (!meshSeparator.Process(originalMeshes, resultMeshArrays))
+		BSP bsp;
+		if (!meshSeparator.Process(originalMeshes, &bsp, resultMeshArrays))
 		{
 			Debug::Error("\n\nAn error in copying Mesh Nodes...");
 			return -1;

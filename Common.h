@@ -27,11 +27,16 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
 class Debug
 {
 public:
-	static void Verbose(char* format, ...);
-	static void Info(char* format, ...);
-	static void Warning(char* format, ...);
-	static void Error(char* format, ...);
-	static void Fatal(char* format, ...);
+	static bool Init();
+	static void Terminate();
+
+	static void Log(const char* buffer);
+	static void Print(const char* buffer);
+	static void Verbose(const char* format, ...);
+	static void Info(const char* format, ...);
+	static void Warning(const char* format, ...);
+	static void Error(const char* format, ...);
+	static void Fatal(const char* format, ...);
 };
 
 #endif // #ifndef _COMMON_H

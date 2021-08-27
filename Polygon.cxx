@@ -6,6 +6,7 @@ Polygon::Polygon(int groupIdx_, int materialIdx_)
 
 	, groupID(groupIdx_)
 	, plane()
+	, center()
 	, aabb()
 {
 }
@@ -21,6 +22,7 @@ Polygon::Polygon(const Polygon& other)
 
 	groupID = other.groupID;
 	plane = other.plane;
+	center = other.center;
 	aabb = other.aabb;
 }
 
@@ -31,6 +33,7 @@ Polygon& Polygon::operator = (const Polygon& other)
 
 	groupID = other.groupID;
 	plane = other.plane;
+	center = other.center;
 	aabb = other.aabb;
 
 	return *this;
@@ -66,6 +69,11 @@ const Plane& Polygon::GetPlane() const
 	return plane;
 }
 
+const Vector3& Polygon::GetCenter() const
+{
+	return center;
+}
+
 const AABB& Polygon::GetAABB() const
 {
 	return aabb;
@@ -83,6 +91,7 @@ void Polygon::Begin(int groupIdx_, int materialIdx_)
 
 	groupID = groupIdx_;
 	plane = Plane(Vector3::UnitY, 0);
+	center = Vector3::Zero;
 	aabb = AABB();
 }
 
@@ -115,6 +124,21 @@ void Polygon::End(DataOptimizer<Vertex>& verticesOptimizer_, DataOptimizer<Vecto
 
 	//////////////////////////////////////
 	// compute AABB
+	if (edges.size() == 0)
+	{
+		center = Vector3::Zero;
+	}
+	else
+	{
+		center = edgeVertexOptimizer_.GetData(edges[0].GetStartIdx());
+		for (size_t i = 1; i < edges.size(); i++)
+			center += edgeVertexOptimizer_.GetData(edges[i].GetStartIdx());
+
+		center /= edges.size();
+	}
+
+	//////////////////////////////////////
+	// compute AABB
 	if (edges.size()==0)
 	{
 		aabb = AABB(Vector3::Zero, Vector3::Zero);
@@ -126,7 +150,7 @@ void Polygon::End(DataOptimizer<Vertex>& verticesOptimizer_, DataOptimizer<Vecto
 			edgeVertexOptimizer_.GetData(edges[0].GetStartIdx()), 
 			edgeVertexOptimizer_.GetData(edges[0].GetStartIdx())
 		);
-		for (size_t i = 0; i < edges.size(); i++)
+		for (size_t i = 1; i < edges.size(); i++)
 		{
 			aabb += edgeVertexOptimizer_.GetData(edges[i].GetStartIdx());
 		}

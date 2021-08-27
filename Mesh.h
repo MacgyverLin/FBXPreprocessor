@@ -39,7 +39,7 @@ public:
 	const AABB& GetAABB() const;
 
 	size_t GetPolygonCount() const;	
-
+	
 	int GetPolygonMaterialIdx(size_t polyIdx) const;
 
 	int GetPolygonEdgesCount(size_t polyIdx) const;
@@ -58,13 +58,13 @@ public:
 
 	const Plane& GetPolygonPlane(size_t polyIdx) const;
 
+	const Vector3& GetPolygonCenter(size_t polyIdx) const;
+
 	const AABB& GetPolygonAABB(size_t polyIdx) const;
 
-	void SetPolygonEdgeAdjacentPolygonIdx(size_t polyIdx, size_t edgeIdx, size_t adjacentPolygonIdx);
-
-	void SetPolygonGroupID(size_t polyIdx, int groupID);
-
 	void Begin(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
+
+	void BeginAppend();
 
 	void BeginPolygon(int groupIdx_, int materialIdx_);
 
@@ -81,12 +81,26 @@ public:
 	void Flip();
 
 	bool IsEmpty() const;
+
+	const Vertex& GetVertex(int idx) const
+	{
+		return verticesOptimizer.GetData(idx);
+	}
+
+	const Vector3& GetEdgeVertex(int idx) const
+	{
+		return edgeVertexOptimizer.GetData(idx);
+	}
 private:
+	void SetPolygonEdgeAdjacentPolygonIdx(size_t polyIdx, size_t edgeIdx, size_t adjacentPolygonIdx);
+	void SetPolygonGroupID(size_t polyIdx, int groupID);
+
 	void SortPolygonsByMaterialIdx();
 	void ComputeAABB();
 	bool ComputePolygonsAdjacency();
 	bool ComputePolygonsAdjacency(std::function<void(int, int, int)> setAdjacentCB);
 	bool ComputeClosed();
+
 	void TestSlice(const Plane& plane);
 
 	bool isClosed;

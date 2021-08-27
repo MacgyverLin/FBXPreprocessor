@@ -22,10 +22,11 @@ void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
     pManager = FbxManager::Create();
     if( !pManager )
     {
-        FBXSDK_printf("Error: Unable to create FBX Manager!\n");
+        Debug::Error("Error: Unable to create FBX Manager!\n");
         exit(1);
     }
-	else FBXSDK_printf("Autodesk FBX SDK version %s\n", pManager->GetVersion());
+	else 
+        Debug::Info("Autodesk FBX SDK version %s\n", pManager->GetVersion());
 
 	//Create an IOSettings object. This object holds all import/export settings.
 	FbxIOSettings* ios = FbxIOSettings::Create(pManager, IOSROOT);
@@ -39,7 +40,7 @@ void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
     pScene = FbxScene::Create(pManager, "My Scene");
 	if( !pScene )
     {
-        FBXSDK_printf("Error: Unable to create FBX scene!\n");
+        Debug::Error("Error: Unable to create FBX scene!\n");
         exit(1);
     }
 }
@@ -47,8 +48,10 @@ void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
 void DestroySdkObjects(FbxManager* pManager, bool pExitStatus)
 {
     //Delete the FBX Manager. All the objects that have been allocated using the FBX Manager and that haven't been explicitly destroyed are also automatically destroyed.
-    if( pManager ) pManager->Destroy();
-	if( pExitStatus ) FBXSDK_printf("Program Success!\n");
+    if( pManager ) 
+        pManager->Destroy();
+	if( pExitStatus ) 
+        Debug::Error("Program Success!\n");
 }
 
 bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename, bool binary)
@@ -101,13 +104,13 @@ bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename,
     // Initialize the exporter by providing a filename.
     if(lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
     {
-        FBXSDK_printf("Call to FbxExporter::Initialize() failed.\n");
-        FBXSDK_printf("Error returned: %s\n\n", lExporter->GetStatus().GetErrorString());
+        Debug::Error("Call to FbxExporter::Initialize() failed.\n");
+        Debug::Error("Error returned: %s\n\n", lExporter->GetStatus().GetErrorString());
         return false;
     }
 
     FbxManager::GetFileFormatVersion(lMajor, lMinor, lRevision);
-    FBXSDK_printf("FBX file format version %d.%d.%d\n\n", lMajor, lMinor, lRevision);
+    Debug::Info("FBX file format version %d.%d.%d\n\n", lMajor, lMinor, lRevision);
 
     // Export the scene.
     lStatus = lExporter->Export(pScene); 
@@ -139,51 +142,51 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     if( !lImportStatus )
     {
         FbxString error = lImporter->GetStatus().GetErrorString();
-        FBXSDK_printf("Call to FbxImporter::Initialize() failed.\n");
-        FBXSDK_printf("Error returned: %s\n\n", error.Buffer());
+        Debug::Error("Call to FbxImporter::Initialize() failed.\n");
+        Debug::Error("Error returned: %s\n\n", error.Buffer());
 
         if (lImporter->GetStatus().GetCode() == FbxStatus::eInvalidFileVersion)
         {
-            FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
-            FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
+            Debug::Error("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
+            Debug::Error("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
         }
 
         return false;
     }
 
-    FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
+    Debug::Info("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
 
     if (lImporter->IsFBX())
     {
-        FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
+        Debug::Info("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
 
         // From this point, it is possible to access animation stack information without
         // the expense of loading the entire file.
 
-        FBXSDK_printf("Animation Stack Information\n");
+        Debug::Info("Animation Stack Information\n");
 
         lAnimStackCount = lImporter->GetAnimStackCount();
 
-        FBXSDK_printf("    Number of Animation Stacks: %d\n", lAnimStackCount);
-        FBXSDK_printf("    Current Animation Stack: \"%s\"\n", lImporter->GetActiveAnimStackName().Buffer());
-        FBXSDK_printf("\n");
+        Debug::Info("    Number of Animation Stacks: %d\n", lAnimStackCount);
+        Debug::Info("    Current Animation Stack: \"%s\"\n", lImporter->GetActiveAnimStackName().Buffer());
+        Debug::Info("\n");
 
         for(int i = 0; i < lAnimStackCount; i++)
         {
             FbxTakeInfo* lTakeInfo = lImporter->GetTakeInfo(i);
 
-            FBXSDK_printf("    Animation Stack %d\n", i);
-            FBXSDK_printf("         Name: \"%s\"\n", lTakeInfo->mName.Buffer());
-            FBXSDK_printf("         Description: \"%s\"\n", lTakeInfo->mDescription.Buffer());
+            Debug::Info("    Animation Stack %d\n", i);
+            Debug::Info("         Name: \"%s\"\n", lTakeInfo->mName.Buffer());
+            Debug::Info("         Description: \"%s\"\n", lTakeInfo->mDescription.Buffer());
 
             // Change the value of the import name if the animation stack should be imported 
             // under a different name.
-            FBXSDK_printf("         Import Name: \"%s\"\n", lTakeInfo->mImportName.Buffer());
+            Debug::Info("         Import Name: \"%s\"\n", lTakeInfo->mImportName.Buffer());
 
             // Set the value of the import state to false if the animation stack should be not
             // be imported. 
-            FBXSDK_printf("         Import State: %s\n", lTakeInfo->mSelect ? "true" : "false");
-            FBXSDK_printf("\n");
+            Debug::Info("         Import State: %s\n", lTakeInfo->mSelect ? "true" : "false");
+            Debug::Info("\n");
         }
 
         // Set the import states. By default, the import states are always set to 
@@ -218,39 +221,39 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
 
 		if (lStatus == false && lImporter->GetStatus() == FbxStatus::ePasswordError)
 		{
-			FBXSDK_printf("\nPassword is wrong, import aborted.\n");
+            Debug::Error("\nPassword is wrong, import aborted.\n");
 		}
 	}
 
 	if (!lStatus || (lImporter->GetStatus() != FbxStatus::eSuccess))
 	{
-		FBXSDK_printf("********************************************************************************\n");
+        Debug::Info("********************************************************************************\n");
 		if (lStatus)
 		{
-			FBXSDK_printf("WARNING:\n");
-			FBXSDK_printf("   The importer was able to read the file but with errors.\n");
-			FBXSDK_printf("   Loaded scene may be incomplete.\n\n");
+            Debug::Error("WARNING:\n");
+            Debug::Error("   The importer was able to read the file but with errors.\n");
+            Debug::Error("   Loaded scene may be incomplete.\n\n");
 		}
 		else
 		{
-			FBXSDK_printf("Importer failed to load the file!\n\n");
+            Debug::Error("Importer failed to load the file!\n\n");
 		}
 
 		if (lImporter->GetStatus() != FbxStatus::eSuccess)
-			FBXSDK_printf("   Last error message: %s\n", lImporter->GetStatus().GetErrorString());
+            Debug::Error("   Last error message: %s\n", lImporter->GetStatus().GetErrorString());
 
 		FbxArray<FbxString*> history;
 		lImporter->GetStatus().GetErrorStringHistory(history);
 		if (history.GetCount() > 1)
 		{
-			FBXSDK_printf("   Error history stack:\n");
+            Debug::Info("   Error history stack:\n");
 			for (int i = 0; i < history.GetCount(); i++)
 			{
-				FBXSDK_printf("      %s\n", history[i]->Buffer());
+                Debug::Info("      %s\n", history[i]->Buffer());
 			}
 		}
 		FbxArrayDelete<FbxString*>(history);
-		FBXSDK_printf("********************************************************************************\n");
+        Debug::Info("********************************************************************************\n");
 	}
 
     // Destroy the importer.
@@ -259,21 +262,38 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     return lStatus;
 }
 
+///////////////////////////////////////////////////////////
+static FILE* fptr = nullptr;
 
-void Debug::Verbose(char* format, ...)
+bool Debug::Init()
 {
-    static char buffer[4096];
-    va_list aptr;
-    int ret;
+    fptr = fopen("log.txt", "wt");
+    
+    return fptr!=nullptr;
+}
 
-    va_start(aptr, format);
-    ret = vsprintf(buffer, format, aptr);
-    va_end(aptr);
+void Debug::Terminate()
+{
+    if (fptr)
+    {
+        fclose(fptr);
+        fptr = nullptr;
+    }
+}
 
+void Debug::Log(const char* buffer)
+{
+    assert(fptr);
+
+    fprintf(fptr, buffer);
+}
+
+void Debug::Print(const char* buffer)
+{
     FBXSDK_printf(buffer);
 }
 
-void Debug::Info(char* format, ...)
+void Debug::Verbose(const char* format, ...)
 {
     static char buffer[4096];
     va_list aptr;
@@ -283,10 +303,11 @@ void Debug::Info(char* format, ...)
     ret = vsprintf(buffer, format, aptr);
     va_end(aptr);
 
-    FBXSDK_printf(buffer);
+    // Debug::Print("Verbose: ");
+    Debug::Print(buffer);
 }
 
-void Debug::Warning(char* format, ...)
+void Debug::Info(const char* format, ...)
 {
     static char buffer[4096];
     va_list aptr;
@@ -296,10 +317,11 @@ void Debug::Warning(char* format, ...)
     ret = vsprintf(buffer, format, aptr);
     va_end(aptr);
 
-    FBXSDK_printf(buffer);
+    // Debug::Print("Info: ");
+    Debug::Print(buffer);
 }
 
-void Debug::Error(char* format, ...)
+void Debug::Warning(const char* format, ...)
 {
     static char buffer[4096];
     va_list aptr;
@@ -309,10 +331,11 @@ void Debug::Error(char* format, ...)
     ret = vsprintf(buffer, format, aptr);
     va_end(aptr);
 
-    FBXSDK_printf(buffer);
+    // Debug::Print("Warning: ");
+    Debug::Print(buffer);
 }
 
-void Debug::Fatal(char* format, ...)
+void Debug::Error(const char* format, ...)
 {
     static char buffer[4096];
     va_list aptr;
@@ -322,5 +345,21 @@ void Debug::Fatal(char* format, ...)
     ret = vsprintf(buffer, format, aptr);
     va_end(aptr);
 
-    FBXSDK_printf(buffer);
+    // Debug::Print("Error: ");
+    Debug::Print(buffer);
+}
+
+void Debug::Fatal(const char* format, ...)
+{
+    static char buffer[4096];
+    va_list aptr;
+    int ret;
+
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+
+    //  Debug::Print("Fatal: ");
+    Debug::Print(buffer);
+    exit(-1);
 }

@@ -29,6 +29,11 @@ public:
 		}
 	}
 
+	const Plane& GetPlane() const
+	{
+		return splitPlane;
+	}
+
 	void Split(const Plane& splitPlane_)
 	{
 		if (!left && !right)

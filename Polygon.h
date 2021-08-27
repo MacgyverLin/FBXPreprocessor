@@ -33,6 +33,8 @@ public:
 
 	const AABB& GetAABB() const;
 
+	const Vector3& GetCenter() const;
+
 	void SetGroupID(int groupID_);
 
 	void Clear();
@@ -54,6 +56,7 @@ private:
 
 	int groupID;
 	Plane plane;
+	Vector3 center;
 	AABB aabb;
 };
 

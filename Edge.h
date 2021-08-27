@@ -113,4 +113,19 @@ private:
 	int adjacentPolygonIdx;
 };
 
+class Loop : public std::vector<Edge>
+{
+public:
+	Loop(int groupID_)
+	: groupID(groupID_)
+	{
+	}
+
+	~Loop()
+	{
+	}
+
+	int groupID;
+};
+
 #endif

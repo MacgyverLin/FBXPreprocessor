@@ -167,6 +167,11 @@ const Plane& Mesh::GetPolygonPlane(size_t polyIdx) const
 	return polygons[polyIdx].GetPlane();
 }
 
+const Vector3& Mesh::GetPolygonCenter(size_t polyIdx) const
+{
+	return polygons[polyIdx].GetCenter();
+}
+
 const AABB& Mesh::GetPolygonAABB(size_t polyIdx) const
 {
 	return polygons[polyIdx].GetAABB();
@@ -183,6 +188,10 @@ void Mesh::SetPolygonGroupID(size_t polyIdx, int groupID)
 		maxGroupIdx = groupID;
 
 	return polygons[polyIdx].SetGroupID(groupID);
+}
+
+void Mesh::BeginAppend()
+{
 }
 
 void Mesh::Begin(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)
@@ -367,7 +376,7 @@ bool Mesh::ComputePolygonsAdjacency(std::function<void(int, int, int)> setAdjace
 				}
 			}
 
-			Debug::Info("%d\n", GetPolygonEdge(polyIdx, edgeIdx).GetAdjacentPolygonIdx());
+			// Debug::Info("%d\n", GetPolygonEdge(polyIdx, edgeIdx).GetAdjacentPolygonIdx());
 
 			if (GetPolygonEdge(polyIdx, edgeIdx).GetAdjacentPolygonIdx() == -1)
 			{
