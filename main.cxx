@@ -28,8 +28,8 @@ int main(int argc, const char** argv)
 
 #define TEST
 #ifdef TEST
-	// for (int i = 0; i < 5; i++)
-	int i = 1;
+	for (int i = 0; i < 5; i++)
+	//int i = 3;
 #else
 #endif
 	{

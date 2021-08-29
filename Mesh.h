@@ -76,21 +76,19 @@ public:
 
 	void End();
 
+	const Vertex& GetVertex(int idx) const;
+
+	const Vector3& GetEdgeStartVertex(int idx) const;
+
+	int GetMaxVertexIndex() const;
+
+	int GetMaxEdgeIndex() const;
+
 	void Clear(int colorChannelCount_ = 0, int uvChannelCount_ = 1, int normalChannelCount_ = 1, int tangentChannelCount_ = 1, int binormalChannelCount_ = 1);
 
 	void Flip();
 
 	bool IsEmpty() const;
-
-	const Vertex& GetVertex(int idx) const
-	{
-		return verticesOptimizer.GetData(idx);
-	}
-
-	const Vector3& GetEdgeVertex(int idx) const
-	{
-		return edgeVertexOptimizer.GetData(idx);
-	}
 private:
 	void SetPolygonEdgeAdjacentPolygonIdx(size_t polyIdx, size_t edgeIdx, size_t adjacentPolygonIdx);
 	void SetPolygonGroupID(size_t polyIdx, int groupID);
@@ -100,8 +98,6 @@ private:
 	bool ComputePolygonsAdjacency();
 	bool ComputePolygonsAdjacency(std::function<void(int, int, int)> setAdjacentCB);
 	bool ComputeClosed();
-
-	void TestSlice(const Plane& plane);
 
 	bool isClosed;
 

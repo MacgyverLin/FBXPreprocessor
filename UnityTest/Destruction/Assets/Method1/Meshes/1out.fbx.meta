@@ -32,13 +32,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: 6
+      name: No Name
     second: {fileID: 2100000, guid: 1c3567e4412160c44b92cd30c505fa3a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: crossSection
-    second: {fileID: 2100000, guid: a30ae254524ab5542986e5ca81f296a8, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0

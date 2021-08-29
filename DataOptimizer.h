@@ -9,6 +9,7 @@ class DataOptimizer
 public:
 	DataOptimizer(bool enabledOptimize_ = true)
 	: enabledOptimize(enabledOptimize_)
+	, maxIndex(-1)
 	, datasMap()
 	, datas()
 	, indices()
@@ -22,7 +23,7 @@ public:
 	DataOptimizer(const DataOptimizer& other)
 	{
 		this->enabledOptimize = other.enabledOptimize;
-
+		this->maxIndex = other.maxIndex;
 		this->datasMap = other.datasMap;
 
 		this->datas = other.datas;
@@ -32,7 +33,7 @@ public:
 	DataOptimizer& operator = (const DataOptimizer& other)
 	{
 		this->enabledOptimize = other.enabledOptimize;
-
+		this->maxIndex = other.maxIndex;
 		this->datasMap = other.datasMap;
 
 		this->datas = other.datas;
@@ -43,48 +44,64 @@ public:
 
 	int Add(const T& data)
 	{
+		int idx;
 		if (enabledOptimize)
 		{
 			std::map<T, int>::iterator itr = datasMap.find(data);
 
-			int idx;
 			if (itr == datasMap.end())
 			{
 				idx = datas.size();
 
 				datasMap[data] = idx;
 				datas.push_back(data);
-
-				indices.push_back(idx);
-				return idx;
 			}
 			else
 			{
 				idx = itr->second;
-				
-				indices.push_back(idx);
-				return idx;
 			}
 		}
 		else
 		{
-			int idx = datas.size();
+			idx = datas.size();
 
 			datasMap[data] = idx;
 			datas.push_back(data);
-			
-			indices.push_back(idx);
-
-			return idx;
 		}
+
+		if (maxIndex < idx)
+			maxIndex = idx;
+		indices.push_back(idx);
+		return idx;
 	}
 
 	void Clear()
 	{
+		maxIndex = -1;
 		datasMap.clear();
 
 		datas.clear();
 		indices.clear();
+	}
+
+	void EnabledOptimize()
+	{
+		enabledOptimize = true;
+	}
+
+	void DisabledOptimize()
+	{
+		enabledOptimize = false;
+	}
+
+	bool IsEnabledOptimize() const
+	{
+		return enabledOptimize;
+	}
+
+	int GetMaxIndex() const
+	{
+		return maxIndex;
 	}
 
 	size_t GetDataCount() const
@@ -127,7 +144,8 @@ public:
 	}
 private:
 	bool enabledOptimize;
-
+	
+	int maxIndex;
 	std::map<T, int> datasMap;
 
 	std::vector<T> datas;

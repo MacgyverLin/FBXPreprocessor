@@ -268,8 +268,26 @@ void Mesh::End()
 	ComputeAABB();
 
 	isClosed = ComputePolygonsAdjacency();
+}
 
-	//TestSlice(Plane());
+const Vertex& Mesh::GetVertex(int idx) const
+{
+	return verticesOptimizer.GetData(idx);
+}
+
+const Vector3& Mesh::GetEdgeStartVertex(int idx) const
+{
+	return edgeVertexOptimizer.GetData(idx);
+}
+
+int Mesh::GetMaxVertexIndex() const
+{
+	return verticesOptimizer.GetMaxIndex();
+}
+
+int Mesh::GetMaxEdgeIndex() const
+{
+	return edgeVertexOptimizer.GetMaxIndex();
 }
 
 void Mesh::SortPolygonsByMaterialIdx()
@@ -394,164 +412,6 @@ bool Mesh::ComputePolygonsAdjacency(std::function<void(int, int, int)> setAdjace
 		Debug::Verbose("Mesh is closed\n");
 
 	return meshClosed;
-}
-
-void Mesh::TestSlice(const Plane& plane)
-{
-	///////////////////////////////////////////////////
-	// assume mesh is closed
-
-	// group
-	Vector3 center = GetAABB().GetCenter(true);
-	//Vector3 normal = GetAABB().GetMajorAxis(true);
-	Vector3 normal = Vector3::UnitY;
-	Plane cutPlane(center, normal);
-
-	for (size_t polyIdx = 0; polyIdx < GetPolygonCount(); polyIdx++)
-	{
-		Vector3 polyCenter = GetPolygonAABB(polyIdx).GetCenter();
-
-		if (cutPlane.WhichSide(polyCenter))
-		{
-			SetPolygonGroupID(polyIdx, 0);
-		}
-		else
-		{
-			SetPolygonGroupID(polyIdx, 1);
-		}
-	}
-
-
-	for (int groupID = 0; groupID <= GetMaxGroupIdx(); groupID++)
-	{
-		Debug::Verbose("Polygon Group=%d\n", groupID);
-		Debug::Verbose("{\n");
-
-		std::multimap<int, Edge> isolatedEdges;
-		{
-#if 1
-			// if polygon neighbour ID is not myself, save the edge in the map
-			for (size_t polyIdx = 0; polyIdx < GetPolygonCount(); polyIdx++)
-			{
-				if (groupID != GetPolygonGroupID(polyIdx))
-					continue;
-
-				for (size_t edgeIdx = 0; edgeIdx < GetPolygonEdgesCount(polyIdx); edgeIdx++)
-				{
-					int polygonEdgeAdjacentPolygonIdx = GetPolygonEdgeAdjacentPolygonIdx(polyIdx, edgeIdx);
-
-					const Polygon& polygon = polygons[polyIdx];
-					const Polygon& adjacentPolygon = polygons[polygonEdgeAdjacentPolygonIdx];
-
-					int id0 = GetPolygonGroupID(polyIdx);
-					int id1 = GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx);
-					int id2 = polygon.GetGroupID();
-					int id3 = adjacentPolygon.GetGroupID();
-
-					if (GetPolygonGroupID(polyIdx) != GetPolygonGroupID(polygonEdgeAdjacentPolygonIdx))
-						//if (polygon.GetGroupID() != adjacentPolygon.GetGroupID())
-					{
-						const Edge& edge = GetPolygonEdge(polyIdx, edgeIdx);
-						isolatedEdges.insert(std::pair<int, Edge>(edge.GetStartIdx(), edge));
-					}
-				}
-			}
-#else
-			// if polygon neighbour ID is not myself, save the edge in the map
-			for (size_t polyIdx = 0; polyIdx < GetPolygonCount(); polyIdx++)
-			{
-				const Polygon& polygon = polygons[polyIdx];
-				if (groupID != GetPolygonGroupID(polyIdx))
-					continue;
-
-				for (size_t edgeIdx = 0; edgeIdx < GetPolygonEdgesCount(polyIdx); edgeIdx++)
-				{
-					int polygonEdgeAdjacentPolygonIdx = GetPolygonEdgeAdjacentPolygonIdx(polyIdx, edgeIdx);
-					const Polygon& adjacentPolygon = polygons[polygonEdgeAdjacentPolygonIdx];
-
-					if (polygon.GetGroupID() != adjacentPolygon.GetGroupID())
-					{
-						const Edge& edge = GetPolygonEdge(polyIdx, edgeIdx);
-						isolatedEdges.insert(std::pair<int, Edge>(edge.GetStartIdx(), edge));
-					}
-				}
-			}
-#endif
-		}
-
-		typedef std::vector<Edge> Loop;
-		std::vector<Loop> loops;
-		{
-			bool newLoop = true;
-
-			std::multimap<int, Edge>::iterator currentEdge = isolatedEdges.begin();
-			while (isolatedEdges.size())
-			{
-				if (newLoop)
-				{
-					loops.push_back(Loop());
-					newLoop = false;
-				}
-
-				Loop& currentLoop = loops.back();
-
-				currentLoop.push_back(currentEdge->second);
-				isolatedEdges.erase(currentEdge);
-
-				if (currentLoop.back().GetEndIdx() == currentLoop.front().GetStartIdx()) // loop itself
-				{
-					newLoop = true;
-					currentEdge = isolatedEdges.begin();
-				}
-				else
-				{
-					int nextIdx = currentLoop.back().GetEndIdx();
-					currentEdge = isolatedEdges.find(currentLoop.back().GetEndIdx());
-				}
-			}
-		}
-
-		for (auto& loop : loops)
-		{
-			Debug::Verbose("\tLoop\n");
-			Debug::Verbose("\t{\n");
-			for (int i = 0; i < loop.size(); i++)
-			{
-				Debug::Verbose("\t\t(%d,%d)", loop[i].GetStartIdx(), loop[i].GetEndIdx());
-
-				if (i == 0)
-				{
-					if (loop[loop.size() - 1].GetEndIdx() == loop[0].GetStartIdx())
-						Debug::Verbose(" *");
-				}
-				else
-				{
-					if (loop[i - 1].GetEndIdx() == loop[i].GetStartIdx())
-						Debug::Verbose(" *");
-				}
-
-				Debug::Verbose("  \n");
-			}
-			Debug::Verbose("\t}\n");
-		}
-
-		Debug::Verbose("}\n\n");
-
-		/*
-		for (auto& loop : loops)
-		{
-			BeginPolygon(GetMaxGroupIdx()+1, GetMaxMaterialIdx() + 1);
-			for (int i = 0; i < loop.size(); i++)
-			{
-				const Edge& edge = loop[i];
-
-				const Vertex& vertex = verticesOptimizer.GetData(edge.GetVertexIdx());
-				AddPolygonVertex(vertex);
-			}
-			EndPolygon();
-		}
-		*/
-	}
 }
 
 void Mesh::Clear(int colorChannelCount_, int uvChannelCount_, int normalChannelCount_, int tangentChannelCount_, int binormalChannelCount_)

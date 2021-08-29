@@ -42,7 +42,8 @@ Shader "Mac/NormalMap"
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float4 _Offset;
-	
+			uniform matrix a[16];
+
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
 	
@@ -165,6 +166,7 @@ Shader "Mac/NormalMap"
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float4 _Offset;
+			uniform matrix a[16];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;

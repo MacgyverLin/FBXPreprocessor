@@ -116,12 +116,27 @@ private:
 class Loop : public std::vector<Edge>
 {
 public:
-	Loop(int groupID_)
+	Loop(int groupID_ = 0)
 	: groupID(groupID_)
 	{
 	}
 
 	~Loop()
+	{
+	}
+
+	int groupID;
+};
+
+class Loop2 : public std::vector<int>
+{
+public:
+	Loop2(int groupID_ = 0)
+		: groupID(groupID_)
+	{
+	}
+
+	~Loop2()
 	{
 	}
 
