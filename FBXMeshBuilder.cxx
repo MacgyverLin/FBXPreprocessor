@@ -300,7 +300,7 @@ void FBXMeshBuilder::FillMaterial(FbxScene* fbxScene, FbxMesh* dstMesh, FbxNode*
 		dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
 
 	// no need copy
-	dstMesh->GetNode()->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+	//dstMesh->GetNode()->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
 }
 
 FbxSurfaceMaterial* FBXMeshBuilder::GetPhongMaterial(FbxScene* fbxScene, FbxString materialName)

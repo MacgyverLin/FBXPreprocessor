@@ -14,7 +14,9 @@ int main(int argc, const char** argv)
 		"2.fbx",
 		"3.fbx",
 		"4.fbx",
-		"5.fbx"
+		"5.fbx",
+		"6.fbx",
+		"7.fbx"
 	};
 
 	const char* fileouts[] =
@@ -23,13 +25,15 @@ int main(int argc, const char** argv)
 		"2out.fbx",
 		"3out.fbx",
 		"4out.fbx",
-		"5out.fbx"
+		"5out.fbx",
+		"6out.fbx",
+		"7out.fbx"
 	};
 
 #define TEST
 #ifdef TEST
-	for (int i = 0; i < 5; i++)
-	//int i = 3;
+	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
+	//int i = 6;
 #else
 #endif
 	{
@@ -69,7 +73,6 @@ int main(int argc, const char** argv)
 		}
 
 		/////////////////////////////////////////////////////////////////////
-#ifdef NO_SLICE
 		MeshSeparator meshSeparator;
 		std::vector<MeshArray> resultMeshArrays;
 		if (!meshSeparator.Process(originalMeshes, resultMeshArrays))
@@ -77,8 +80,6 @@ int main(int argc, const char** argv)
 			Debug::Error("\n\nAn error in copying Mesh Nodes...");
 			return -1;
 		}
-#else
-#endif
 
 		/////////////////////////////////////////////////////////////////////
 		FBXMeshBuilder fbxMeshBuilder;
