@@ -295,12 +295,29 @@ void FBXMeshBuilder::FillPolygon(bool useOptimizer, FbxMesh* dstMesh, const Mesh
 
 void FBXMeshBuilder::FillMaterial(FbxScene* fbxScene, FbxMesh* dstMesh, FbxNode* fbxNode)
 {
-	FbxMesh* srcMesh = fbxNode->GetMesh();
+	// FbxMesh* srcMesh = fbxNode->GetMesh();
+	// for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
+		// dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
+
+	// dstMesh->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+
+	//for (size_t i = 0; i < fbxScene->GetMaterialCount(); i++)
+	//{
+		// fbxScene->GetMaterial(i);
+	//}
+	//fbxScene->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+
+	Debug::Info("%d\n", fbxScene->GetMaterialCount());
+	Debug::Info("%d\n", dstMesh->GetNode()->GetMaterialCount());
 	for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
 		dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
 
-	// no need copy
-	//dstMesh->GetNode()->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+	Debug::Info("%d\n", fbxScene->GetMaterialCount());
+	Debug::Info("%d\n", dstMesh->GetNode()->GetMaterialCount());
+	dstMesh->GetNode()->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+	
+	Debug::Info("%d\n", fbxScene->GetMaterialCount());
+	Debug::Info("%d\n", dstMesh->GetNode()->GetMaterialCount());
 }
 
 FbxSurfaceMaterial* FBXMeshBuilder::GetPhongMaterial(FbxScene* fbxScene, FbxString materialName)

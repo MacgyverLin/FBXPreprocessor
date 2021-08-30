@@ -210,6 +210,15 @@ Vector2 Vector2::operator- () const
 	);
 }
 
+Vector2 operator* (float fScalar, const Vector2& v)
+{
+	return Vector2
+	(
+		fScalar * v.m[0],
+		fScalar * v.m[1]
+	);
+}
+
 // arithmetic updates
 Vector2& Vector2::operator+= (const Vector2& v)
 {

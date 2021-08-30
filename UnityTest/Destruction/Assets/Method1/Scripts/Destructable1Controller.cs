@@ -14,11 +14,6 @@ public class Destructable1Controller : MonoBehaviour
     public float rigidBodyMaxLifetime = 4.0f;
     public float fadeTime = 1.0f;
 
-    // Start is void called before the first frame update
-    void Start()
-    {
-    }
-
     // Update is called once per frame
     void Update()
     {

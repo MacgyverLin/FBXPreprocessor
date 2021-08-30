@@ -33,7 +33,7 @@ int main(int argc, const char** argv)
 #define TEST
 #ifdef TEST
 	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
-	//int i = 6;
+	//int i = 0;
 #else
 #endif
 	{

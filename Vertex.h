@@ -55,6 +55,8 @@ public:
 
 	Vertex operator- () const;
 
+	friend Vertex operator* (float fScalar, const Vertex& v);
+
 	// arithmetic updates
 	Vertex& operator+= (const Vertex& v);
 

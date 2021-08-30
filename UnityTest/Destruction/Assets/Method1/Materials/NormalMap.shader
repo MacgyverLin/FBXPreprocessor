@@ -1,10 +1,7 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Mac/NormalMap"
+﻿Shader "Mac/NormalMap"
 {
-	Properties{
+	Properties
+	{
 		_Color("Color Tint", Color) = (1.0, 1.0, 1.0, 1.0)
 		_MainTex("Diffuse Texture", 2D) = "white" {}
 		_BumpMap("Normal Texture", 2D) = "bump" {}
@@ -14,7 +11,7 @@ Shader "Mac/NormalMap"
 		_RimColor("Rim Color", Color) = (1.0, 1.0, 1.0, 1.0)
 		_RimPower("Rim Power", Range(0.1, 10.0)) = 3.0
 		_Alpha("Alpha", Range(0.0, 1.0)) = 1.0
-		_Offset("Offset", Vector) = (0.0, 0.0, 0.0, 0.0)
+		_ShowCrossSection("ShowCrossSection", Range(0.0, 1.0)) = 1.0
 	}
 
 	SubShader
@@ -41,8 +38,8 @@ Shader "Mac/NormalMap"
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
-			uniform float4 _Offset;
-			uniform matrix a[16];
+			uniform float _ShowCrossSection;
+			uniform float4x4 _Transforms[3];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -53,7 +50,7 @@ Shader "Mac/NormalMap"
 				float4 vertex: POSITION;
 				float3 normal: NORMAL;
 				float4 texcoord: TEXCOORD0;
-				float4 groupID: TEXCOORD1;
+				float4 groupID_CrossSection: TEXCOORD1;
 				float4 tangent: TANGENT;
 			};
 		
@@ -72,13 +69,21 @@ Shader "Mac/NormalMap"
 			{
 				vertexOutput o;
 
-				v.vertex.xyz *= max((1.0 - v.groupID.y), _Offset.w); // hide vertex if 0
-				v.vertex.xyz += v.groupID.x * _Offset.xyz; // move part by group id
-	
+				float groupID = v.groupID_CrossSection.x;
+				float crossSection = v.groupID_CrossSection.y;
+
+				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+				if (_ShowCrossSection > 0.5)
+				{
+					v.vertex.xyz = mul(_Transforms[groupID.x], float4(v.vertex.xyz, 1.0));
+					v.normal.xyz = mul(_Transforms[groupID.x], float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(_Transforms[groupID.x], float4(v.tangent.xyz, 0.0));
+				}
+
 				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
 				o.tangentWorld = normalize(mul(unity_ObjectToWorld, v.tangent).xyz);
 				o.binormalWorld = normalize(cross(o.normalWorld, o.tangentWorld));
-	
+
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 				o.pos = UnityObjectToClipPos(v.vertex);
 				o.tex = v.texcoord;
@@ -137,7 +142,6 @@ Shader "Mac/NormalMap"
 				float3 rimLighting = saturate(pow(rim, _RimPower) * _RimColor.rgb * diffuseReflection);
 				float3 lightFinal = diffuseReflection + specularReflection + rimLighting + UNITY_LIGHTMODEL_AMBIENT.rgb;
 	
-	
 				return float4(tex.xyz * lightFinal * _Color.xyz, _Alpha);
 			}
 	
@@ -165,8 +169,8 @@ Shader "Mac/NormalMap"
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
-			uniform float4 _Offset;
-			uniform matrix a[16];
+			uniform float _ShowCrossSection;
+			uniform float4x4 _Transforms[3];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -177,7 +181,7 @@ Shader "Mac/NormalMap"
 				float4 vertex: POSITION;
 				float3 normal: NORMAL;
 				float4 texcoord: TEXCOORD0;
-				float4 groupID: TEXCOORD1;
+				float4 groupID_CrossSection: TEXCOORD1;
 				float4 tangent: TANGENT;
 			};
 
@@ -196,12 +200,20 @@ Shader "Mac/NormalMap"
 			{
 				vertexOutput o;
 
+				float groupID = v.groupID_CrossSection.x;
+				float crossSection = v.groupID_CrossSection.y;
+
+				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+				if (_ShowCrossSection > 0.5)
+				{
+					v.vertex.xyz = mul(_Transforms[groupID.x], float4(v.vertex.xyz, 1.0));
+					v.normal.xyz = mul(_Transforms[groupID.x], float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(_Transforms[groupID.x], float4(v.tangent.xyz, 0.0));
+				}
+
 				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
 				o.tangentWorld = normalize(mul(unity_ObjectToWorld, v.tangent).xyz);
 				o.binormalWorld = normalize(cross(o.normalWorld, o.tangentWorld));
-
-				v.vertex.xyz *= max((1.0 - v.groupID.y), _Offset.w); // hide vertex if 0
-				v.vertex.xyz += v.groupID.x * _Offset.xyz; // move part by group id
 
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 				o.pos = UnityObjectToClipPos(v.vertex);
@@ -263,6 +275,75 @@ Shader "Mac/NormalMap"
 			}
 			ENDCG
 		}
+
+		Pass
+		{
+			Tags { "LightMode" = "ShadowCaster" }
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma exclude_renderers flash
+
+			// User Defined Variables
+			uniform float4 _Color;
+			uniform sampler2D _MainTex;
+			uniform float4 _MainTex_ST;
+			uniform sampler2D _BumpMap;
+			uniform float4 _BumpMap_ST;
+			uniform float _BumpDepth;
+			uniform float4 _SpecColor;
+			uniform float _Shininess;
+			uniform float4 _RimColor;
+			uniform float _RimPower;
+			uniform float _Alpha;
+			uniform float _ShowCrossSection;
+			uniform float4x4 _Transforms[3];
+
+			// Unity Defined Variables;
+			uniform float4 _LightColor0;
+
+			// Base Input Structs
+			struct vertexInput
+			{
+				float4 vertex: POSITION;
+				float3 normal: NORMAL;
+				float4 texcoord: TEXCOORD0;
+				float4 groupID_CrossSection: TEXCOORD1;
+			};
+
+			struct vertexOutput
+			{
+				float4 pos: SV_POSITION;
+				float4 posWorld: TEXCOORD1;
+			};
+
+			// Vertex Function
+			vertexOutput vert(vertexInput v)
+			{
+				vertexOutput o;
+
+				float groupID = v.groupID_CrossSection.x;
+				float crossSection = v.groupID_CrossSection.y;
+
+				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+				if (_ShowCrossSection > 0.5)
+				{
+					v.vertex.xyz = mul(_Transforms[groupID.x], float4(v.vertex.xyz, 1.0));
+				}
+
+				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+				o.pos = UnityObjectToClipPos(v.vertex);
+
+				return o;
+			}
+
+			// Fragment Function
+			float4 frag(vertexOutput i) : COLOR
+			{
+				return float4(1.0, 1.0, 1.0, _Alpha);
+			}
+			ENDCG
+		}
 	}
-	//FallBack "Specular"
+	FallBack "Specular"
 }

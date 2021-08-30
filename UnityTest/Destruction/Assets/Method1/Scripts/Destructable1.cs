@@ -18,52 +18,37 @@ public class Destructable1 : MonoBehaviour
     {
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
 
-        foreach(var material in meshRenderer.materials)
-            material.SetVector("_Offset", new Vector4(-1.0f * Mathf.Abs(Mathf.Sin(Time.time / 5.0f * 3.14f * 2.0f)), 0.0f, 0.0f, showCrossSection ? 1.0f : 0.0f));
+        Matrix4x4[] transforms = new Matrix4x4[3];
+
+        Quaternion rotate0 = Quaternion.Euler(0, 0, 360.0f * Time.time / 20.0f);
+        Vector3 translate0 = new Vector3(-5.0f * Mathf.Abs(Mathf.Sin(2.0f * Mathf.PI * Time.time / 20.0f)), 0.0f, 0.0f);
+        transforms[0] = Matrix4x4.TRS(translate0, rotate0, Vector3.one);
+
+        Quaternion rotate1 = Quaternion.Euler(0, 0, 360.0f * Time.time / 20.0f);
+        Vector3 translate1 = new Vector3(5.0f * Mathf.Abs(Mathf.Sin(2.0f * Mathf.PI * Time.time / 20.0f)), 0.0f, 0.0f);
+        transforms[1] = Matrix4x4.TRS(translate1, rotate1, Vector3.one);
+
+        Quaternion rotate2 = Quaternion.Euler(0, 0, 360.0f * Time.time / 20.0f);
+        Vector3 translate2 = new Vector3(0.0f, 5.0f * Mathf.Abs(Mathf.Sin(2.0f * Mathf.PI * Time.time / 20.0f)), 0.0f);
+        transforms[2] = Matrix4x4.TRS(translate2, rotate2, Vector3.one);
+
+        for (int i = 0; i < meshRenderer.materials.Length; i++)
+        {
+            meshRenderer.materials[i].SetFloat("_ShowCrossSection", showCrossSection ? 1.0f : 0.0f);
+            meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
+        }
     }
 
     private void Init()
     {
-        // enable Parent
+        // make sure visible
         this.gameObject.SetActive(true);
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
-        // init child
-        /*
-        Material[] materials = new Material[meshRenderer.materials.Length+1];
-        for(int i=0; i<meshRenderer.materials.Length+1; i++)
-        {
-            if(i==meshRenderer.materials.Length)
-                materials[i] = crossSectionMaterial;
-            else
-                materials[i] = meshRenderer.materials[i];
-        }
-        */
-
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            // Debug.Log(transform.GetChild(i).gameObject.name);
-            InitChild(transform.GetChild(i).gameObject);
-        }
-    }
-
-    private void InitChild(GameObject child)
-    {
-        // disable child
-        child.SetActive(false);
-        MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
-        meshRenderer.enabled = false;
-
-        // last material must be crossSection Material
-        Material[] matArray = meshRenderer.materials;
-        matArray[matArray.Length - 1] = crossSectionMaterial;
-        meshRenderer.materials = matArray;
-
-        // child use physics
-        Rigidbody rigidbody = child.AddComponent<Rigidbody>();
-        MeshCollider meshCollider = child.AddComponent<MeshCollider>();
-        meshCollider.convex = true;
+        Material[] materials = meshRenderer.materials;
+        materials[materials.Length - 1] = crossSectionMaterial;
+        meshRenderer.materials = materials;
     }
 
     public void Destruct(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
@@ -90,45 +75,27 @@ public class Destructable1 : MonoBehaviour
 
     public void BeginDestruct(float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
-        // make sure parent, children are active
+        // make sure visible
         this.gameObject.SetActive(true);
-
-        // switch off rendering parent
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-        meshRenderer.enabled = false;
-
-        for (int i = 0; i < transform.childCount; i++)
-            DestructChild(transform.GetChild(i).gameObject, this.gameObject.transform.position, explosionForce, explosionRadius, upwardsModifier = 0.0f, mode);
-    }
-
-    private void DestructChild(GameObject child, Vector3 explosionPosition, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
-    {
-        // make sure child is active
-        child.SetActive(true);
-
-        // switch on render child
-        MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
-
-        // do some physics
-        Rigidbody rigidbody = child.GetComponent<Rigidbody>();
-        Vector3 torque = new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)) * explosionForce * 100;
-        rigidbody.AddTorque(torque, mode);
-        rigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius, upwardsModifier, mode);
     }
 
     IEnumerator WaitAllRigidBodySleptOrTimeOut(float timeout)
     {
         float startTime = Time.time;
 
+        /*
         // can cache component?
         List<Rigidbody> rigidbodies = new List<Rigidbody>();
         for (int i = 0; i < transform.childCount; i++)
             rigidbodies.Add(transform.GetChild(i).GetComponent<Rigidbody>());
+        */
 
         bool done = false;
         while (!done && ((Time.time - startTime) < timeout))
         {
+            /*
             done = true;
             foreach (var rb in rigidbodies)
             {
@@ -138,6 +105,7 @@ public class Destructable1 : MonoBehaviour
                     break;
                 }
             }
+            */
 
             yield return null;
         }
@@ -145,6 +113,7 @@ public class Destructable1 : MonoBehaviour
 
     IEnumerator FadeChild(float timeout)
     {
+        /*
         // can cache component?
         List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
         for (int i = 0; i < transform.childCount; i++)
@@ -169,6 +138,8 @@ public class Destructable1 : MonoBehaviour
 
             yield return null;
         }
+        */
+        yield return null;
     }
 
     public void ChangeAlpha(Material[] materials, string name, float alpha)
@@ -183,6 +154,7 @@ public class Destructable1 : MonoBehaviour
 
     IEnumerator HideChild()
     {
+        /*
         List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
         for (int i = 0; i < transform.childCount; i++)
             meshRenderers.Add(transform.GetChild(i).GetComponent<MeshRenderer>());
@@ -191,7 +163,30 @@ public class Destructable1 : MonoBehaviour
         {
             meshRenderer.enabled = false;
         }
+        */
 
         yield return null;
     }
+
+
+    /*
+    private void InitChild(GameObject child)
+    {
+        // disable child
+        child.SetActive(false);
+        MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = false;
+
+        // last material must be crossSection Material
+        Material[] matArray = meshRenderer.materials;
+        matArray[matArray.Length - 1] = crossSectionMaterial;
+        meshRenderer.materials = matArray;
+
+        // child use physics
+        Rigidbody rigidbody = child.AddComponent<Rigidbody>();
+        MeshCollider meshCollider = child.AddComponent<MeshCollider>();
+        meshCollider.convex = true;
+    }
+    */
+
 }

@@ -79,6 +79,8 @@ public:
 
 	Vector3 operator- () const;
 
+	friend Vector3 operator* (float fScalar, const Vector3& v);
+
 	// arithmetic updates
 	Vector3& operator+= (const Vector3& v);
 

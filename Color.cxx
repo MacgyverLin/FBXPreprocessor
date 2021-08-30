@@ -253,6 +253,17 @@ Color Color::operator- () const
 	);
 }
 
+Color operator* (float fScalar, const Color& v)
+{
+	return Color
+	(
+		fScalar * v.m[0],
+		fScalar * v.m[1],
+		fScalar * v.m[2],
+		fScalar * v.m[3]
+	);
+}
+
 // arithmetic updates
 Color& Color::operator+= (const Color& v)
 {

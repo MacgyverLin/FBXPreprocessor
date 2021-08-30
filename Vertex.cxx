@@ -307,6 +307,30 @@ Vertex Vertex::operator- () const
 	return result;
 }
 
+Vertex operator* (float fScalar, const Vertex& v)
+{
+	Vertex result;
+
+	result.position = fScalar * v.position;
+
+	for (size_t i = 0; i < NUM_COLORS; i++)
+		result.colors[i] = fScalar * v.colors[i];
+
+	for (size_t i = 0; i < NUM_UVS; i++)
+		result.uvs[i] = fScalar * v.uvs[i];
+
+	for (size_t i = 0; i < NUM_NORMALS; i++)
+		result.normals[i] = fScalar * v.normals[i];
+
+	for (size_t i = 0; i < NUM_TANGENTS; i++)
+		result.tangents[i] = fScalar * v.tangents[i];
+
+	for (size_t i = 0; i < NUM_BINORMALS; i++)
+		result.binormals[i] = fScalar * v.binormals[i];
+
+	return result;
+}
+
 // arithmetic updates
 Vertex& Vertex::operator+= (const Vertex& v)
 {

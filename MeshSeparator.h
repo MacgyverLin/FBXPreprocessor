@@ -16,8 +16,10 @@ public:
 	bool Process(const std::vector<Mesh>& srcMeshes_, std::vector<MeshArray>& resultMeshArrays_);
 private:
 	bool Process(const Mesh& srcMesh_, Mesh& resultMesh_);
+	bool ComputeSceneMaxMaterialIdx(const std::vector<Mesh>& srcMeshes_);
+	
 	bool Slice(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_);
-	int GetGroupIdx(const Mesh& srcMesh_, BSP* root_, const Vector3& p_);
+	int GetSlicedGroupIdx(const Mesh& srcMesh_, BSP* root_, const Vector3& p_);
 
 // #define USE_METHOD1
 #ifdef USE_METHOD1
@@ -34,7 +36,9 @@ private:
 	bool BuildCrossSectionLoopsFromEdges2(std::map<int, UnorderedEdges> unorderedEdgesGroups_, std::vector<Loop2>& crossSectionLoops_);
 	bool PrintCrossSectionLoops2(const Mesh& resultMesh_, const std::vector<Loop2>& loops_);
 	bool AddCrossSectionLoopsToMesh2(const std::vector<Loop2>& crossSectionLoops_, const Matrix4& projMatrix, float textureSize, Mesh& resultMesh_);
+	Vertex MakeVertex(const Mesh& mesh, const Matrix4& projMatrix, const Vector3& center, const Vector3& normal, const Vector3& tangent, const Vector3& binormal, float textureSize, int groupID);
 #endif
+	int sceneMaxMaterialIdx;
 };
 
 #endif

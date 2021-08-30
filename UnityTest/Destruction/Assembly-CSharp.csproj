@@ -60,8 +60,8 @@
     <Compile Include="Assets\Method1\Scripts\Destructable1Controller.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Method1\Materials\1.txt" />
     <None Include="Assets\Method1\Materials\NormalMap.shader" />
+    <None Include="Assets\Method1\Materials\NormalMap - Copy.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

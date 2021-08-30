@@ -83,6 +83,8 @@ public:
 
 	Color operator- () const;
 
+	friend Color operator* (float fScalar, const Color& v);
+
 	// arithmetic updates
 	Color& operator+= (const Color& v);
 

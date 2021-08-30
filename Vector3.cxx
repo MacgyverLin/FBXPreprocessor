@@ -278,6 +278,16 @@ Vector3& Vector3::operator/= (float fScalar)
 	return *this;
 }
 
+Vector3 operator* (float fScalar, const Vector3& v)
+{
+	return Vector3
+	(
+		fScalar * v.m[0],
+		fScalar * v.m[1],
+		fScalar * v.m[2]
+	);
+}
+
 // vector operations
 float Vector3::Length() const
 {
