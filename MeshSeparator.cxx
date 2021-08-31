@@ -2,10 +2,13 @@
 #include "Polygon.h"
 #include "BSP.h"
 
-// material, shadow problem
+// material
+// cross section material
+// shadow problem
+// normal
+// vertex explode
 
 MeshSeparator::MeshSeparator()
-	: sceneMaxMaterialIdx(0)
 {
 }
 
@@ -15,34 +18,33 @@ MeshSeparator::~MeshSeparator()
 
 bool MeshSeparator::Process(const std::vector<Mesh>& srcMeshes_, std::vector<MeshArray>& resultMeshArrays_)
 {
-	if (!ComputeSceneMaxMaterialIdx(srcMeshes_))
-		return false;
+	int sceneMaxMaterialIdx = ComputeSceneMaxMaterialIdx(srcMeshes_);
 
 	resultMeshArrays_.resize(srcMeshes_.size());
 	for (size_t i = 0; i < srcMeshes_.size(); i++)
 	{
 		resultMeshArrays_[i].resize(1);
 
-		if (!Process(srcMeshes_[i], resultMeshArrays_[i][0]))
+		if (!Process(sceneMaxMaterialIdx, srcMeshes_[i], resultMeshArrays_[i][0]))
 			return false;
 	}
 
 	return true;
 }
 
-bool MeshSeparator::ComputeSceneMaxMaterialIdx(const std::vector<Mesh>& srcMeshes_)
+int MeshSeparator::ComputeSceneMaxMaterialIdx(const std::vector<Mesh>& srcMeshes_)
 {
-	sceneMaxMaterialIdx = 0;
+	int sceneMaxMaterialIdx = 0;
 	for (size_t i = 0; i < srcMeshes_.size(); i++)
 	{
 		if (sceneMaxMaterialIdx < srcMeshes_[i].GetMaxMaterialIdx())
 			sceneMaxMaterialIdx = srcMeshes_[i].GetMaxMaterialIdx();
 	}
 
-	return true;
+	return sceneMaxMaterialIdx;
 }
 
-bool MeshSeparator::Process(const Mesh& srcMesh_, Mesh& resultMesh_)
+bool MeshSeparator::Process(int sceneMaxMaterialIdx_, const Mesh& srcMesh_, Mesh& resultMesh_)
 {
 	BSP bsp;
 	bsp.splitPlane = Plane(
@@ -69,7 +71,7 @@ bool MeshSeparator::Process(const Mesh& srcMesh_, Mesh& resultMesh_)
 		return false;
 
 	Matrix4 transform;
-	if (!AddCrossSectionLoopsToMesh(crossSectionLoops, transform, 1, resultMesh_))
+	if (!AddCrossSectionLoopsToMesh(crossSectionLoops, int sceneMaxMaterialIdx_, 1.0f, resultMesh_))
 		return false;
 #else
 	std::vector<Loop2> crossSectionLoops2;
@@ -79,8 +81,7 @@ bool MeshSeparator::Process(const Mesh& srcMesh_, Mesh& resultMesh_)
 	if (!PrintCrossSectionLoops2(resultMesh_, crossSectionLoops2))
 		return false;
 
-	Matrix4 transform;
-	if (!AddCrossSectionLoopsToMesh2(crossSectionLoops2, transform, 1, resultMesh_))
+	if (!AddCrossSectionLoopsToMesh2(crossSectionLoops2, sceneMaxMaterialIdx_, 1.0f, resultMesh_))
 		return false;
 #endif
 	return true;
@@ -212,17 +213,15 @@ bool MeshSeparator::BuildCrossSectionLoopsFromEdges(const std::multimap<int, Edg
 	return true;
 }
 
-bool MeshSeparator::AddCrossSectionLoopsToMesh(const std::vector<Loop>& crossSectionLoops_, const Matrix4& projMatrix_, float textureSize_, Mesh& resultMesh_)
+bool MeshSeparator::AddCrossSectionLoopsToMesh(const std::vector<Loop>& crossSectionLoops_, float textureSize_, int sceneMaxMaterialIdx_, Mesh& resultMesh_)
 {
 	int groupIDUVChannel = resultMesh_.GetUVChannelCount() - 1;
 
 	resultMesh_.BeginAppend();
 
-	int id = 30;
 	for (auto& crossSectionLoop : crossSectionLoops_)
 	{
-		// resultMesh_.BeginPolygon(crossSectionLoop.groupID, resultMesh_.GetMaxMaterialIdx() + 1);
-		resultMesh_.BeginPolygon(crossSectionLoop.groupID, id++);
+		resultMesh_.BeginPolygon(crossSectionLoop.groupID, sceneMaxMaterialIdx_+ 1);
 
 		for (int i = 0; i < crossSectionLoop.size(); i++)
 		{
@@ -589,7 +588,7 @@ bool MeshSeparator::PrintCrossSectionLoops2(const Mesh& resultMesh_, const std::
 	return true;
 }
 
-bool MeshSeparator::AddCrossSectionLoopsToMesh2(const std::vector<Loop2>& crossSectionLoops_, const Matrix4& projMatrix_, float textureSize_, Mesh& resultMesh_)
+bool MeshSeparator::AddCrossSectionLoopsToMesh2(const std::vector<Loop2>& crossSectionLoops_, int sceneMaxMaterialIdx_, float textureSize_, Mesh& resultMesh_)
 {
 	resultMesh_.BeginAppend();
 
@@ -618,11 +617,12 @@ bool MeshSeparator::AddCrossSectionLoopsToMesh2(const std::vector<Loop2>& crossS
 		Matrix4 projMatrix;
 		projMatrix.Init(tangent, binormal, normal, center);
 		projMatrix = projMatrix.Inverse();
+
 		Vertex apex = MakeVertex(resultMesh_, projMatrix, center - normal * 0.01f, normal, tangent, binormal, 1.0f, crossSectionLoop.groupID);
 
 		for (int i = 0; i < crossSectionLoop.size(); i++)
 		{
-			resultMesh_.BeginPolygon(crossSectionLoop.groupID, sceneMaxMaterialIdx+1);
+			resultMesh_.BeginPolygon(crossSectionLoop.groupID, sceneMaxMaterialIdx_ + 1);
 
 			const int& edgeVertexIdx0 = crossSectionLoop[(i + 1) % crossSectionLoop.size()];
 			const int& edgeVertexIdx1 = crossSectionLoop[(i + 0) % crossSectionLoop.size()];

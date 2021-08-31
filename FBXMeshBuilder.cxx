@@ -10,58 +10,36 @@ FBXMeshBuilder::~FBXMeshBuilder()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-/*
-bool FBXMeshBuilder::TriangulateMeshArrays(std::vector<MeshArray>& meshArrays)
+bool FBXMeshBuilder::Build(FbxScene* fbxScene_, std::vector<FbxNode*>& fbxNodes_, const std::vector<MeshArray>& meshArrays_)
 {
-	for (size_t i = 0; i < meshArrays.size(); i++)
-	{
-		MeshArray& meshes = meshArrays[i];
-
-		for (size_t j = 0; j < meshes.size(); j++)
-		{
-			Triangulate(meshes[j]);
-		}
-	}
-
-	return true;
-}
-*/
-
-/////////////////////////////////////////////////////////////////////////////////
-bool FBXMeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& meshArrays)
-{
-	if (!BuildFbxMeshes(fbxScene, fbxNodes, meshArrays))
+	int sceneMaxMaterialIdx = ComputeSceneMaxMaterialIdx(meshArrays_);
+	if (!BuildFbxMeshes(fbxScene_, fbxNodes_, sceneMaxMaterialIdx, meshArrays_))
 		return false;
 
 	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, const std::vector<MeshArray>& meshArrays)
+bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene_, std::vector<FbxNode* >& fbxNodes_, int sceneMaxMaterialIdx_, const std::vector<MeshArray>& meshArrays_)
 {
-	for (size_t i = 0; i < fbxNodes.size(); i++)
+	for (size_t i = 0; i < fbxNodes_.size(); i++)
 	{
-		FbxNode* fbxNode = fbxNodes[i];
-		const MeshArray& meshes = meshArrays[i];
+		const MeshArray& meshes = meshArrays_[i];
 
 		for (size_t j = 0; j < meshes.size(); j++)
 		{
-			FbxString name(fbxNode->GetName());
-			name += FbxString("_");
-			name += (int)j;
-
-			BuildFbxMesh(fbxScene, fbxNode, meshes[j], name);
+			BuildFbxMesh(fbxScene_, fbxNodes_[i], sceneMaxMaterialIdx_, meshes[j]);
 		}
 	}
 
 	return true;
 }
 
-void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name)
+void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, int sceneMaxMaterialIdx_, const Mesh& mesh)
 {
 	////////////////////////////////////////////////////////
 	// create Mesh
-	FbxMesh* dstMesh = FbxMesh::Create(fbxScene, name);
+	FbxMesh* dstMesh = FbxMesh::Create(fbxScene, fbxNode->GetName());
 
 	////////////////////////////////////////////////////////
 	// fill material
@@ -105,24 +83,21 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Me
 	FillPolygon(useOptimizer, dstMesh, mesh);
 
 	////////////////////////////////////////////////////////
-	// copy Geometry Transform
-	FbxNode* dstNode = FbxNode::Create(fbxScene, name);
-	dstNode->SetNodeAttribute(dstMesh);
-	fbxScene->GetRootNode()->AddChild(dstNode);
-	auto t1 = fbxNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
-	auto r1 = fbxNode->GetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
-	auto s1 = fbxNode->GetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
-	dstNode->SetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, t1);
-	dstNode->SetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, r1);
-	dstNode->SetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot, s1);
+	fbxNode->SetNodeAttribute(dstMesh);
 
 	////////////////////////////////////////////////////////
-	// fill material 
-	FillMaterial(fbxScene, dstMesh, fbxNode);
+	std::vector<FbxString> names(fbxNode->GetMaterialCount());
+	for (int i = 0; i < fbxNode->GetMaterialCount(); i++)
+		names[i] = fbxNode->GetMaterial(i)->GetName();
 
-	////////////////////////////////////////////////////////
-	// delete original mesh node
-	fbxScene->GetRootNode()->RemoveChild(fbxNode);
+	fbxNode->RemoveAllMaterials();
+
+	for (int i = 0; i < sceneMaxMaterialIdx_; i++)
+	{
+		AddMaterial(fbxNode, names[i]);
+	}
+
+	AddMaterial(fbxNode, "Cross Section");
 }
 
 void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, size_t ch)
@@ -293,41 +268,30 @@ void FBXMeshBuilder::FillPolygon(bool useOptimizer, FbxMesh* dstMesh, const Mesh
 	}
 }
 
-void FBXMeshBuilder::FillMaterial(FbxScene* fbxScene, FbxMesh* dstMesh, FbxNode* fbxNode)
+int FBXMeshBuilder::ComputeSceneMaxMaterialIdx(const std::vector<MeshArray>& meshArrays_)
 {
-	// FbxMesh* srcMesh = fbxNode->GetMesh();
-	// for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
-		// dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
+	int sceneMaxMaterialIdx = 0;
 
-	// dstMesh->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+	for (auto& meshArray : meshArrays_)
+	{
+		for (auto& mesh : meshArray)
+		{
+			if (sceneMaxMaterialIdx < mesh.GetMaxMaterialIdx())
+				sceneMaxMaterialIdx = mesh.GetMaxMaterialIdx();
+		}
+	}
 
-	//for (size_t i = 0; i < fbxScene->GetMaterialCount(); i++)
-	//{
-		// fbxScene->GetMaterial(i);
-	//}
-	//fbxScene->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
-
-	Debug::Info("%d\n", fbxScene->GetMaterialCount());
-	Debug::Info("%d\n", dstMesh->GetNode()->GetMaterialCount());
-	for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
-		dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
-
-	Debug::Info("%d\n", fbxScene->GetMaterialCount());
-	Debug::Info("%d\n", dstMesh->GetNode()->GetMaterialCount());
-	dstMesh->GetNode()->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
-	
-	Debug::Info("%d\n", fbxScene->GetMaterialCount());
-	Debug::Info("%d\n", dstMesh->GetNode()->GetMaterialCount());
+	return sceneMaxMaterialIdx;
 }
 
-FbxSurfaceMaterial* FBXMeshBuilder::GetPhongMaterial(FbxScene* fbxScene, FbxString materialName)
+FbxSurfaceMaterial* FBXMeshBuilder::AddMaterial(FbxNode* fbxNode, FbxString materialName)
 {
 	FbxString lMaterialName = materialName;
 	FbxString lShadingName = "Phong";
 	FbxDouble3 lBlack(0.0, 0.0, 0.0);
 	FbxDouble3 lRed(1.0, 0.0, 0.0);
 	FbxDouble3 lColor(1.0f, 1.0f, 1.0f);
-	FbxSurfacePhong* material = FbxSurfacePhong::Create(fbxScene, lMaterialName.Buffer());
+	FbxSurfacePhong* material = FbxSurfacePhong::Create(fbxNode, lMaterialName.Buffer());
 
 	// Generate primary and secondary colors.
 	material->Emissive.Set(lBlack);

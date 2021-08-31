@@ -39,7 +39,7 @@
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float _ShowCrossSection;
-			uniform float4x4 _Transforms[3];
+			uniform float4x4 _Transforms[16];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
