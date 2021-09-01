@@ -325,7 +325,7 @@
 				float groupID = v.groupID_CrossSection.x;
 				float crossSection = v.groupID_CrossSection.y;
 
-				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection));
 				if (_ShowCrossSection > 0.5)
 				{
 					v.vertex.xyz = mul(_Transforms[groupID.x], float4(v.vertex.xyz, 1.0));

@@ -13,8 +13,7 @@ public class Destructable1 : MonoBehaviour
         Init();
     }
 
-    // Update is called once per frame
-    void Update()
+    void UpdateCrossSection()
     {
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
 
@@ -37,6 +36,17 @@ public class Destructable1 : MonoBehaviour
             meshRenderer.materials[i].SetFloat("_ShowCrossSection", showCrossSection ? 1.0f : 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
         }
+    }
+
+    void Reset()
+    {
+        UpdateCrossSection();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        UpdateCrossSection();
     }
 
     private void Init()
