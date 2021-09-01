@@ -22,8 +22,8 @@ public:
 	bool Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& meshArrays);
 private:
 	/////////////////////////////////////////////////////////////////////////////////
-	bool BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, const std::vector<MeshArray>& meshArrays);
-	void BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name);
+	bool BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, int sceneMaxMaterialIdx_, const std::vector<MeshArray>& meshArrays);
+	void BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, int sceneMaxMaterialIdx_, const Mesh& mesh, const FbxString& name);
 
 	void FillColor(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 	void FillUV(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch);
@@ -32,8 +32,10 @@ private:
 	void FillBinormal(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh, int ch);
 
 	void FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh);
-	void FillMaterial(FbxScene* fbxScene, FbxMesh* dstMesh, FbxNode* fbxNode);
-	FbxSurfaceMaterial* GetPhongMaterial(FbxScene* fbxScene, FbxString materialName);
+
+	int ComputeSceneMaxMaterialIdx(const std::vector<MeshArray>& meshArrays_);
+	void BuildMaterial(FbxNode* fbxNode, FbxNode* dstNode, int sceneMaxMaterialIdx_);
+	FbxSurfaceMaterial* AddMaterial(FbxNode* fbxNode, FbxString materialName);
 };
 
 #endif

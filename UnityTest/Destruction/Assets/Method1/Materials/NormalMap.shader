@@ -253,6 +253,65 @@ Shader "Mac/NormalMap"
 			}
 			ENDCG
 		}
+
+		Pass
+		{
+			Tags { "LightMode" = "ShadowCaster" }
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma exclude_renderers flash
+
+			// User Defined Variables
+			uniform float4 _Color;
+			uniform sampler2D _MainTex;
+			uniform float4 _MainTex_ST;
+			uniform sampler2D _BumpMap;
+			uniform float4 _BumpMap_ST;
+			uniform float _BumpDepth;
+			uniform float4 _SpecColor;
+			uniform float _Shininess;
+			uniform float4 _RimColor;
+			uniform float _RimPower;
+			uniform float _Alpha;
+			uniform float _ShowCrossSection;
+			uniform float4x4 _Transforms[3];
+
+			// Unity Defined Variables;
+			uniform float4 _LightColor0;
+
+			// Base Input Structs
+			struct vertexInput
+			{
+				float4 vertex: POSITION;
+				float3 normal: NORMAL;
+				float4 texcoord: TEXCOORD0;
+			};
+
+			struct vertexOutput
+			{
+				float4 pos: SV_POSITION;
+				float4 posWorld: TEXCOORD1;
+			};
+
+			// Vertex Function
+			vertexOutput vert(vertexInput v)
+			{
+				vertexOutput o;
+
+				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+				o.pos = UnityObjectToClipPos(v.vertex);
+
+				return o;
+			}
+
+			// Fragment Function
+			float4 frag(vertexOutput i) : COLOR
+			{
+				return float4(1.0, 1.0, 1.0, _Alpha);
+			}
+			ENDCG
+		}
 	}
 	//FallBack "Specular"
 }

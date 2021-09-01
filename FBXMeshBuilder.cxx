@@ -30,14 +30,16 @@ bool FBXMeshBuilder::TriangulateMeshArrays(std::vector<MeshArray>& meshArrays)
 /////////////////////////////////////////////////////////////////////////////////
 bool FBXMeshBuilder::Build(FbxScene* fbxScene, std::vector<FbxNode*>& fbxNodes, const std::vector<MeshArray>& meshArrays)
 {
-	if (!BuildFbxMeshes(fbxScene, fbxNodes, meshArrays))
+	int sceneMaxMaterialIdx = ComputeSceneMaxMaterialIdx(meshArrays);
+
+	if (!BuildFbxMeshes(fbxScene, fbxNodes, sceneMaxMaterialIdx, meshArrays))
 		return false;
 
 	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, const std::vector<MeshArray>& meshArrays)
+bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& fbxNodes, int sceneMaxMaterialIdx_, const std::vector<MeshArray>& meshArrays)
 {
 	for (size_t i = 0; i < fbxNodes.size(); i++)
 	{
@@ -46,18 +48,18 @@ bool FBXMeshBuilder::BuildFbxMeshes(FbxScene* fbxScene, std::vector<FbxNode* >& 
 
 		for (size_t j = 0; j < meshes.size(); j++)
 		{
-			FbxString name(fbxNode->GetName());
-			name += FbxString("_");
+			FbxString name = fbxNode->GetName();
+			name += "_";
 			name += (int)j;
 
-			BuildFbxMesh(fbxScene, fbxNode, meshes[j], name);
+			BuildFbxMesh(fbxScene, fbxNode, sceneMaxMaterialIdx_, meshes[j], name);
 		}
 	}
 
 	return true;
 }
 
-void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Mesh& mesh, const FbxString& name)
+void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, int sceneMaxMaterialIdx_, const Mesh& mesh, const FbxString& name)
 {
 	////////////////////////////////////////////////////////
 	// create Mesh
@@ -105,15 +107,11 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Me
 	FillPolygon(useOptimizer, dstMesh, mesh);
 
 	////////////////////////////////////////////////////////
-	// fill material 
+	// Copy Geometry Transform
 	FbxNode* dstNode = FbxNode::Create(fbxScene, name);
 	dstNode->SetNodeAttribute(dstMesh); 
 	fbxNode->AddChild(dstNode);
 
-	FillMaterial(fbxScene, dstMesh, fbxNode);
-
-	////////////////////////////////////////////////////////
-	// copy Geometry Transform
 	auto t2 = fbxNode->LclTranslation.Get();
 	auto r2 = fbxNode->LclRotation.Get();
 	auto s2 = fbxNode->LclScaling.Get();
@@ -123,6 +121,10 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, const Me
 	dstNode->SetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, t1);
 	dstNode->SetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot, r1);
 	dstNode->SetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot, s1);
+
+	////////////////////////////////////////////////////////
+	// fill material 
+	BuildMaterial(fbxNode, dstNode, sceneMaxMaterialIdx_);
 }
 
 void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, int ch)
@@ -289,23 +291,46 @@ void FBXMeshBuilder::FillPolygon(bool useOptimizer, FbxMesh* dstMesh, const Mesh
 	}
 }
 
-void FBXMeshBuilder::FillMaterial(FbxScene* fbxScene, FbxMesh* dstMesh, FbxNode* fbxNode)
+int FBXMeshBuilder::ComputeSceneMaxMaterialIdx(const std::vector<MeshArray>& meshArrays_)
 {
-	FbxMesh* srcMesh = fbxNode->GetMesh();
-	for (size_t i = 0; i < fbxNode->GetMaterialCount(); i++)
-		dstMesh->GetNode()->AddMaterial(fbxNode->GetMaterial(i));
+	int sceneMaxMaterialIdx = 0;
 
-	dstMesh->GetNode()->AddMaterial(GetPhongMaterial(fbxScene, "crossSection"));
+	for (auto& meshArray : meshArrays_)
+	{
+		for (auto& mesh : meshArray)
+		{
+			if (sceneMaxMaterialIdx < mesh.GetMaxMaterialIdx())
+				sceneMaxMaterialIdx = mesh.GetMaxMaterialIdx();
+		}
+	}
+
+	return sceneMaxMaterialIdx;
 }
 
-FbxSurfaceMaterial* FBXMeshBuilder::GetPhongMaterial(FbxScene* fbxScene, FbxString materialName)
+void FBXMeshBuilder::BuildMaterial(FbxNode* fbxNode, FbxNode* dstNode, int sceneMaxMaterialIdx_)
+{
+	std::vector<FbxString> names(fbxNode->GetMaterialCount());
+	for (int i = 0; i < fbxNode->GetMaterialCount(); i++)
+		names[i] = fbxNode->GetMaterial(i)->GetName();
+
+	dstNode->RemoveAllMaterials();
+
+	for (int i = 0; i < sceneMaxMaterialIdx_; i++)
+	{
+		AddMaterial(dstNode, names[i]);
+	}
+
+	AddMaterial(dstNode, "Cross Section");
+}
+
+FbxSurfaceMaterial* FBXMeshBuilder::AddMaterial(FbxNode* fbxNode, FbxString materialName)
 {
 	FbxString lMaterialName = materialName;
 	FbxString lShadingName = "Phong";
 	FbxDouble3 lBlack(0.0, 0.0, 0.0);
 	FbxDouble3 lRed(1.0, 0.0, 0.0);
 	FbxDouble3 lColor(1.0f, 1.0f, 1.0f);
-	FbxSurfacePhong* material = FbxSurfacePhong::Create(fbxScene, lMaterialName.Buffer());
+	FbxSurfacePhong* material = FbxSurfacePhong::Create(fbxNode, lMaterialName.Buffer());
 
 	// Generate primary and secondary colors.
 	material->Emissive.Set(lBlack);
