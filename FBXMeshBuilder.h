@@ -27,6 +27,7 @@ private:
 	void FillPolygon(bool useBatch, FbxMesh* dstMesh, const Mesh& mesh);
 
 	int ComputeSceneMaxMaterialIdx(const std::vector<MeshArray>& meshArrays_);
+	void BuildMaterial(FbxNode* fbxNode, int sceneMaxMaterialIdx_);
 	FbxSurfaceMaterial* AddMaterial(FbxNode* fbxNode, FbxString materialName);
 };
 

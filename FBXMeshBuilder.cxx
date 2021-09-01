@@ -86,18 +86,7 @@ void FBXMeshBuilder::BuildFbxMesh(FbxScene* fbxScene, FbxNode* fbxNode, int scen
 	fbxNode->SetNodeAttribute(dstMesh);
 
 	////////////////////////////////////////////////////////
-	std::vector<FbxString> names(fbxNode->GetMaterialCount());
-	for (int i = 0; i < fbxNode->GetMaterialCount(); i++)
-		names[i] = fbxNode->GetMaterial(i)->GetName();
-
-	fbxNode->RemoveAllMaterials();
-
-	for (int i = 0; i < sceneMaxMaterialIdx_; i++)
-	{
-		AddMaterial(fbxNode, names[i]);
-	}
-
-	AddMaterial(fbxNode, "Cross Section");
+	BuildMaterial(fbxNode, sceneMaxMaterialIdx_);
 }
 
 void FBXMeshBuilder::FillColor(bool useOptimizer, FbxMesh* dstMesh, const Mesh& mesh, size_t ch)
@@ -282,6 +271,22 @@ int FBXMeshBuilder::ComputeSceneMaxMaterialIdx(const std::vector<MeshArray>& mes
 	}
 
 	return sceneMaxMaterialIdx;
+}
+
+void FBXMeshBuilder::BuildMaterial(FbxNode* fbxNode, int sceneMaxMaterialIdx_)
+{
+	std::vector<FbxString> names(fbxNode->GetMaterialCount());
+	for (int i = 0; i < fbxNode->GetMaterialCount(); i++)
+		names[i] = fbxNode->GetMaterial(i)->GetName();
+
+	fbxNode->RemoveAllMaterials();
+
+	for (int i = 0; i < sceneMaxMaterialIdx_; i++)
+	{
+		AddMaterial(fbxNode, names[i]);
+	}
+
+	AddMaterial(fbxNode, "Cross Section");
 }
 
 FbxSurfaceMaterial* FBXMeshBuilder::AddMaterial(FbxNode* fbxNode, FbxString materialName)
