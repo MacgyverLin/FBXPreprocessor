@@ -13,6 +13,7 @@ int main(int argc, const char** argv)
 		"1.fbx",
 		"2.fbx",
 		"3.fbx",
+		"3_1.fbx",
 		"4.fbx",
 		"5.fbx",
 		"6.fbx",
@@ -24,6 +25,7 @@ int main(int argc, const char** argv)
 		"1out.fbx",
 		"2out.fbx",
 		"3out.fbx",
+		"3_1out.fbx",
 		"4out.fbx",
 		"5out.fbx",
 		"6out.fbx",
@@ -32,8 +34,8 @@ int main(int argc, const char** argv)
 
 #define TEST
 #ifdef TEST
-	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
-	//int i = 0;
+	//for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
+	int i = 2;
 #else
 #endif
 	{
@@ -77,7 +79,7 @@ int main(int argc, const char** argv)
 		std::vector<MeshArray> resultMeshArrays;
 		if (!meshSeparator.Process(originalMeshes, resultMeshArrays))
 		{
-			Debug::Error("\n\nAn error in copying Mesh Nodes...");
+			Debug::Error("\n\nAn error in processing Mesh Nodes...");
 			return -1;
 		}
 

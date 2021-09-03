@@ -4,13 +4,36 @@ using UnityEngine;
 
 public class Destructable1 : MonoBehaviour
 {
-    public Material crossSectionMaterial;
+    // public Material crossSectionMaterial;
     public bool showCrossSection = false;
 
     // Start is void called before the first frame update
     void Start()
     {
         Init();
+    }
+
+    void Reset()
+    {
+        UpdateCrossSection();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        UpdateCrossSection();
+    }
+
+    private void Init()
+    {
+        // make sure visible
+        this.gameObject.SetActive(true);
+        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = true;
+
+        //Material[] materials = meshRenderer.materials;
+        //materials[materials.Length - 1] = crossSectionMaterial;
+        //meshRenderer.materials = materials;
     }
 
     void UpdateCrossSection()
@@ -36,29 +59,6 @@ public class Destructable1 : MonoBehaviour
             meshRenderer.materials[i].SetFloat("_ShowCrossSection", showCrossSection ? 1.0f : 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
         }
-    }
-
-    void Reset()
-    {
-        UpdateCrossSection();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        UpdateCrossSection();
-    }
-
-    private void Init()
-    {
-        // make sure visible
-        this.gameObject.SetActive(true);
-        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-        meshRenderer.enabled = true;
-
-        Material[] materials = meshRenderer.materials;
-        materials[materials.Length - 1] = crossSectionMaterial;
-        meshRenderer.materials = materials;
     }
 
     public void Destruct(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
@@ -157,8 +157,6 @@ public class Destructable1 : MonoBehaviour
         foreach (var material in materials)
         {
             material.SetFloat("_Alpha", alpha);
-            material.SetInt("MySrcMode", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            material.SetInt("MyDstMode", (int)UnityEngine.Rendering.BlendMode.Zero);
         }
     }
 
