@@ -241,8 +241,8 @@ void Mesh::AddPolygonVertex(const Vertex& vertex)
 
 	int idx0 = verticesOptimizer.Add(vertex);
 	int idx1 = edgeVertexOptimizer.Add(vertex.position);
-	idx0 = verticesOptimizer.Add(vertex);
-	idx1 = edgeVertexOptimizer.Add(vertex.position);
+	//idx0 = verticesOptimizer.Add(vertex);
+	//idx1 = edgeVertexOptimizer.Add(vertex.position);
 
 	polygon.Add
 	(

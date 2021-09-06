@@ -50,7 +50,7 @@
 				float4 vertex: POSITION;
 				float3 normal: NORMAL;
 				float4 texcoord: TEXCOORD0;
-				float4 groupID_CrossSection: TEXCOORD1;
+				float4 groupID_CrossSection: TEXCOORD2;
 				float4 tangent: TANGENT;
 			};
 		
@@ -69,15 +69,15 @@
 			{
 				vertexOutput o;
 
-				float groupID = v.groupID_CrossSection.x;
-				float crossSection = v.groupID_CrossSection.y;
+				int groupID = (int)v.groupID_CrossSection.x;
+				int crossSection = (int)v.groupID_CrossSection.y;
 
 				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
-				if (_ShowCrossSection > 0.5)
+				if (_ShowCrossSection == 1.0)
 				{
-					v.vertex.xyz = mul(_Transforms[groupID.x], float4(v.vertex.xyz, 1.0));
-					v.normal.xyz = mul(_Transforms[groupID.x], float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(_Transforms[groupID.x], float4(v.tangent.xyz, 0.0));
+					v.vertex.xyz = mul(_Transforms[groupID], float4(v.vertex.xyz, 1.0));
+					v.normal.xyz = mul(_Transforms[groupID], float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(_Transforms[groupID], float4(v.tangent.xyz, 0.0));
 				}
 
 				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
@@ -181,7 +181,7 @@
 				float4 vertex: POSITION;
 				float3 normal: NORMAL;
 				float4 texcoord: TEXCOORD0;
-				float4 groupID_CrossSection: TEXCOORD1;
+				float4 groupID_CrossSection: TEXCOORD2;
 				float4 tangent: TANGENT;
 			};
 
@@ -200,15 +200,15 @@
 			{
 				vertexOutput o;
 
-				float groupID = v.groupID_CrossSection.x;
-				float crossSection = v.groupID_CrossSection.y;
+				int groupID = (int)v.groupID_CrossSection.x;
+				int crossSection = (int)v.groupID_CrossSection.y;
 
 				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
 				if (_ShowCrossSection > 0.5)
 				{
-					v.vertex.xyz = mul(_Transforms[groupID.x], float4(v.vertex.xyz, 1.0));
-					v.normal.xyz = mul(_Transforms[groupID.x], float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(_Transforms[groupID.x], float4(v.tangent.xyz, 0.0));
+					v.vertex.xyz = mul(_Transforms[groupID], float4(v.vertex.xyz, 1.0));
+					v.normal.xyz = mul(_Transforms[groupID], float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(_Transforms[groupID], float4(v.tangent.xyz, 0.0));
 				}
 
 				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
@@ -308,7 +308,7 @@
 				float4 vertex: POSITION;
 				float3 normal: NORMAL;
 				float4 texcoord: TEXCOORD0;
-				float4 groupID_CrossSection: TEXCOORD1;
+				float4 groupID_CrossSection: TEXCOORD2;
 			};
 
 			struct vertexOutput
@@ -322,13 +322,13 @@
 			{
 				vertexOutput o;
 
-				float groupID = v.groupID_CrossSection.x;
-				float crossSection = v.groupID_CrossSection.y;
+				int groupID = (int)v.groupID_CrossSection.x;
+				int crossSection = (int)v.groupID_CrossSection.y;
 
 				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection));
 				if (_ShowCrossSection > 0.5)
 				{
-					v.vertex.xyz = mul(_Transforms[groupID.x], float4(v.vertex.xyz, 1.0));
+					v.vertex.xyz = mul(_Transforms[groupID], float4(v.vertex.xyz, 1.0));
 				}
 
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);

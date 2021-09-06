@@ -10,32 +10,30 @@ int main(int argc, const char** argv)
 
 	const char* fileins[] =
 	{
+		"0.fbx",
 		"1.fbx",
 		"2.fbx",
 		"3.fbx",
-		"3_1.fbx",
 		"4.fbx",
 		"5.fbx",
-		"6.fbx",
-		"7.fbx"
+		"6.fbx"
 	};
 
 	const char* fileouts[] =
 	{
+		"0out.fbx",
 		"1out.fbx",
 		"2out.fbx",
 		"3out.fbx",
-		"3_1out.fbx",
 		"4out.fbx",
 		"5out.fbx",
-		"6out.fbx",
-		"7out.fbx"
+		"6out.fbx"
 	};
 
 #define TEST
 #ifdef TEST
-	//for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
-	int i = 2;
+	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
+	//int i = 6;
 #else
 #endif
 	{

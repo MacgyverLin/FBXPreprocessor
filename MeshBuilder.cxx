@@ -247,11 +247,18 @@ bool MeshBuilder::BuildPolygonGroup(FbxNode* fbxNode, int polygonIndex, int& pol
 
 bool MeshBuilder::BuildPosition(FbxNode* fbxNode, Mesh& mesh, Vertex& vertex, int lControlPointIndex, int vertexId)
 {
+	const auto& t = fbxNode->GetGeometricTranslation(FbxNode::EPivotSet::eSourcePivot);
+	const auto& r = fbxNode->GetGeometricRotation(FbxNode::EPivotSet::eSourcePivot);
+	const auto& s = fbxNode->GetGeometricScaling(FbxNode::EPivotSet::eSourcePivot);
+	FbxAMatrix geoTransform(t, r, s);
+	FbxAMatrix localTransform = fbxNode->EvaluateGlobalTransform();
+
 	assert(lControlPointIndex >= 0);
 	FbxMesh* fbxMesh = fbxNode->GetMesh();
 
 	FbxVector4* lControlPoints = fbxMesh->GetControlPoints();
 	vertex.position = lControlPoints[lControlPointIndex];
+	//vertex.position = localTransform.MultT(lControlPoints[lControlPointIndex]);
 
 	return true;
 }

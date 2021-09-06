@@ -7,13 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Cross Section
-    second: {fileID: 2100000, guid: a30ae254524ab5542986e5ca81f296a8, type: 2}
+      name: 01 - Default
+    second: {fileID: 2100000, guid: cd95003cc3ae0194e91b011c6e34b0c5, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Mat0
-    second: {fileID: 2100000, guid: cd95003cc3ae0194e91b011c6e34b0c5, type: 2}
+      name: 03 - Default
+    second: {fileID: 2100000, guid: 0b2af26545ee6814cb414aadc39fc79a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cross Section
+    second: {fileID: 2100000, guid: a30ae254524ab5542986e5ca81f296a8, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0

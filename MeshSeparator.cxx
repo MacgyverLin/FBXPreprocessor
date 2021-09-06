@@ -98,6 +98,11 @@ bool MeshSeparator::Slice(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_)
 		const Vector3& center = srcMesh_.GetPolygonCenter(polyIdx);
 		int groupID = GetSlicedGroupIdx(srcMesh_, root_, center);
 
+		if (groupID == 1)
+		{
+			groupID = groupID;
+		}
+
 		resultMesh_.BeginPolygon(groupID, srcMesh_.GetPolygonMaterialIdx(polyIdx));
 		for (size_t edgeIdx = 0; edgeIdx < srcMesh_.GetPolygonEdgesCount(polyIdx); edgeIdx++)
 		{
@@ -576,8 +581,8 @@ bool MeshSeparator::PrintCrossSectionLoops2(const Mesh& resultMesh_, const std::
 		for (int i = 0; i < crossSectionLoop.size(); i++)
 		{
 			const Vector3& v = resultMesh_.GetEdgeStartVertex(crossSectionLoop[i]);
-			if (vmap.find(v) != vmap.end())
-				return false;
+			//if (vmap.find(v) != vmap.end())
+				//return false;
 
 			vmap[v] = i;
 			Debug::Info("(%2.3f,%2.3f,%2.3f)->", v.X(), v.Y(), v.Z());
@@ -618,11 +623,12 @@ bool MeshSeparator::AddCrossSectionLoopsToMesh2(const std::vector<Loop2>& crossS
 		projMatrix.Init(tangent, binormal, normal, center);
 		projMatrix = projMatrix.Inverse();
 
-		Vertex apex = MakeVertex(resultMesh_, projMatrix, center - normal * 0.01f, normal, tangent, binormal, 1.0f, crossSectionLoop.groupID);
+		Vertex apex = MakeVertex(resultMesh_, projMatrix, center - normal * 0.05f, normal, tangent, binormal, 1.0f, crossSectionLoop.groupID);
 
 		for (int i = 0; i < crossSectionLoop.size(); i++)
 		{
 			resultMesh_.BeginPolygon(crossSectionLoop.groupID, sceneMaxMaterialIdx_ + 1);
+			//resultMesh_.BeginPolygon(crossSectionLoop.groupID, (crossSectionLoop.groupID + 1) * 10);
 
 			const int& edgeVertexIdx0 = crossSectionLoop[(i + 1) % crossSectionLoop.size()];
 			const int& edgeVertexIdx1 = crossSectionLoop[(i + 0) % crossSectionLoop.size()];
@@ -651,12 +657,16 @@ Vertex MeshSeparator::MakeVertex(const Mesh& mesh, const Matrix4& projMatrix,
 {
 	Vertex v;
 	v.position = position;
+	Debug::Info("%3.2f, %3.2f, %3.2f\n", position.X(), position.Y(), position.Z());
+
 	Vector3 vProj = projMatrix.TimesPositionVector(v.position);
-		for (size_t i = 0; i < mesh.GetColorChannelCount(); i++)
+	for (size_t i = 0; i < mesh.GetColorChannelCount(); i++)
 		v.colors[i] = Color(1.0, 1.0, 1.0, 1.0);
 
 	Vector2 uv = Vector2(vProj.X(), vProj.Y());
 	uv *= Vector2(1.0f / textureSize, 1.0f / textureSize);
+
+	Debug::Info("%3.2f, %3.2f\n", uv.X(), uv.Y());
 	for (size_t i = 0; i < mesh.GetUVChannelCount() - 1; i++)
 		v.uvs[i] = uv;
 	
