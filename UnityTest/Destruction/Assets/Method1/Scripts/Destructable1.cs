@@ -2,44 +2,72 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class MiniPhysics
+class MiniRigidbody
 {
     private Vector3 linearPosition = new Vector3();
     private Vector3 linearVelocity = new Vector3();
     private Vector3 angularPosition = new Vector3();
     private Vector3 angularVelocity = new Vector3();
+    private Vector3 localScale = new Vector3();
+    bool sleeping;
 
-    public MiniPhysics()
+    public MiniRigidbody()
     {
     }
 
-    public void Init(Vector3 linearPosition, Vector3 linearVelocity, Vector3 angularPosition, Vector3 angularVelocity)
+    public void Init(Vector3 linearPosition, Vector3 linearVelocity, Vector3 angularPosition, Vector3 angularVelocity, Vector3 localScale)
     {
+        this.sleeping = false;
         this.linearPosition = linearPosition;
         this.linearVelocity = linearVelocity;
         this.angularPosition = angularPosition;
         this.angularVelocity = angularVelocity;
+        this.localScale = localScale;
     }
 
     public void Update(Vector3 linearAcc, Vector3 angularAcc, float linearDrag, float angularDrag, float dt)
     {
-        ///////////////////////////////////////
-        this.linearVelocity -= this.linearVelocity * dt;
-        this.linearVelocity += linearAcc * dt;
-        this.linearPosition += this.linearVelocity * dt;
-
-        ///////////////////////////////////////
-        this.angularVelocity -= this.angularVelocity * angularDrag * dt;
-        this.angularVelocity += angularAcc * dt;
-        this.angularPosition += this.angularVelocity * dt;
+        if (sleeping)
+            return;
 
         RaycastHit hitInfo = new RaycastHit();
-        if (Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo))
+        bool hit = Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt * 2);
+        if (hit)
         {
-            // this.linearVelocity -= 2.0f * Vector3.Dot(this.linearVelocity, hitInfo.normal) * hitInfo.normal;
-            //this.linearPosition = hitInfo.point + this.linearVelocity * dt  * 0.5f;
-            this.linearPosition.y = 0.0f;
+            linearDrag = 0.1f;
+            angularDrag = 0.1f;
+            linearAcc = Vector3.zero;
+            angularAcc = Vector3.zero;
+
+            ///////////////////////////////////////
+            this.linearVelocity -= this.linearVelocity * linearDrag;
+            this.linearPosition += this.linearVelocity * dt;
+
+            ///////////////////////////////////////
+            this.angularVelocity -= this.angularVelocity * angularDrag;
+            this.angularPosition += this.angularVelocity * dt;
+
+            this.linearPosition.y = hitInfo.point.y;
+
+            sleeping = true;
         }
+        else
+        {
+            ///////////////////////////////////////
+            this.linearVelocity -= this.linearVelocity * linearDrag;
+            this.linearVelocity += linearAcc * dt;
+            this.linearPosition += this.linearVelocity * dt;
+
+            ///////////////////////////////////////
+            this.angularVelocity -= this.angularVelocity * angularDrag;
+            this.angularVelocity += angularAcc * dt;
+            this.angularPosition += this.angularVelocity * dt;
+        }
+    }
+
+    public bool IsSleeping()
+    {
+        return sleeping;
     }
 
     public Matrix4x4 GetTransform()
@@ -48,7 +76,7 @@ class MiniPhysics
         Quaternion q = new Quaternion();
         q.eulerAngles = angularPosition;
 
-        result.SetTRS(this.linearPosition, q, Vector3.one);
+        result.SetTRS(this.linearPosition, q, localScale);
 
         return result;
     }
@@ -56,14 +84,11 @@ class MiniPhysics
 
 public class Destructable1 : MonoBehaviour
 {
-    // public Material crossSectionMaterial;
-    public bool showCrossSection = false;
-
     private Vector3 linearAcc = new Vector3(0.0f, -9.8f, 0.0f);
     private Vector3 angularAcc = new Vector3(0.0f, 0.0f, 0.0f);
     private float linearDrag = 0.01f;
     private float angularDrag = 0.01f;
-    private MiniPhysics[] miniPhysics = new MiniPhysics[16];
+    private MiniRigidbody[] miniRigidbodies = new MiniRigidbody[16];
     private Matrix4x4[] transforms = new Matrix4x4[16];
 
     // Start is void called before the first frame update
@@ -75,65 +100,58 @@ public class Destructable1 : MonoBehaviour
     void Reset()
     {
         Init();
-        UpdateCrossSection();
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdateCrossSection();
     }
 
     private void Init()
     {
-        float V1 = 20.0f;
+        float V1 = 50.0f;
         float V2 = 10.0f;
-
         float AV1 = 180.0f * 1.0f;
 
-        for (int i = 0; i < miniPhysics.Length; i++)
+        for (int i = 0; i < miniRigidbodies.Length; i++)
         {
-            miniPhysics[i] = new MiniPhysics();
-            miniPhysics[i].Init
+            miniRigidbodies[i] = new MiniRigidbody();
+            miniRigidbodies[i].Init
             (
                 this.transform.position,
-                new Vector3(Random.Range(-V1, V1), Random.Range(0.0f, V2), Random.Range(-V1, V1)),
+                new Vector3(Random.Range(-V1, V1), Random.Range(0.0f, 3.0f), Random.Range(-V1, V1)),
                 this.transform.rotation.eulerAngles,
-                new Vector3(Random.Range(-AV1, AV1), Random.Range(-AV1, AV1), Random.Range(-AV1, AV1))
+                new Vector3(Random.Range(-AV1, AV1), Random.Range(-AV1, AV1), Random.Range(-AV1, AV1)),
+                this.transform.localScale
             );
         }
 
         for (int i = 0; i < transforms.Length; i++)
         {
-            transforms[i] = miniPhysics[i].GetTransform();
-        }
-    }
-
-    void UpdateCrossSection()
-    {
-        if (showCrossSection)
-        {
-            UpdatePhysics();
-        }
-        else
-        {
-            Init();
+            transforms[i] = miniRigidbodies[i].GetTransform();
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         for (int i = 0; i < meshRenderer.materials.Length; i++)
         {
-            meshRenderer.materials[i].SetFloat("_ShowCrossSection", showCrossSection ? 1.0f : 0.0f);
+            meshRenderer.materials[i].SetFloat("_ShowCrossSection", 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
         }
     }
 
     void UpdatePhysics()
     {
-        for (int i = 0; i < miniPhysics.Length; i++)
+        for (int i = 0; i < miniRigidbodies.Length; i++)
         {
-            miniPhysics[i].Update(linearAcc, angularAcc, linearDrag, angularDrag, Time.deltaTime);
-            transforms[i] = miniPhysics[i].GetTransform();
+            miniRigidbodies[i].Update(linearAcc, angularAcc, linearDrag, angularDrag, Time.deltaTime);
+            transforms[i] = miniRigidbodies[i].GetTransform();
+        }
+
+        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+        for (int i = 0; i < meshRenderer.materials.Length; i++)
+        {
+            meshRenderer.materials[i].SetFloat("_ShowCrossSection", 1.0f);
+            meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
         }
     }
 
@@ -165,25 +183,21 @@ public class Destructable1 : MonoBehaviour
         this.gameObject.SetActive(true);
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
+
+        Init();
     }
 
     IEnumerator WaitAllRigidBodySleptOrTimeOut(float timeout)
     {
         float startTime = Time.time;
 
-        /*
-        // can cache component?
-        List<Rigidbody> rigidbodies = new List<Rigidbody>();
-        for (int i = 0; i < transform.childCount; i++)
-            rigidbodies.Add(transform.GetChild(i).GetComponent<Rigidbody>());
-        */
-
         bool done = false;
         while (!done && ((Time.time - startTime) < timeout))
         {
-            /*
+            UpdatePhysics();
+
             done = true;
-            foreach (var rb in rigidbodies)
+            foreach (var rb in miniRigidbodies)
             {
                 if (!rb.IsSleeping())
                 {
@@ -191,7 +205,6 @@ public class Destructable1 : MonoBehaviour
                     break;
                 }
             }
-            */
 
             yield return null;
         }
@@ -199,11 +212,8 @@ public class Destructable1 : MonoBehaviour
 
     IEnumerator FadeChild(float timeout)
     {
-        /*
         // can cache component?
-        List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
-        for (int i = 0; i < transform.childCount; i++)
-            meshRenderers.Add(transform.GetChild(i).GetComponent<MeshRenderer>());
+        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
 
         float startTime = Time.time;
         while ((Time.time - startTime) < timeout)
@@ -212,19 +222,14 @@ public class Destructable1 : MonoBehaviour
             if (alpha < 0.0f)
                 yield break;
 
-            foreach (var meshRenderer in meshRenderers)
+            foreach (var material in meshRenderer.materials)
             {
-                // ChangeAlpha(meshRenderer.materials, "_Alpha", alpha);
-
-                foreach (var material in meshRenderer.materials)
-                {
-                    material.SetFloat("_Alpha", alpha);
-                }
+                material.SetFloat("_Alpha", alpha);
             }
 
             yield return null;
         }
-        */
+
         yield return null;
     }
 
@@ -238,39 +243,9 @@ public class Destructable1 : MonoBehaviour
 
     IEnumerator HideChild()
     {
-        /*
-        List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
-        for (int i = 0; i < transform.childCount; i++)
-            meshRenderers.Add(transform.GetChild(i).GetComponent<MeshRenderer>());
-
-        foreach (var meshRenderer in meshRenderers)
-        {
-            meshRenderer.enabled = false;
-        }
-        */
+        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = false;
 
         yield return null;
     }
-
-
-    /*
-    private void InitChild(GameObject child)
-    {
-        // disable child
-        child.SetActive(false);
-        MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
-        meshRenderer.enabled = false;
-
-        // last material must be crossSection Material
-        Material[] matArray = meshRenderer.materials;
-        matArray[matArray.Length - 1] = crossSectionMaterial;
-        meshRenderer.materials = matArray;
-
-        // child use physics
-        Rigidbody rigidbody = child.AddComponent<Rigidbody>();
-        MeshCollider meshCollider = child.AddComponent<MeshCollider>();
-        meshCollider.convex = true;
-    }
-    */
-
 }

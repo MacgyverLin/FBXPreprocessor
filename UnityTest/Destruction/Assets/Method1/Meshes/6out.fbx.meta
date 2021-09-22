@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 9dbf8bf0e3494d04bbed18d138c01864
+guid: 70f661809d0f9ae4c87b206084cde0ba
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable: []
@@ -7,13 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: 01 - Default
+      name: Cross Section
+    second: {fileID: 2100000, guid: a30ae254524ab5542986e5ca81f296a8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: material_0
     second: {fileID: 2100000, guid: cd95003cc3ae0194e91b011c6e34b0c5, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Cross Section
-    second: {fileID: 2100000, guid: cd95003cc3ae0194e91b011c6e34b0c5, type: 2}
+      name: material_1
+    second: {fileID: 2100000, guid: 0b2af26545ee6814cb414aadc39fc79a, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
