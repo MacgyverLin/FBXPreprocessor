@@ -16,16 +16,32 @@
 	#define IOS_REF (*(pManager->GetIOSettings()))
 #endif
 
+void Printf(char* format, ...)
+{
+    static char buffer[1024];
+    va_list aptr;
+    int ret;
+
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+
+    // FBXSDK_printf(buffer);
+}
+
 void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
 {
     //The first thing to do is to create the FBX Manager which is the object allocator for almost all the classes in the SDK
     pManager = FbxManager::Create();
     if( !pManager )
     {
-        FBXSDK_printf("Error: Unable to create FBX Manager!\n");
+        Printf("Error: Unable to create FBX Manager!\n");
         exit(1);
     }
-	else FBXSDK_printf("Autodesk FBX SDK version %s\n", pManager->GetVersion());
+    else
+    {
+        Printf("Autodesk FBX SDK version %s\n", pManager->GetVersion());
+    }
 
 	//Create an IOSettings object. This object holds all import/export settings.
 	FbxIOSettings* ios = FbxIOSettings::Create(pManager, IOSROOT);
@@ -39,7 +55,7 @@ void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
     pScene = FbxScene::Create(pManager, "My Scene");
 	if( !pScene )
     {
-        FBXSDK_printf("Error: Unable to create FBX scene!\n");
+        Printf("Error: Unable to create FBX scene!\n");
         exit(1);
     }
 }
@@ -48,7 +64,7 @@ void DestroySdkObjects(FbxManager* pManager, bool pExitStatus)
 {
     //Delete the FBX Manager. All the objects that have been allocated using the FBX Manager and that haven't been explicitly destroyed are also automatically destroyed.
     if( pManager ) pManager->Destroy();
-	if( pExitStatus ) FBXSDK_printf("Program Success!\n");
+	if( pExitStatus ) Printf("Program Success!\n");
 }
 
 bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename, bool binary)
@@ -101,13 +117,13 @@ bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename,
     // Initialize the exporter by providing a filename.
     if(lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
     {
-        FBXSDK_printf("Call to FbxExporter::Initialize() failed.\n");
-        FBXSDK_printf("Error returned: %s\n\n", lExporter->GetStatus().GetErrorString());
+        Printf("Call to FbxExporter::Initialize() failed.\n");
+        Printf("Error returned: %s\n\n", lExporter->GetStatus().GetErrorString());
         return false;
     }
 
     FbxManager::GetFileFormatVersion(lMajor, lMinor, lRevision);
-    FBXSDK_printf("FBX file format version %d.%d.%d\n\n", lMajor, lMinor, lRevision);
+    Printf("FBX file format version %d.%d.%d\n\n", lMajor, lMinor, lRevision);
 
     // Export the scene.
     lStatus = lExporter->Export(pScene); 
@@ -139,51 +155,51 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     if( !lImportStatus )
     {
         FbxString error = lImporter->GetStatus().GetErrorString();
-        FBXSDK_printf("Call to FbxImporter::Initialize() failed.\n");
-        FBXSDK_printf("Error returned: %s\n\n", error.Buffer());
+        Printf("Call to FbxImporter::Initialize() failed.\n");
+        Printf("Error returned: %s\n\n", error.Buffer());
 
         if (lImporter->GetStatus().GetCode() == FbxStatus::eInvalidFileVersion)
         {
-            FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
-            FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
+            Printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
+            Printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
         }
 
         return false;
     }
 
-    FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
+    Printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
 
     if (lImporter->IsFBX())
     {
-        FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
+        Printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
 
         // From this point, it is possible to access animation stack information without
         // the expense of loading the entire file.
 
-        FBXSDK_printf("Animation Stack Information\n");
+        Printf("Animation Stack Information\n");
 
         lAnimStackCount = lImporter->GetAnimStackCount();
 
-        FBXSDK_printf("    Number of Animation Stacks: %d\n", lAnimStackCount);
-        FBXSDK_printf("    Current Animation Stack: \"%s\"\n", lImporter->GetActiveAnimStackName().Buffer());
-        FBXSDK_printf("\n");
+        Printf("    Number of Animation Stacks: %d\n", lAnimStackCount);
+        Printf("    Current Animation Stack: \"%s\"\n", lImporter->GetActiveAnimStackName().Buffer());
+        Printf("\n");
 
         for(int i = 0; i < lAnimStackCount; i++)
         {
             FbxTakeInfo* lTakeInfo = lImporter->GetTakeInfo(i);
 
-            FBXSDK_printf("    Animation Stack %d\n", i);
-            FBXSDK_printf("         Name: \"%s\"\n", lTakeInfo->mName.Buffer());
-            FBXSDK_printf("         Description: \"%s\"\n", lTakeInfo->mDescription.Buffer());
+            Printf("    Animation Stack %d\n", i);
+            Printf("         Name: \"%s\"\n", lTakeInfo->mName.Buffer());
+            Printf("         Description: \"%s\"\n", lTakeInfo->mDescription.Buffer());
 
             // Change the value of the import name if the animation stack should be imported 
             // under a different name.
-            FBXSDK_printf("         Import Name: \"%s\"\n", lTakeInfo->mImportName.Buffer());
+            Printf("         Import Name: \"%s\"\n", lTakeInfo->mImportName.Buffer());
 
             // Set the value of the import state to false if the animation stack should be not
             // be imported. 
-            FBXSDK_printf("         Import State: %s\n", lTakeInfo->mSelect ? "true" : "false");
-            FBXSDK_printf("\n");
+            Printf("         Import State: %s\n", lTakeInfo->mSelect ? "true" : "false");
+            Printf("\n");
         }
 
         // Set the import states. By default, the import states are always set to 
@@ -201,7 +217,7 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     lStatus = lImporter->Import(pScene);
 	if (lStatus == false && lImporter->GetStatus() == FbxStatus::ePasswordError)
 	{
-		FBXSDK_printf("Please enter password: ");
+		Printf("Please enter password: ");
 
 		lPassword[0] = '\0';
 
@@ -218,39 +234,39 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
 
 		if (lStatus == false && lImporter->GetStatus() == FbxStatus::ePasswordError)
 		{
-			FBXSDK_printf("\nPassword is wrong, import aborted.\n");
+			Printf("\nPassword is wrong, import aborted.\n");
 		}
 	}
 
 	if (!lStatus || (lImporter->GetStatus() != FbxStatus::eSuccess))
 	{
-		FBXSDK_printf("********************************************************************************\n");
+		Printf("********************************************************************************\n");
 		if (lStatus)
 		{
-			FBXSDK_printf("WARNING:\n");
-			FBXSDK_printf("   The importer was able to read the file but with errors.\n");
-			FBXSDK_printf("   Loaded scene may be incomplete.\n\n");
+			Printf("WARNING:\n");
+			Printf("   The importer was able to read the file but with errors.\n");
+			Printf("   Loaded scene may be incomplete.\n\n");
 		}
 		else
 		{
-			FBXSDK_printf("Importer failed to load the file!\n\n");
+			Printf("Importer failed to load the file!\n\n");
 		}
 
 		if (lImporter->GetStatus() != FbxStatus::eSuccess)
-			FBXSDK_printf("   Last error message: %s\n", lImporter->GetStatus().GetErrorString());
+			Printf("   Last error message: %s\n", lImporter->GetStatus().GetErrorString());
 
 		FbxArray<FbxString*> history;
 		lImporter->GetStatus().GetErrorStringHistory(history);
 		if (history.GetCount() > 1)
 		{
-			FBXSDK_printf("   Error history stack:\n");
+			Printf("   Error history stack:\n");
 			for (int i = 0; i < history.GetCount(); i++)
 			{
-				FBXSDK_printf("      %s\n", history[i]->Buffer());
+				Printf("      %s\n", history[i]->Buffer());
 			}
 		}
 		FbxArrayDelete<FbxString*>(history);
-		FBXSDK_printf("********************************************************************************\n");
+		Printf("********************************************************************************\n");
 	}
 
     // Destroy the importer.

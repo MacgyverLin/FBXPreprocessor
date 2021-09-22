@@ -6,6 +6,8 @@ int main(int argc, const char** argv)
 {
 	Arguments args(argc, argv);
 
+// #define TEST
+#ifdef TEST
 	const char* fileins[] =
 	{
 		"1.fbx",
@@ -28,8 +30,6 @@ int main(int argc, const char** argv)
 		"7out.fbx",
 	};
 
-#define TEST
-#ifdef TEST
 	for (int i = 0; i < sizeof(fileouts)/ sizeof(fileouts[0]); i++)
 	//int i = 5;
 #else
@@ -71,15 +71,6 @@ int main(int argc, const char** argv)
 		}
 
 		/////////////////////////////////////////////////////////////////////
-// #define NO_SLICE
-#ifdef NO_SLICE
-		std::vector<MeshArray> resultMeshArrays;
-		if (!meshBuilder.Copy(originalMeshes, resultMeshArrays))
-		{
-			ErrorMsg("\n\nAn error in copying Mesh Nodes...");
-			return -1;
-		}
-#else
 		BSPMeshSlicer meshSlicer;
 		std::vector<MeshArray> resultMeshArrays;
 		if (!meshSlicer.Process(originalMeshes, resultMeshArrays, args.sliceCount, args.crossSectionTextureScale))
@@ -87,7 +78,6 @@ int main(int argc, const char** argv)
 			ErrorMsg("\n\nAn error in slicing Mesh Nodes...");
 			return -1;
 		}
-#endif
 
 		/////////////////////////////////////////////////////////////////////
 		FBXMeshBuilder fbxMeshBuilder;
