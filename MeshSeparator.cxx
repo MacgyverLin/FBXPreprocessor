@@ -36,30 +36,38 @@ bool MeshSeparator::Process(int sceneMaxMaterialIdx_, const Mesh& srcMesh_, Mesh
 {
 #if defined(USE_METHOD1)
 	BSP bsp;
-	bsp.splitPlane = Plane(
-		//srcMesh_.GetAABB().GetMajorAxis(true),
-		//srcMesh_.GetAABB().GetCenter(true)
-		Vector3::UnitY,
-		srcMesh_.GetAABB().GetCenter(false)
-	);
+
+	for (int i = 0; i < 10; i++)
+	{
+		bsp.Split
+		(
+			Plane
+			(
+				srcMesh_.GetAABB().GetMajorAxis(true),
+				srcMesh_.GetAABB().GetCenter(true)
+				// Vector3::UnitY,
+				// srcMesh_.GetAABB().GetCenter(false)
+			)
+		);
+	}
 
 	// make sure src Mesh is closed
 	if (!srcMesh_.IsClosed())
 		return false;
 
 	// slice, use bsp to set groupID
-	if (!Slice(srcMesh_, &bsp, resultMesh_))
+	if (!Slice(srcMesh_, bsp, resultMesh_))
 		return false;
 
-	std::vector<Loop2> crossSectionLoops2;
-	if (!BuildCrossSectionLoops2(resultMesh_, crossSectionLoops2))
-		return false;
+	//std::vector<Loop2> crossSectionLoops2;
+	//if (!BuildCrossSectionLoops2(resultMesh_, crossSectionLoops2))
+		//return false;
 
-	if (!PrintCrossSectionLoops2(resultMesh_, crossSectionLoops2))
-		return false;
+	//if (!PrintCrossSectionLoops2(resultMesh_, crossSectionLoops2))
+//		return false;
 
-	if (!AddCrossSectionLoopsToMesh2(crossSectionLoops2, sceneMaxMaterialIdx_, 1.0f, resultMesh_))
-		return false;
+	//if (!AddCrossSectionLoopsToMesh2(crossSectionLoops2, sceneMaxMaterialIdx_, 1.0f, resultMesh_))
+		//return false;
 #elif defined(USE_METHOD2)
 #endif
 	return true;
@@ -67,8 +75,19 @@ bool MeshSeparator::Process(int sceneMaxMaterialIdx_, const Mesh& srcMesh_, Mesh
 
 #if defined(USE_METHOD1)
 
-bool MeshSeparator::Slice(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_)
+bool MeshSeparator::Slice(const Mesh& srcMesh_, BSP& bsp_, Mesh& resultMesh_)
 {
+	std::vector<const BSP*> bspArray;
+	bsp_.BFS
+	(
+		[&](const BSP* node) -> void
+		{
+			bspArray.push_back(node);
+		}
+	);
+
+	std::map<int, int> groupIDMaps;
+
 	int uvChannelCount = srcMesh_.GetUVChannelCount();
 	resultMesh_.Begin(srcMesh_.GetColorChannelCount(), uvChannelCount + 1, srcMesh_.GetNormalChannelCount(), srcMesh_.GetTangentChannelCount(), srcMesh_.GetBinormalChannelCount());
 
@@ -76,12 +95,12 @@ bool MeshSeparator::Slice(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_)
 	for (size_t polyIdx = 0; polyIdx < srcMesh_.GetPolygonCount(); polyIdx++)
 	{
 		const Vector3& center = srcMesh_.GetPolygonCenter(polyIdx);
-		int groupID = GetSlicedGroupIdx(srcMesh_, root_, center);
-
-		if (groupID == 1)
-		{
-			groupID = groupID;
-		}
+		int region = GetBSPRegion(srcMesh_, bspArray, center);
+		if(groupIDMaps.find(region) == groupIDMaps.end())
+			groupIDMaps[region] = groupIDMaps.size();
+		
+		int groupID = groupIDMaps[region];
+		Debug::Info("%d->%d\n", region, groupID);
 
 		resultMesh_.BeginPolygon(groupID, srcMesh_.GetPolygonMaterialIdx(polyIdx));
 		for (size_t edgeIdx = 0; edgeIdx < srcMesh_.GetPolygonEdgesCount(polyIdx); edgeIdx++)
@@ -111,8 +130,27 @@ int MeshSeparator::ComputeSceneMaxMaterialIdx(const std::vector<Mesh>& srcMeshes
 	return sceneMaxMaterialIdx;
 }
 
-int MeshSeparator::GetSlicedGroupIdx(const Mesh& srcMesh_, BSP* root_, const Vector3& p_)
+int MeshSeparator::GetBSPRegion(const Mesh& srcMesh_, const std::vector<const BSP*>& bspArray_, const Vector3& p_)
 {
+	int idx = 0;
+
+	while ((idx * 2 + 2) < bspArray_.size())
+	{
+		const Plane& plane = bspArray_[idx]->GetPlane();
+		
+		if (plane.WhichSide(p_))
+		{
+			idx = idx * 2 + 1;
+		}
+		else
+		{
+			idx = idx * 2 + 2;
+		}
+	}
+
+	return idx;
+
+	/*
 	int polygonGroupID = 0;
 	if (root_->GetPlane().WhichSide(p_))
 	{
@@ -131,6 +169,7 @@ int MeshSeparator::GetSlicedGroupIdx(const Mesh& srcMesh_, BSP* root_, const Vec
 	}
 
 	return polygonGroupID;
+	*/
 }
 
 bool MeshSeparator::BuildCrossSectionLoops2(const Mesh& resultMesh_, std::vector<Loop2>& crossSectionLoops_)

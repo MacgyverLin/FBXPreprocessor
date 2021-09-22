@@ -7,11 +7,12 @@
 class BSP
 {
 public:
-	BSP()
+	BSP(int id_ = -1)
 		: splitPlane()
+		, id(id_)
+		, left(nullptr)
+		, right(nullptr)
 	{
-		left = nullptr;
-		right = nullptr;
 	}
 
 	~BSP()
@@ -29,9 +30,24 @@ public:
 		}
 	}
 
+	int GetID() const
+	{
+		return id;
+	}
+	
 	const Plane& GetPlane() const
 	{
 		return splitPlane;
+	}
+
+	const BSP* GetLeft() const
+	{
+		return left;
+	}
+
+	const BSP* GetRight() const
+	{
+		return right;
 	}
 
 	void Split(const Plane& splitPlane_)
@@ -39,8 +55,8 @@ public:
 		if (!left && !right)
 		{
 			splitPlane = splitPlane_;
-			left = new BSP();
-			right = new BSP();
+			left = new BSP(2 * id + 1);
+			right = new BSP(2 * id + 2);
 		}
 		else
 		{
@@ -52,29 +68,30 @@ public:
 		}
 	}
 
-	void BFS(std::function<void(BSP*)> cb)
+	void BFS(std::function<void(const BSP*)> cb)
 	{
-		std::queue<BSP*> queue;
+		std::queue<BSP* > queue;
 
 		queue.push(this);
 		while (!queue.empty())
 		{
-			cb(queue.front());
+			BSP* current = queue.front();
+			cb(current);
 			queue.pop();
 
-			if (left)
+			if (current->left)
 			{
-				queue.push(left);
+				queue.push(current->left);
 			}
 
-			if (right)
+			if (current->right)
 			{
-				queue.push(right);
+				queue.push(current->right);
 			}
 		}
 	}
 
-	void DFS(std::function<void(BSP*)> cb)
+	void DFS(std::function<void(const BSP*)> cb)
 	{
 		cb(this);
 
@@ -84,7 +101,8 @@ public:
 		if (right)
 			right->DFS(cb);
 	}
-
+private:
+	int id;
 	Plane splitPlane;
 	BSP* left;
 	BSP* right;

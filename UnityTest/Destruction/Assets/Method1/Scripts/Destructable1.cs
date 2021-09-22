@@ -2,10 +2,69 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+class MiniPhysics
+{
+    private Vector3 linearPosition = new Vector3();
+    private Vector3 linearVelocity = new Vector3();
+    private Vector3 angularPosition = new Vector3();
+    private Vector3 angularVelocity = new Vector3();
+
+    public MiniPhysics()
+    {
+    }
+
+    public void Init(Vector3 linearPosition, Vector3 linearVelocity, Vector3 angularPosition, Vector3 angularVelocity)
+    {
+        this.linearPosition = linearPosition;
+        this.linearVelocity = linearVelocity;
+        this.angularPosition = angularPosition;
+        this.angularVelocity = angularVelocity;
+    }
+
+    public void Update(Vector3 linearAcc, Vector3 angularAcc, float linearDrag, float angularDrag, float dt)
+    {
+        ///////////////////////////////////////
+        this.linearVelocity -= this.linearVelocity * dt;
+        this.linearVelocity += linearAcc * dt;
+        this.linearPosition += this.linearVelocity * dt;
+
+        ///////////////////////////////////////
+        this.angularVelocity -= this.angularVelocity * angularDrag * dt;
+        this.angularVelocity += angularAcc * dt;
+        this.angularPosition += this.angularVelocity * dt;
+
+        RaycastHit hitInfo = new RaycastHit();
+        if (Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo))
+        {
+            // this.linearVelocity -= 2.0f * Vector3.Dot(this.linearVelocity, hitInfo.normal) * hitInfo.normal;
+            //this.linearPosition = hitInfo.point + this.linearVelocity * dt  * 0.5f;
+            this.linearPosition.y = 0.0f;
+        }
+    }
+
+    public Matrix4x4 GetTransform()
+    {
+        Matrix4x4 result = new Matrix4x4();
+        Quaternion q = new Quaternion();
+        q.eulerAngles = angularPosition;
+
+        result.SetTRS(this.linearPosition, q, Vector3.one);
+
+        return result;
+    }
+};
+
 public class Destructable1 : MonoBehaviour
 {
     // public Material crossSectionMaterial;
     public bool showCrossSection = false;
+
+    private Vector3 linearAcc = new Vector3(0.0f, -9.8f, 0.0f);
+    private Vector3 angularAcc = new Vector3(0.0f, 0.0f, 0.0f);
+    private float linearDrag = 0.01f;
+    private float angularDrag = 0.01f;
+    private MiniPhysics[] miniPhysics = new MiniPhysics[16];
+    private Matrix4x4[] transforms = new Matrix4x4[16];
 
     // Start is void called before the first frame update
     void Start()
@@ -15,6 +74,7 @@ public class Destructable1 : MonoBehaviour
 
     void Reset()
     {
+        Init();
         UpdateCrossSection();
     }
 
@@ -26,38 +86,54 @@ public class Destructable1 : MonoBehaviour
 
     private void Init()
     {
-        // make sure visible
-        this.gameObject.SetActive(true);
-        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-        meshRenderer.enabled = true;
+        float V1 = 20.0f;
+        float V2 = 10.0f;
 
-        //Material[] materials = meshRenderer.materials;
-        //materials[materials.Length - 1] = crossSectionMaterial;
-        //meshRenderer.materials = materials;
+        float AV1 = 180.0f * 1.0f;
+
+        for (int i = 0; i < miniPhysics.Length; i++)
+        {
+            miniPhysics[i] = new MiniPhysics();
+            miniPhysics[i].Init
+            (
+                this.transform.position,
+                new Vector3(Random.Range(-V1, V1), Random.Range(0.0f, V2), Random.Range(-V1, V1)),
+                this.transform.rotation.eulerAngles,
+                new Vector3(Random.Range(-AV1, AV1), Random.Range(-AV1, AV1), Random.Range(-AV1, AV1))
+            );
+        }
+
+        for (int i = 0; i < transforms.Length; i++)
+        {
+            transforms[i] = miniPhysics[i].GetTransform();
+        }
     }
 
     void UpdateCrossSection()
     {
+        if (showCrossSection)
+        {
+            UpdatePhysics();
+        }
+        else
+        {
+            Init();
+        }
+
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-
-        Matrix4x4[] transforms = new Matrix4x4[3];
-
-        Quaternion rotate0 = Quaternion.Euler(0, 0, 360.0f * Time.time / 20.0f);
-        Vector3 translate0 = new Vector3(-5.0f * Mathf.Abs(Mathf.Sin(2.0f * Mathf.PI * Time.time / 20.0f)), 0.0f, 0.0f);
-        transforms[0] = Matrix4x4.TRS(translate0, rotate0, Vector3.one);
-
-        Quaternion rotate1 = Quaternion.Euler(0, 0, 360.0f * Time.time / 20.0f);
-        Vector3 translate1 = new Vector3(5.0f * Mathf.Abs(Mathf.Sin(2.0f * Mathf.PI * Time.time / 20.0f)), 0.0f, 0.0f);
-        transforms[1] = Matrix4x4.TRS(translate1, rotate1, Vector3.one);
-
-        Quaternion rotate2 = Quaternion.Euler(0, 0, 360.0f * Time.time / 20.0f);
-        Vector3 translate2 = new Vector3(0.0f, 5.0f * Mathf.Abs(Mathf.Sin(2.0f * Mathf.PI * Time.time / 20.0f)), 0.0f);
-        transforms[2] = Matrix4x4.TRS(translate2, rotate2, Vector3.one);
-
         for (int i = 0; i < meshRenderer.materials.Length; i++)
         {
             meshRenderer.materials[i].SetFloat("_ShowCrossSection", showCrossSection ? 1.0f : 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
+        }
+    }
+
+    void UpdatePhysics()
+    {
+        for (int i = 0; i < miniPhysics.Length; i++)
+        {
+            miniPhysics[i].Update(linearAcc, angularAcc, linearDrag, angularDrag, Time.deltaTime);
+            transforms[i] = miniPhysics[i].GetTransform();
         }
     }
 

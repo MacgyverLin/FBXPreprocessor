@@ -21,10 +21,10 @@ private:
 // #define USE_METHOD2
 
 #if defined(USE_METHOD1)
-	bool Slice(const Mesh& srcMesh_, BSP* root_, Mesh& resultMesh_);
+	bool Slice(const Mesh& srcMesh_, BSP& bsp_, Mesh& resultMesh_);
 
 	int ComputeSceneMaxMaterialIdx(const std::vector<Mesh>& srcMeshes_);
-	int GetSlicedGroupIdx(const Mesh& srcMesh_, BSP* root_, const Vector3& p_);
+	int GetBSPRegion(const Mesh& srcMesh_, const std::vector<const BSP*>& bspArray_, const Vector3& p_);
 
 	typedef std::multimap<int, int> UnorderedEdges;
 	bool BuildCrossSectionLoops2(const Mesh& resultMesh_, std::vector<Loop2>& crossSectionLoops_);

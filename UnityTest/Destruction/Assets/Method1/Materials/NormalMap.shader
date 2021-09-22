@@ -73,18 +73,21 @@
 				int crossSection = (int)v.groupID_CrossSection.y;
 
 				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+
+				float4x4 transform = mul(unity_WorldToObject, _Transforms[groupID]);
+				// float4x4 transform = _Transforms[groupID];
 				if (_ShowCrossSection == 1.0)
 				{
-					v.vertex.xyz = mul(_Transforms[groupID], float4(v.vertex.xyz, 1.0));
-					v.normal.xyz = mul(_Transforms[groupID], float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(_Transforms[groupID], float4(v.tangent.xyz, 0.0));
+					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
+					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
 				}
 
-				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
+				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+				o.normalWorld = normalize(mul(unity_ObjectToWorld, v.normal).xyz);
 				o.tangentWorld = normalize(mul(unity_ObjectToWorld, v.tangent).xyz);
 				o.binormalWorld = normalize(cross(o.normalWorld, o.tangentWorld));
-
-				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+				
 				o.pos = UnityObjectToClipPos(v.vertex);
 				o.tex = v.texcoord;
 	
@@ -170,7 +173,7 @@
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float _ShowCrossSection;
-			uniform float4x4 _Transforms[3];
+			uniform float4x4 _Transforms[16];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -196,7 +199,7 @@
 			};
 
 			// Vertex Function
-			vertexOutput vert(vertexInput v) 
+			vertexOutput vert(vertexInput v)
 			{
 				vertexOutput o;
 
@@ -204,23 +207,27 @@
 				int crossSection = (int)v.groupID_CrossSection.y;
 
 				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
-				if (_ShowCrossSection > 0.5)
+
+				float4x4 transform = mul(unity_WorldToObject, _Transforms[groupID]);
+				// float4x4 transform = _Transforms[groupID];
+				if (_ShowCrossSection == 1.0)
 				{
-					v.vertex.xyz = mul(_Transforms[groupID], float4(v.vertex.xyz, 1.0));
-					v.normal.xyz = mul(_Transforms[groupID], float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(_Transforms[groupID], float4(v.tangent.xyz, 0.0));
+					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
+					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
 				}
 
-				o.normalWorld = normalize(mul(float4(v.normal, 0.0), unity_WorldToObject).xyz);
+				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+				o.normalWorld = normalize(mul(unity_ObjectToWorld, v.normal).xyz);
 				o.tangentWorld = normalize(mul(unity_ObjectToWorld, v.tangent).xyz);
 				o.binormalWorld = normalize(cross(o.normalWorld, o.tangentWorld));
 
-				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 				o.pos = UnityObjectToClipPos(v.vertex);
 				o.tex = v.texcoord;
 
 				return o;
 			}
+
 
 			// Fragment Function
 			float4 frag(vertexOutput i) : COLOR 
@@ -297,7 +304,7 @@
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float _ShowCrossSection;
-			uniform float4x4 _Transforms[3];
+			uniform float4x4 _Transforms[16];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -325,10 +332,13 @@
 				int groupID = (int)v.groupID_CrossSection.x;
 				int crossSection = (int)v.groupID_CrossSection.y;
 
-				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection));
-				if (_ShowCrossSection > 0.5)
+				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+
+				float4x4 transform = mul(unity_WorldToObject, _Transforms[groupID]);
+				// float4x4 transform = _Transforms[groupID];
+				if (_ShowCrossSection == 1.0)
 				{
-					v.vertex.xyz = mul(_Transforms[groupID], float4(v.vertex.xyz, 1.0));
+					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
 				}
 
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
