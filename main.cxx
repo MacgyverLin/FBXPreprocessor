@@ -8,6 +8,8 @@ int main(int argc, const char** argv)
 {
 	Arguments args(argc, argv);
 
+#define TEST
+#ifdef TEST
 	const char* fileins[] =
 	{
 		"0.fbx",
@@ -30,8 +32,6 @@ int main(int argc, const char** argv)
 		"6out.fbx"
 	};
 
-#define TEST
-#ifdef TEST
 	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
 	//int i = 6;
 #else
