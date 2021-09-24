@@ -69,8 +69,8 @@
 			{
 				vertexOutput o;
 
-				int groupID = (int)v.groupID_CrossSection.x;
-				int crossSection = (int)v.groupID_CrossSection.y;
+				int groupID = (int)(v.groupID_CrossSection.x);
+				int crossSection = (int)(v.groupID_CrossSection.y);
 
 				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
 
@@ -154,7 +154,8 @@
 		Pass
 		{
 			Tags { "LightMode" = "ForwardAdd" }
-			Blend One One
+			Blend One OneMinusSrcAlpha
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag

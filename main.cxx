@@ -32,8 +32,8 @@ int main(int argc, const char** argv)
 		"6out.fbx"
 	};
 
-	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
-	//int i = 6;
+	// for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
+	int i = 1;
 #else
 #endif
 	{

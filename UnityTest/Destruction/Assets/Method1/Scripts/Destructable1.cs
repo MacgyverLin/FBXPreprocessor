@@ -107,11 +107,10 @@ public class Destructable1 : MonoBehaviour
     {
     }
 
-    private void Init()
+    private void Init(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
-        float V1 = 50.0f;
-        float V2 = 10.0f;
-        float AV1 = 180.0f * 1.0f;
+        float linearSpeed = 10.0f * explosionForce;
+        float angularSpeed = 360.0f * explosionForce;
 
         for (int i = 0; i < miniRigidbodies.Length; i++)
         {
@@ -119,9 +118,9 @@ public class Destructable1 : MonoBehaviour
             miniRigidbodies[i].Init
             (
                 this.transform.position,
-                new Vector3(Random.Range(-V1, V1), Random.Range(0.0f, 3.0f), Random.Range(-V1, V1)),
+                new Vector3(Random.Range(-linearSpeed, linearSpeed), Random.Range(0.0f, linearSpeed * upwardsModifier), Random.Range(-linearSpeed, linearSpeed)),
                 this.transform.rotation.eulerAngles,
-                new Vector3(Random.Range(-AV1, AV1), Random.Range(-AV1, AV1), Random.Range(-AV1, AV1)),
+                new Vector3(Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed)),
                 this.transform.localScale
             );
         }
@@ -165,13 +164,13 @@ public class Destructable1 : MonoBehaviour
         BeginDestruct(explosionForce, explosionRadius, upwardsModifier, mode);
 
         // yield return WaitAllRigidBodySleptOrTimeOut(Random.Range((rigidBodyMaxLifetime - 1.0f)/2, rigidBodyMaxLifetime - 1.0f));
-        yield return WaitAllRigidBodySleptOrTimeOut(rigidBodyMaxLifetime - 1.0f);
+        yield return WaitAllRigidBodySleptOrTimeOut(rigidBodyMaxLifetime);
 
         yield return new WaitForSeconds(1.0f);
 
         if (doFading)
         {
-            yield return FadeChild(Random.Range(1.0f, fadeTime));
+            yield return FadeChild(fadeTime);
 
             yield return HideChild();
         }
@@ -184,7 +183,7 @@ public class Destructable1 : MonoBehaviour
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
-        Init();
+        Init(explosionForce, explosionRadius, upwardsModifier, mode);
     }
 
     IEnumerator WaitAllRigidBodySleptOrTimeOut(float timeout)
@@ -192,7 +191,7 @@ public class Destructable1 : MonoBehaviour
         float startTime = Time.time;
 
         bool done = false;
-        while (!done && ((Time.time - startTime) < timeout))
+        while (!done/* && (Time.time-startTime<timeout)*/)
         {
             UpdatePhysics();
 
@@ -222,9 +221,9 @@ public class Destructable1 : MonoBehaviour
             if (alpha < 0.0f)
                 yield break;
 
-            foreach (var material in meshRenderer.materials)
+            for (int i = 0; i < meshRenderer.materials.Length; i++)
             {
-                material.SetFloat("_Alpha", alpha);
+                meshRenderer.materials[i].SetFloat("_Alpha", alpha);
             }
 
             yield return null;
@@ -233,13 +232,6 @@ public class Destructable1 : MonoBehaviour
         yield return null;
     }
 
-    public void ChangeAlpha(Material[] materials, string name, float alpha)
-    {
-        foreach (var material in materials)
-        {
-            material.SetFloat("_Alpha", alpha);
-        }
-    }
 
     IEnumerator HideChild()
     {

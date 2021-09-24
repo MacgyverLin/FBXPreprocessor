@@ -104,9 +104,10 @@
 		vertexPerFace = 3
 		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
 		
+		print faceGroupMap.count
 		for faceGroup in faceGroupMap do
 		(
-			print faceGroup.key
+			format "% %\n" faceGroup.key (mod faceGroup.key maxGroupCount)
 			for faceIdx in faceGroup.value do
 			(
 				vertexIds = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
@@ -118,7 +119,7 @@
 					vertexIdx = vertexIdxs[v]
 					
 					p = meshop.getMapVert obj useMapChannel vertexIdx
-					p.x = mod faceGroup.key maxGroupCount
+					p.x = (mod faceGroup.key maxGroupCount)
 					meshop.setMapVert obj useMapChannel vertexIdx p
 				)
 			)
