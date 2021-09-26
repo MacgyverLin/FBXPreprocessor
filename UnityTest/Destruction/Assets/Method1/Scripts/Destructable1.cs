@@ -79,14 +79,15 @@ class SimplePhysics : PhysicsBase
         this.scale = new Vector4(scale.x, scale.y, scale.z, 1.0f);
     }
 
-    public void Update()
+    public override void Update()
     {
-        float dt = Time.deltaTime;
         if (sleeping)
             return;
 
+        float dt = Time.deltaTime;
+
         RaycastHit hitInfo = new RaycastHit();
-        bool hit = Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt * 2);
+        bool hit = Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt);
         if (hit)
         {
             float fraction = hitInfo.distance / this.linearVelocity.magnitude;
@@ -101,6 +102,7 @@ class SimplePhysics : PhysicsBase
             this.angularVelocity -= this.angularVelocity * this.angularDrag * dt;
 
             this.linearPosition = hitInfo.point;
+            //this.angularPosition = new Vector3(0.0f, 0.0f, 0.0f);// hitInfo.normal;
 
             sleeping = true;
         }
@@ -117,37 +119,40 @@ class SimplePhysics : PhysicsBase
             this.angularVelocity += this.angularAcc * dt;
         }
 
-        transform.SetTRS(this.linearPosition, q, scale);
+        if (this.linearPosition.y < 1)
+            sleeping = true;
+        //////////////////////////////
         translation = this.linearPosition;
 
         Quaternion q = new Quaternion();
         q.eulerAngles = angularPosition;
         rotation = new Vector4(q.x, q.y, q.z, q.w);
+
+        transform.SetTRS(this.linearPosition, q, scale);
+    }
+};
+
+class RigidbodyPhysics : PhysicsBase
+{
+    public RigidbodyPhysics()
+    {
     }
 
-    public bool IsSleeping()
+    public void Init(GameObject gameobject, Vector3 linearPosition, Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
+                     Vector3 angularPosition, Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
+                     Vector3 scale)
     {
-        return sleeping;
+        this.sleeping = false;
+
+
     }
 
-    public Matrix4x4 GetTransform()
+    public override void Update()
     {
-        return transform;
-    }
-
-    public Vector4 GetTranslation()
-    {
-        return translation;
-    }
-
-    public Vector4 GetRotation()
-    {
-        return rotation;
-    }
+        float dt = Time.deltaTime;
+        if (sleeping)
+            return;
     
-    public Vector4 GetScale()
-    {
-        return new Vector4(scale.x, scale.y, scale.z, 1.0f);
     }
 };
 
@@ -169,6 +174,9 @@ public class Destructable1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+        //MeshFilter meshFilter = meshRenderer.GetComponent<MeshFilter>();
+        //meshFilter.mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100.0f);
     }
 
     private void Init(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)

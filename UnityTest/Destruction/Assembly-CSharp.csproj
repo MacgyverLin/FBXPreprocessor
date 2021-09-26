@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\CameraController.cs" />
+    <Compile Include="Assets\DisableCulling.cs" />
     <Compile Include="Assets\Method1\Scripts\Destructable1.cs" />
     <Compile Include="Assets\Method1\Scripts\Destructable1Controller.cs" />
   </ItemGroup>
