@@ -119,8 +119,8 @@ class SimplePhysics : PhysicsBase
             this.angularVelocity += this.angularAcc * dt;
         }
 
-        if (this.linearPosition.y < 1)
-            sleeping = true;
+        //if (this.linearPosition.y < 1)
+            //sleeping = true;
         //////////////////////////////
         translation = this.linearPosition;
 

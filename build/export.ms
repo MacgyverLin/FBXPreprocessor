@@ -32,16 +32,6 @@
 			)
 		)
 		
-		for faceID in faceIDArray do
-		(
-			--format "% %\n" faceIdx faceIDArray[faceIdx]
-		)
-				
-		for faceGroup in faceGroupMap do
-		(
-			--format "group:%, count:%, values:%\n" faceGroup.key faceGroup.value.count faceGroup.value
-		)
-		
 		return faceGroupMap
 	)
 	
@@ -86,16 +76,110 @@
 		return true
 	)
 	
-	fn setFaceGroupID vertexPerFace faceIdx useMapChannel groupID =
+	-------------------------------------------------------------------------
+	fn vector3Max v1 v2 = 
 	(
-		vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-		meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
+		result = [0, 0, 0]
+		if(v1.x > v2.x) then
+			result.x  = v1.x
+		else
+			result.x  = v2.x
 		
-		for v = 1 to vertexIdxs.count do
+		if(v1.y > v2.y) then
+			result.y  = v1.y
+		else
+			result.y  = v2.y		
+		
+		if(v1.z > v2.z) then
+			result.z  = v1.z
+		else
+			result.z  = v2.z		
+		
+		return result
+	)
+	
+	fn vector3Min v1 v2 = 
+	(
+		result = [0, 0, 0]
+		if(v1.x < v2.x) then
+			result.x  = v1.x
+		else
+			result.x  = v2.x
+		
+		if(v1.y < v2.y) then
+			result.y  = v1.y
+		else
+			result.y  = v2.y		
+		
+		if(v1.z < v2.z) then
+			result.z  = v1.z
+		else
+			result.z  = v2.z		
+		
+		return result
+	)
+	
+	fn computeAABBTest obj = 
+	(
+		format "------------\n"
+		
+		minV = obj.min
+		maxV = obj.max
+		center = (obj.min + obj.max) / 2
+		
+		format "% % %\n" center minV maxV
+		
+		return true
+	)	
+	
+	fn computeAABB obj = 
+	(
+		format "------------\n"
+		
+		minV = [999999, 999999, 999999]
+		maxV = [-999999, -999999, -999999]
+		center = [0, 0, 0]
+		vertexcount = 0
+		
+		for face in obj.faces do
 		(
-			p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
-			p.x = groupID
-			meshop.setMapVert obj useMapChannel vertexIdxs[v] p
+			faceIdx = face.index
+			vertexIdxs = (meshop.getFace obj faceIdx)
+			
+			for v = 1 to vertexIdxs.count do
+			(
+				p = meshop.getVert obj vertexIdxs[v]
+				center = center + p
+				vertexcount = vertexcount + 1
+				
+				minV = vector3Min minV p
+				maxV = vector3Max maxV p
+			)
+		)
+		
+		if(vertexcount) then
+			center = center / vertexcount;
+		
+		format "% % %\n" center minV maxV
+		
+		return true
+	)
+	
+	
+	----------------------------------------------------
+	fn setFacesGroupID vertexPerFace faces useMapChannel groupID =
+	(
+		for faceIdx in faces do
+		(		
+			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
+		
+			for v = 1 to vertexIdxs.count do
+			(
+				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
+				p.x = groupID
+				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
+			)
 		)
 	)
 	
@@ -104,8 +188,8 @@
 		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps obj
 		numFaces = meshop.getNumFaces obj
-		
 		faceGroupMap = computeFaceGroupMap obj
+		
 		if(useMapChannel>=maxChannel) then
 			meshop.setNumMaps obj (useMapChannel+1) keep:true
 		
@@ -118,23 +202,20 @@
 		(
 			groupID = (mod faceGroup.key maxGroupCount)
 			format "% %\n"groupID faceGroup.value
-			for faceIdx in faceGroup.value do
-			(
-				setFaceGroupID vertexPerFace faceIdx useMapChannel groupID
-			)
+
+			setFacesGroupID vertexPerFace faceGroup.value useMapChannel groupID
 		)
 		
 		return true
 	)
 	
-	
-	fn addCrossSectionFace obj useMapChannel = 
+	-------------------------------------------------------------------------
+	fn setCrossSectionFace obj useMapChannel faces isCrossSection = 
 	(
 		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps obj
 		numFaces = meshop.getNumFaces obj
 		
-		faceGroupMap = computeFaceGroupMap obj
 		if(useMapChannel>=maxChannel) then
 			meshop.setNumMaps obj (useMapChannel+1) keep:true
 		
@@ -142,7 +223,7 @@
 		
 		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
 		
-		for face in obj.selectedFaces do
+		for face in faces do
 		(
 			faceIdx = face.index
 			
@@ -153,80 +234,30 @@
 			for v = 1 to vertexIdxs.count do
 			(
 				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
-				p.y = 1
-				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
-			)			
-		)		
-		
-		
-		return true
-	)
-	
-	fn removeCrossSectionFace obj useMapChannel = 
-	(
-		vertexPerFace = 3
-		maxChannel = meshop.getNumMaps obj
-		numFaces = meshop.getNumFaces obj
-		
-		faceGroupMap = computeFaceGroupMap obj
-		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps obj (useMapChannel+1) keep:true
-		
-		meshop.buildMapFaces obj useMapChannel keep:true
-		
-		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
-		
-		for face in obj.selectedFaces do
-		(
-			faceIdx = face.index
-			
-			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
-			
-			vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
-			for v = 1 to vertexIdxs.count do
-			(
-				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
-				p.y = 0
+				p.y = isCrossSection
 				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
 			)			
 		)		
 		
 		return true
+	)	
+	
+	fn addSelectedToCrossSection obj useMapChannel = 
+	(
+		return setCrossSectionFace obj useMapChannel obj.selectedFaces 1
 	)
 	
-	
-	fn clearAllCrossSectionFace obj useMapChannel = 
+	fn removeSelectedFromCrossSection obj useMapChannel = 
 	(
-		vertexPerFace = 3
-		maxChannel = meshop.getNumMaps obj
-		numFaces = meshop.getNumFaces obj
-		
-		faceGroupMap = computeFaceGroupMap obj
-		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps obj (useMapChannel+1) keep:true
-		
-		meshop.buildMapFaces obj useMapChannel keep:true
-		
-		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
-		
-		for faceIdx = 1 to numFaces do
-		(
-			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
-			
-			vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
-			for v = 1 to vertexIdxs.count do
-			(
-				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
-				p.y = 0
-				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
-			)			
-		)
-		
-		return true
+		return setCrossSectionFace obj useMapChannel obj.selectedFaces 0
+	)
+	
+	fn clearAllCrossSection obj useMapChannel = 
+	(
+		return setCrossSectionFace obj useMapChannel obj.faces 0
 	)		
 	
+	-------------------------------------------------------------------------
 	group "MapChannel"
 	(
 		spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
@@ -234,15 +265,37 @@
 		
 	group "GroupID"
 	(
-		button groupIDComputeUI "Compute"
+		button groupIDComputeUI "Compute GroupID"
+		button computeAABBUI "ComputeAABB"		
 	)
 	
-	group "Cross Section Face"
+	group "Cross Section"
 	(
-		button crossSectionFaceAddSelectedUI "Add Selected Face"
-		button crossSectionFaceRemoveSelectedUI "Remove Selected Face"
-		button crossSectionFaceClearAllUI "Clear All"
+		button addSelectedToCrossSectionUI "Add Selected Face"
+		button removeSelectedFromCrossSectionUI "Remove Selected Face"
+		button clearAllCrossSectionUI "Clear All"
 	)
+	
+	on computeAABBUI pressed do
+	(
+		if($==undefined) then
+		(
+			messageBox "Please select at least 1 mesh."
+		)
+		else
+		(
+			obj = $
+
+			convertToMesh obj
+			
+			computeAABB obj
+			
+			computeAABBTest obj
+
+			messageBox "Compute AABB successful"
+		)
+	)
+	
 
 	on groupIDComputeUI pressed do
 	(
@@ -262,7 +315,7 @@
 		)
 	)
 	
-	on crossSectionFaceAddSelectedUI pressed do
+	on addSelectedToCrossSectionUI pressed do
 	(
 		if($==undefined) then
 		(
@@ -274,13 +327,13 @@
 
 			convertToMesh obj
 			
-			addCrossSectionFace obj mapChannelUI.value
+			addSelectedToCrossSection obj mapChannelUI.value
 
-			messageBox "Export successful"
+			messageBox "Selected Faces are added as Cross Section"
 		)
 	)
 	
-	on crossSectionFaceRemoveSelectedUI pressed do
+	on removeSelectedFromCrossSectionUI pressed do
 	(
 		if($==undefined) then
 		(
@@ -292,13 +345,13 @@
 
 			convertToMesh obj
 			
-			removeCrossSectionFace obj mapChannelUI.value
+			removeSelectedFromCrossSection obj mapChannelUI.value
 
-			messageBox "Export successful"
+			messageBox "Selected Faces are removed from Cross Section"
 		)
 	)
 	
-	on crossSectionFaceClearAllUI pressed do
+	on clearAllCrossSectionUI pressed do
 	(
 		if($==undefined) then
 		(
@@ -310,9 +363,9 @@
 
 			convertToMesh obj
 			
-			clearAllCrossSectionFace obj mapChannelUI.value
+			clearAllCrossSection obj mapChannelUI.value
 
-			messageBox "Export successful"
+			messageBox "all Faces are removed from Cross Section"
 		)
 	)		
 )

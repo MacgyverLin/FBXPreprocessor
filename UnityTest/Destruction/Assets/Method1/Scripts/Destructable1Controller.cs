@@ -20,8 +20,24 @@ public class Destructable1Controller : MonoBehaviour
         if (Input.GetKeyDown("space"))
         {
             Debug.Log("space key was pressed");
-            foreach (var d in destructables)
-                d.GetComponent<Destructable1>().Destruct(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+            Destruct(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+        }
+    }
+
+    public void Destruct(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    {
+        StartCoroutine(DestructCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
+    }
+
+    private IEnumerator DestructCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
+    {
+        int i = 0;
+
+        while (i < destructables.Count)
+        {
+            destructables[i++].GetComponent<Destructable1>().Destruct(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+            
+            yield return new WaitForSeconds(Random.Range(0.0f, 0.1f));
         }
     }
 }
