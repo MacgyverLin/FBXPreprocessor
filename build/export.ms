@@ -4,38 +4,7 @@
 	running from commandline
 	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
 	*/
-	fn computeFaceGroupMap obj =
-	(
-		assert(obj!=undefined)
-
-		currentGroup = -1
-		
-		faceIDArray = #()
-		faceGroupMap = Dictionary(#integer)
-		for i = 1 to obj.numfaces do
-		(
-			if(faceIDArray[i]==undefined) then
-			(
-				currentGroup = currentGroup + 1;
-				faceGroupMap[currentGroup] = #()
-			)
-
-			elementFaceIndices = meshop.GetElementsUsingFace obj i as Array
-			for j = 1 to elementFaceIndices.count do
-			(
-				elementFaceIndex = elementFaceIndices[j]
-				if(faceIDArray[elementFaceIndex]==undefined) then
-				(
-					faceIDArray[elementFaceIndex] = currentGroup
-					appendIfUnique faceGroupMap[currentGroup] elementFaceIndex
-				)
-			)
-		)
-		
-		return faceGroupMap
-	)
-	
-	fn exportJSON filename faceGroupMap = 
+	fn exportJSON filename faceGroups = 
 	(
 		fptr = openFile filename mode:"wt"
 		if(fptr==undefined) then
@@ -44,7 +13,7 @@
 		groupIdx = 0
 
 		format "[\n" to:fptr
-		for faceGroup in faceGroupMap do
+		for faceGroup in faceGroups do
 		(
 			format "\t{\n" to:fptr
 			
@@ -63,7 +32,7 @@
 			format "\t}" to:fptr
 
 			groupIdx += 1;						
-			if(groupIdx<faceGroupMap.count) then
+			if(groupIdx<faceGroups.count) then
 			format "," to:fptr
 					
 			format "\n" to:fptr
@@ -165,11 +134,66 @@
 		return true
 	)
 	
-	
-	----------------------------------------------------
-	fn setFacesGroupID vertexPerFace faces useMapChannel groupID =
+	struct BoundingCapsule
 	(
-		for faceIdx in faces do
+		center, 
+		height=2, 
+		radius=0.5
+	)
+	
+	struct FaceGroup
+	(
+		groupID, 
+		faceIndices=#(), 
+		bound=(BoundingCapsule [0, 0, 0])
+	)
+  
+	fn computeFaceGroups obj =
+	(
+		assert(obj!=undefined)
+
+		currentGroup = -1
+		
+		faceIDArray = #()
+		faceGroups = Dictionary(#integer)
+		for i = 1 to obj.numfaces do
+		(
+			if(faceIDArray[i]==undefined) then
+			(
+				currentGroup = currentGroup + 1;
+				faceGroups[currentGroup] = (FaceGroup currentGroup)
+			)
+
+			elementFaceIndices = meshop.GetElementsUsingFace obj i as Array
+			for j = 1 to elementFaceIndices.count do
+			(
+				elementFaceIndex = elementFaceIndices[j]
+				if(faceIDArray[elementFaceIndex]==undefined) then
+				(
+					faceIDArray[elementFaceIndex] = currentGroup
+					appendIfUnique faceGroups[currentGroup].faceIndices elementFaceIndex
+				)
+			)
+		)
+		
+		return faceGroups
+	)
+		
+	----------------------------------------------------
+	fn convertToFacesIndices obj =
+	(
+		result = #()
+		for face in obj.faces do
+		(
+			append result face.index
+		)
+		
+		return result
+	)
+
+	fn setFaceGroupID obj vertexPerFace useMapChannel faceGroupValue =
+	(
+		for faceIdx in faceGroupValue.faceIndices do
 		(		
 			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
 			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
@@ -177,18 +201,17 @@
 			for v = 1 to vertexIdxs.count do
 			(
 				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
-				p.x = groupID
+				p.x = faceGroupValue.groupID
 				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
 			)
 		)
 	)
-	
-	fn computeMeshGroupID obj useMapChannel maxGroupCount = 
+
+	fn setMeshGroupIDs obj useMapChannel maxGroupCount faceGroups = 
 	(
 		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps obj
 		numFaces = meshop.getNumFaces obj
-		faceGroupMap = computeFaceGroupMap obj
 		
 		if(useMapChannel>=maxChannel) then
 			meshop.setNumMaps obj (useMapChannel+1) keep:true
@@ -197,17 +220,51 @@
 
 		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
 		
-		print faceGroupMap.count
-		for faceGroup in faceGroupMap do
+		for faceGroupKeyValue in faceGroups do
 		(
-			groupID = (mod faceGroup.key maxGroupCount)
-			format "% %\n"groupID faceGroup.value
-
-			setFacesGroupID vertexPerFace faceGroup.value useMapChannel groupID
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+			
+			setFaceGroupID obj vertexPerFace useMapChannel faceGroupValue
 		)
 		
 		return true
 	)
+	
+	fn computeMeshFaceGroups obj useMapChannel maxGroupCount = 
+	(
+		faceGroups = computeFaceGroups obj
+		if(faceGroups.count>=maxGroupCount) then
+		(
+			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
+			
+			return false
+		)
+		
+		setMeshGroupIDs obj useMapChannel maxGroupCount faceGroups
+		
+		--computeMeshGroupBounds obj useMapChannel maxGroupCount faceGroups
+		
+		return true
+	)
+	
+	fn clearMeshFaceGroups obj useMapChannel maxGroupCount = 
+	(
+		faceGroups = Dictionary(#integer)
+		faceGroups[0] = (FaceGroup 0 (convertToFacesIndices obj))
+		if(faceGroups.count>=maxGroupCount) then
+		(
+			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
+			
+			return false
+		)
+		
+		setMeshGroupIDs obj useMapChannel maxGroupCount faceGroups
+			
+		--setMeshGroupBounds obj useMapChannel maxGroupCount faceGroups
+		
+		return true
+	)	
 	
 	-------------------------------------------------------------------------
 	fn setCrossSectionFace obj useMapChannel faces isCrossSection = 
@@ -263,10 +320,10 @@
 		spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
 	)
 		
-	group "GroupID"
+	group "Mesh Face Groups"
 	(
-		button groupIDComputeUI "Compute GroupID"
-		button computeAABBUI "ComputeAABB"		
+		button computeMeshFaceGroupsUI "Compute Face Groups"
+		button clearMeshFaceGroupsUI "Clear Face Groups"
 	)
 	
 	group "Cross Section"
@@ -276,7 +333,7 @@
 		button clearAllCrossSectionUI "Clear All"
 	)
 	
-	on computeAABBUI pressed do
+	on computeMeshFaceGroupsUI pressed do
 	(
 		if($==undefined) then
 		(
@@ -288,16 +345,14 @@
 
 			convertToMesh obj
 			
-			computeAABB obj
-			
-			computeAABBTest obj
-
-			messageBox "Compute AABB successful"
+			if( (computeMeshFaceGroups obj mapChannelUI.value 16)) then
+				messageBox "Compute Mesh Face Groups succeeded."
+			else
+				messageBox "Compute Mesh Face Groups failed."
 		)
 	)
 	
-
-	on groupIDComputeUI pressed do
+	on clearMeshFaceGroupsUI pressed do
 	(
 		if($==undefined) then
 		(
@@ -309,11 +364,12 @@
 
 			convertToMesh obj
 			
-			computeMeshGroupID obj mapChannelUI.value 16
-
-			messageBox "Compute successful"
+			if( (clearMeshFaceGroups obj mapChannelUI.value 16)) then
+				messageBox "Clear Mesh Face Groups succeeded."
+			else
+				messageBox "Clear Mesh Face Groups failed."			
 		)
-	)
+	)	
 	
 	on addSelectedToCrossSectionUI pressed do
 	(
