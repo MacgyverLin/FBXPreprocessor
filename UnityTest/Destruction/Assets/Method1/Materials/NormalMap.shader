@@ -10,24 +10,32 @@
 		_Shininess("Shininess", float) = 10
 		_RimColor("Rim Color", Color) = (1.0, 1.0, 1.0, 1.0)
 		_RimPower("Rim Power", Range(0.1, 10.0)) = 3.0
-		_Alpha("Alpha", Range(0.0, 1.0)) = 1.0
-		_ShowCrossSection("ShowCrossSection", Range(0.0, 1.0)) = 1.0
+		_Alpha("Alpha", Range(0.0, 1.0)) = 1.0 
+		_IsDestructed("IsDestructed", Range(0.0, 1.0)) = 0.0
 	}
 
 	SubShader
 	{
 		Pass
 		{
-			Blend SrcAlpha OneMinusSrcAlpha
+			Tags 
+			{ 
+				"LightMode" = "ForwardBase"
+				"Queue" = "Transparent" 
+				"RenderType" = "Transparent" 
+			}
 
-			Tags { "LightMode" = "ForwardBase" }
+			Blend SrcAlpha OneMinusSrcAlpha
+			// Cull Off
+			// ZWrite Off
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma exclude_renderers flash
 	
 			// User Defined Variables
-			uniform float4 _Color;
+			uniform float3 _Color;
 			uniform sampler2D _MainTex;
 			uniform float4 _MainTex_ST;
 			uniform sampler2D _BumpMap;
@@ -38,12 +46,41 @@
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
-			uniform float _ShowCrossSection;
+			uniform float _IsDestructed;
 			uniform float4x4 _Transforms[16];
+
+			uniform float4 _Rotation[16];
+			uniform float4 _Translate[16];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
 	
+			float4x4 getTransform(int groupID)
+			{
+				return _Transforms[groupID];
+				float4x4 m;
+ 
+				float4 rotation = _Rotation[groupID];
+				float4 translate = _Translate[groupID];
+
+				float yy2 = 2.0 * rotation.y * rotation.y;
+				float zz2 = 2.0 * rotation.z * rotation.z;
+				float xy2 = 2.0 * rotation.x * rotation.y;
+				float sz2 = 2.0 * rotation.w * rotation.z;
+				float xz2 = 2.0 * rotation.x * rotation.z;
+				float sy2 = 2.0 * rotation.w * rotation.y;
+				float xx2 = 2.0 * rotation.x * rotation.x;
+				float yz2 = 2.0 * rotation.y * rotation.z;
+				float sx2 = 2.0 * rotation.w * rotation.x;
+
+				m[0] = float4(1.0 - yy2 - zz2, xy2 + sz2, xz2 - sy2, translate.x);
+				m[1] = float4(xy2 - sz2, 1.0 - xx2 - zz2, yz2 + sx2, translate.y);
+				m[2] = float4(xz2 + sy2, yz2 - sx2, 1.0 - xx2 - yy2, translate.z);
+				m[3] = float4(0.0, 0.0, 0.0, 1.0);
+
+				return m;
+			}
+
 			// Base Input Structs
 			struct vertexInput 
 			{
@@ -72,11 +109,11 @@
 				int groupID = (int)(v.groupID_CrossSection.x);
 				int crossSection = (int)(v.groupID_CrossSection.y);
 
-				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
 
-				float4x4 transform = mul(unity_WorldToObject, _Transforms[groupID]);
-				// float4x4 transform = _Transforms[groupID];
-				if (_ShowCrossSection == 1.0)
+				// Convert Physics Transform to Object Space
+				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
+				if (_IsDestructed == 1.0)
 				{
 					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
 					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
@@ -151,10 +188,18 @@
 			ENDCG
 		}
 
+		/*
 		Pass
 		{
-			Tags { "LightMode" = "ForwardAdd" }
+			Tags
+			{
+				"LightMode" = "ForwardAdd"
+				"Queue" = "Transparent"
+				"RenderType" = "Transparent"
+			}
 			Blend One OneMinusSrcAlpha
+			// Cull Off
+			// ZWrite Off
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -162,7 +207,7 @@
 			#pragma exclude_renderers flash
 
 			// User Defined Variables
-			uniform float4 _Color;
+			uniform float3 _Color;
 			uniform sampler2D _MainTex;
 			uniform float4 _MainTex_ST;
 			uniform sampler2D _BumpMap;
@@ -173,7 +218,7 @@
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
-			uniform float _ShowCrossSection;
+			uniform float _IsDestructed;
 			uniform float4x4 _Transforms[16];
 
 			// Unity Defined Variables;
@@ -199,6 +244,32 @@
 				float3 binormalWorld: TEXCOORD4;
 			};
 
+			float4x4 getTransform(int groupID)
+			{
+				float4x4 m;
+
+				float4 rotation = _Rotation[groupID];
+
+				float yy2 = 2.0 * rotation.y * rotation.y;
+				float zz2 = 2.0 * rotation.z * rotation.z;
+				float xy2 = 2.0 * rotation.x * rotation.y;
+				float sz2 = 2.0 * rotation.w * rotation.z;
+				float xz2 = 2.0 * rotation.x * rotation.z;
+				float sy2 = 2.0 * rotation.w * rotation.y;
+				float xx2 = 2.0 * rotation.x * rotation.x;
+				float yz2 = 2.0 * rotation.y * rotation.z;
+				float sx2 = 2.0 * rotation.w * rotation.x;
+
+				m[0] = float4(1.0 - yy2 - zz2, xy2 - sz2, xz2 + sy2, 0.0);
+				m[1] = float4(xy2 + sz2, 1.0 - xx2 - zz2, yz2 - sx2, 0.0);
+				m[2] = float4(xz2 - sy2, yz2 + sx2, 1.0 - xx2 - yy2, 0.0);
+				m[3] = float4(0.0, 0.0, 0.0, 1.0);
+
+				return m;
+
+				// return _Transforms[groupID]);
+			}
+
 			// Vertex Function
 			vertexOutput vert(vertexInput v)
 			{
@@ -207,11 +278,10 @@
 				int groupID = (int)v.groupID_CrossSection.x;
 				int crossSection = (int)v.groupID_CrossSection.y;
 
-				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
 
-				float4x4 transform = mul(unity_WorldToObject, _Transforms[groupID]);
-				// float4x4 transform = _Transforms[groupID];
-				if (_ShowCrossSection == 1.0)
+				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
+				if (_IsDestructed == 1.0)
 				{
 					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
 					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
@@ -286,14 +356,19 @@
 
 		Pass
 		{
-			Tags { "LightMode" = "ShadowCaster" }
+			Tags 
+			{ 
+				"LightMode" = "ShadowCaster" 
+			}
+			Blend Off
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma exclude_renderers flash
 
 			// User Defined Variables
-			uniform float4 _Color;
+			uniform float3 _Color;
 			uniform sampler2D _MainTex;
 			uniform float4 _MainTex_ST;
 			uniform sampler2D _BumpMap;
@@ -304,7 +379,7 @@
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
-			uniform float _ShowCrossSection;
+			uniform float _IsDestructed;
 			uniform float4x4 _Transforms[16];
 
 			// Unity Defined Variables;
@@ -324,6 +399,32 @@
 				float4 pos: SV_POSITION;
 				float4 posWorld: TEXCOORD1;
 			};
+			 
+			float4x4 getTransform(int groupID)
+			{
+				float4x4 m;
+
+				float4 rotation = _Rotation[groupID];
+
+				float yy2 = 2.0 * rotation.y * rotation.y;
+				float zz2 = 2.0 * rotation.z * rotation.z;
+				float xy2 = 2.0 * rotation.x * rotation.y;
+				float xz2 = 2.0 * rotation.x * rotation.z;
+				float xx2 = 2.0 * rotation.x * rotation.x;
+				float yz2 = 2.0 * rotation.y * rotation.z;
+				float sz2 = 2.0 * rotation.w * rotation.z;
+				float sy2 = 2.0 * rotation.w * rotation.y;
+				float sx2 = 2.0 * rotation.w * rotation.x;
+
+				m[0] = float4(1.0 - yy2 - zz2, xy2 - sz2, xz2 + sy2, 0.0);
+				m[1] = float4(xy2 + sz2, 1.0 - xx2 - zz2, yz2 - sx2, 0.0);
+				m[2] = float4(xz2 - sy2, yz2 + sx2, 1.0 - xx2 - yy2, 0.0);
+				m[3] = float4(0.0, 0.0, 0.0, 1.0);
+
+				return m;
+
+				// return _Transforms[groupID]);
+			}
 
 			// Vertex Function
 			vertexOutput vert(vertexInput v)
@@ -333,12 +434,11 @@
 				int groupID = (int)v.groupID_CrossSection.x;
 				int crossSection = (int)v.groupID_CrossSection.y;
 
-				v.vertex.xyz *= max(_ShowCrossSection, (1.0f - crossSection)); // if (_ShowCrossSection==1) || (crossSection==0) vetex not shrink
+				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
 
-				float4x4 transform = mul(unity_WorldToObject, _Transforms[groupID]);
-				// float4x4 transform = _Transforms[groupID];
-				if (_ShowCrossSection == 1.0)
-				{
+				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
+				if (_IsDestructed == 1.0)
+				{	
 					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
 				}
 
@@ -355,5 +455,6 @@
 			}
 			ENDCG
 		}
+		*/
 	}
 }

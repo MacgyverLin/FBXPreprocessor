@@ -80,6 +80,24 @@ class MiniRigidbody
 
         return result;
     }
+
+    public Vector4 GetTranslation()
+    {
+        return this.linearPosition;
+    }
+
+    public Vector4 GetRotation()
+    {
+        Quaternion q = new Quaternion();
+        q.eulerAngles = angularPosition;
+
+        return new Vector4(q.x, q.y, q.z, q.w);
+    }
+
+    public Vector3 GetScale()
+    {
+        return new Vector4(localScale.x, localScale.y, localScale.z, 1.0f);
+    }
 };
 
 public class Destructable1 : MonoBehaviour
@@ -90,6 +108,9 @@ public class Destructable1 : MonoBehaviour
     private float angularDrag = 0.01f;
     private MiniRigidbody[] miniRigidbodies = new MiniRigidbody[16];
     private Matrix4x4[] transforms = new Matrix4x4[16];
+
+    private Vector4[] translations = new Vector4[16];
+    private Vector4[] rotations = new Vector4[16];
 
     // Start is void called before the first frame update
     void Start()
@@ -105,6 +126,59 @@ public class Destructable1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+    }
+
+    void Test()
+    {
+        float theta = Time.time * 10.0f;
+        Vector3 dir = new Vector4(0.0f, 1.0f, 0.0f) * Mathf.Sin(theta / 2.0f);
+        float cosA = Mathf.Cos(theta / 2.0f);
+
+        Vector4[] rotation = new Vector4[16];
+        rotation[0] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[1] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[2] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[3] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[4] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[5] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[6] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[7] = new Vector4(dir.x, dir.y, dir.z, cosA);
+
+        rotation[8] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[9] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[10] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[11] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[12] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[13] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[14] = new Vector4(dir.x, dir.y, dir.z, cosA);
+        rotation[15] = new Vector4(dir.x, dir.y, dir.z, cosA);
+
+        Vector4[] translate = new Vector4[16];
+        translate[0] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[1] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[2] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[3] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[4] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[5] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[6] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[7] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+
+        translate[8] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[9] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[10] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[11] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[12] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[13] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[14] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+        translate[15] = new Vector4(3.0f * Mathf.Sin(Time.time), 0, 0, 0);
+
+        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+        for (int i = 0; i < meshRenderer.materials.Length; i++)
+        {
+            meshRenderer.materials[i].SetFloat("_IsDestructed", 1.0f);
+            meshRenderer.materials[i].SetVectorArray("_Rotation", rotation);
+            meshRenderer.materials[i].SetVectorArray("_Translate", translate);
+        }
     }
 
     private void Init(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
@@ -128,13 +202,19 @@ public class Destructable1 : MonoBehaviour
         for (int i = 0; i < transforms.Length; i++)
         {
             transforms[i] = miniRigidbodies[i].GetTransform();
+
+            translations[i] = miniRigidbodies[i].GetTranslation();
+            rotations[i] = miniRigidbodies[i].GetRotation();
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         for (int i = 0; i < meshRenderer.materials.Length; i++)
         {
-            meshRenderer.materials[i].SetFloat("_ShowCrossSection", 0.0f);
+            meshRenderer.materials[i].SetFloat("_IsDestructed", 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
+
+            meshRenderer.materials[i].SetVectorArray("_Translate", translations);
+            meshRenderer.materials[i].SetVectorArray("_Rotation", rotations);
         }
     }
 
@@ -144,13 +224,19 @@ public class Destructable1 : MonoBehaviour
         {
             miniRigidbodies[i].Update(linearAcc, angularAcc, linearDrag, angularDrag, Time.deltaTime);
             transforms[i] = miniRigidbodies[i].GetTransform();
+
+            translations[i] = miniRigidbodies[i].GetTranslation();
+            rotations[i] = miniRigidbodies[i].GetRotation();
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         for (int i = 0; i < meshRenderer.materials.Length; i++)
         {
-            meshRenderer.materials[i].SetFloat("_ShowCrossSection", 1.0f);
+            meshRenderer.materials[i].SetFloat("_IsDestructed", 1.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
+
+            meshRenderer.materials[i].SetVectorArray("_Translate", translations);
+            meshRenderer.materials[i].SetVectorArray("_Rotation", rotations);
         }
     }
 
