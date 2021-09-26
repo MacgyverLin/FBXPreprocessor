@@ -86,85 +86,68 @@
 		return true
 	)
 	
-	fn setMeshGroupID obj useMapChannel maxGroupCount = 
+	fn setFaceGroupID vertexPerFace faceIdx useMapChannel groupID =
 	(
-		faceGroupMap = computeFaceGroupMap obj
+		vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+		meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
 		
+		for v = 1 to vertexIdxs.count do
+		(
+			p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
+			p.x = groupID
+			meshop.setMapVert obj useMapChannel vertexIdxs[v] p
+		)
+	)
+	
+	fn computeMeshGroupID obj useMapChannel maxGroupCount = 
+	(
+		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps obj
 		numFaces = meshop.getNumFaces obj
 		
-		-- print maxChannel
-		-- print useMapChannel
-		-- print numFaces
+		faceGroupMap = computeFaceGroupMap obj
 		if(useMapChannel>=maxChannel) then
 			meshop.setNumMaps obj (useMapChannel+1) keep:true
 		
 		meshop.buildMapFaces obj useMapChannel keep:true
-		
-		vertexPerFace = 3
+
 		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
 		
+		print faceGroupMap.count
 		for faceGroup in faceGroupMap do
 		(
-			print faceGroup.key
+			groupID = (mod faceGroup.key maxGroupCount)
+			format "% %\n"groupID faceGroup.value
 			for faceIdx in faceGroup.value do
 			(
-				vertexIds = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-				meshop.setMapFace obj useMapChannel faceIdx vertexIds
-				
-				vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
-				for v = 1 to vertexIdxs.count do
-				(
-					vertexIdx = vertexIdxs[v]
-					
-					p = meshop.getMapVert obj useMapChannel vertexIdx
-					p.x = mod faceGroup.key maxGroupCount
-					meshop.setMapVert obj useMapChannel vertexIdx p
-				)
+				setFaceGroupID vertexPerFace faceIdx useMapChannel groupID
 			)
 		)
 		
 		return true
 	)
 	
-	fn markInternalFace obj useMapChannel = 
+	
+	fn addCrossSectionFace obj useMapChannel = 
 	(
-		faceGroupMap = computeFaceGroupMap obj
-		
+		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps obj
 		numFaces = meshop.getNumFaces obj
 		
-		-- print maxChannel
-		-- print useMapChannel
-		-- print numFaces
+		faceGroupMap = computeFaceGroupMap obj
 		if(useMapChannel>=maxChannel) then
 			meshop.setNumMaps obj (useMapChannel+1) keep:true
 		
 		meshop.buildMapFaces obj useMapChannel keep:true
 		
-		vertexPerFace = 3
 		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
-		
-		for faceIdx = 1 to numFaces do
-		(
-			vertexIds = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace obj useMapChannel faceIdx vertexIds
-			
-			vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
-			for v = 1 to vertexIdxs.count do
-			(
-				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
-				p.y = 0
-				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
-			)			
-		)
 		
 		for face in obj.selectedFaces do
 		(
 			faceIdx = face.index
 			
-			vertexIds = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace obj useMapChannel faceIdx vertexIds
+			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
 			
 			vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
 			for v = 1 to vertexIdxs.count do
@@ -177,24 +160,91 @@
 		
 		
 		return true
-	)	
+	)
+	
+	fn removeCrossSectionFace obj useMapChannel = 
+	(
+		vertexPerFace = 3
+		maxChannel = meshop.getNumMaps obj
+		numFaces = meshop.getNumFaces obj
+		
+		faceGroupMap = computeFaceGroupMap obj
+		if(useMapChannel>=maxChannel) then
+			meshop.setNumMaps obj (useMapChannel+1) keep:true
+		
+		meshop.buildMapFaces obj useMapChannel keep:true
+		
+		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
+		
+		for face in obj.selectedFaces do
+		(
+			faceIdx = face.index
+			
+			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
+			
+			vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
+			for v = 1 to vertexIdxs.count do
+			(
+				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
+				p.y = 0
+				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
+			)			
+		)		
+		
+		return true
+	)
+	
+	
+	fn clearAllCrossSectionFace obj useMapChannel = 
+	(
+		vertexPerFace = 3
+		maxChannel = meshop.getNumMaps obj
+		numFaces = meshop.getNumFaces obj
+		
+		faceGroupMap = computeFaceGroupMap obj
+		if(useMapChannel>=maxChannel) then
+			meshop.setNumMaps obj (useMapChannel+1) keep:true
+		
+		meshop.buildMapFaces obj useMapChannel keep:true
+		
+		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
+		
+		for faceIdx = 1 to numFaces do
+		(
+			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
+			
+			vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
+			for v = 1 to vertexIdxs.count do
+			(
+				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
+				p.y = 0
+				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
+			)			
+		)
+		
+		return true
+	)		
 	
 	group "MapChannel"
 	(
 		spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
 	)
 		
-	group "Set GroupID"
+	group "GroupID"
 	(
-		button setGroupIDUI "Compute"
+		button groupIDComputeUI "Compute"
 	)
 	
-	group "Mark Internal Face"
+	group "Cross Section Face"
 	(
-		button markInternalFaceUI "Mark"
-	)	
+		button crossSectionFaceAddSelectedUI "Add Selected Face"
+		button crossSectionFaceRemoveSelectedUI "Remove Selected Face"
+		button crossSectionFaceClearAllUI "Clear All"
+	)
 
-	on setGroupIDUI pressed do
+	on groupIDComputeUI pressed do
 	(
 		if($==undefined) then
 		(
@@ -206,20 +256,13 @@
 
 			convertToMesh obj
 			
-			setMeshGroupID obj mapChannelUI.value 16
+			computeMeshGroupID obj mapChannelUI.value 16
 
-			messageBox "Export successful"
-			
-			--filePath = getSaveFileName types:"Json(*.json)|*.json"
-			--filePath = "C:/Users/guanronlin/Desktop/3.json"
-			--if(exportJSON filePath faceGroupMap) then
-				--messageBox "Export successful"
-			--else
-				--messageBox "Export not successful"
+			messageBox "Compute successful"
 		)
 	)
 	
-	on markInternalFaceUI pressed do
+	on crossSectionFaceAddSelectedUI pressed do
 	(
 		if($==undefined) then
 		(
@@ -231,16 +274,45 @@
 
 			convertToMesh obj
 			
-			markInternalFace obj mapChannelUI.value
+			addCrossSectionFace obj mapChannelUI.value
 
 			messageBox "Export successful"
-			
-			--filePath = getSaveFileName types:"Json(*.json)|*.json"
-			--filePath = "C:/Users/guanronlin/Desktop/3.json"
-			--if(exportJSON filePath faceGroupMap) then
-				--messageBox "Export successful"
-			--else
-				--messageBox "Export not successful"
 		)
 	)
+	
+	on crossSectionFaceRemoveSelectedUI pressed do
+	(
+		if($==undefined) then
+		(
+			messageBox "Please select at least 1 mesh."
+		)
+		else
+		(
+			obj = $
+
+			convertToMesh obj
+			
+			removeCrossSectionFace obj mapChannelUI.value
+
+			messageBox "Export successful"
+		)
+	)
+	
+	on crossSectionFaceClearAllUI pressed do
+	(
+		if($==undefined) then
+		(
+			messageBox "Please select at least 1 mesh."
+		)
+		else
+		(
+			obj = $
+
+			convertToMesh obj
+			
+			clearAllCrossSectionFace obj mapChannelUI.value
+
+			messageBox "Export successful"
+		)
+	)		
 )
