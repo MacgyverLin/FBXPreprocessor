@@ -180,17 +180,59 @@
 	)
 		
 	----------------------------------------------------
-	fn convertToFacesIndices obj =
+	fn computeCapsule vertexPositions =
 	(
-		result = #()
-		for face in obj.faces do
-		(
-			append result face.index
+		for vertexPosition in vertexPositions do
+		(	
+		)
+	)
+	
+	fn computeOBB vertexPositions =
+	(
+		for vertexPosition in vertexPositions do
+		(	
+		)
+	)	
+	
+	fn computeConvexHull vertexPositions =
+	(
+		for vertexPosition in vertexPositions do
+		(	
+		)
+	)		
+	
+	fn setFaceGroupBound obj faceGroupValue =
+	(
+		vertexPositions = #()
+		for faceIdx in faceGroupValue.faceIndices do
+		(		
+			vertexIdxs = meshop.getFace obj faceIdx
+		
+			for v = 1 to vertexIdxs.count do
+			(
+				append vertexPositions (meshop.getVert obj vertexIdxs[v])
+			)
 		)
 		
-		return result
+		faceGroupValue.bound = (computeCapsule vertexPositions)
+		faceGroupValue.bound = (computeConvexHull vertexPositions)
+		faceGroupValue.bound = (computeOBBs vertexPositions)
 	)
 
+	fn setMeshFaceGroupBounds obj maxGroupCount faceGroups = 
+	(
+		for faceGroupKeyValue in faceGroups do
+		(
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+
+			setFaceGroupBound obj faceGroupValue
+		)
+		
+		return true
+	)
+
+	------------------------------------	
 	fn setFaceGroupID obj vertexPerFace useMapChannel faceGroupValue =
 	(
 		for faceIdx in faceGroupValue.faceIndices do
@@ -207,7 +249,7 @@
 		)
 	)
 
-	fn setMeshGroupIDs obj useMapChannel maxGroupCount faceGroups = 
+	fn setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups = 
 	(
 		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps obj
@@ -231,6 +273,7 @@
 		return true
 	)
 	
+	----------------------------------------------------
 	fn computeMeshFaceGroups obj useMapChannel maxGroupCount = 
 	(
 		faceGroups = computeFaceGroups obj
@@ -241,13 +284,25 @@
 			return false
 		)
 		
-		setMeshGroupIDs obj useMapChannel maxGroupCount faceGroups
+		setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups
 		
-		--computeMeshGroupBounds obj useMapChannel maxGroupCount faceGroups
+		setMeshFaceGroupBounds obj maxGroupCount faceGroups
 		
 		return true
 	)
 	
+	----------------------------------------------------
+	fn convertToFacesIndices obj =
+	(
+		result = #()
+		for face in obj.faces do
+		(
+			append result face.index
+		)
+		
+		return result
+	)
+
 	fn clearMeshFaceGroups obj useMapChannel maxGroupCount = 
 	(
 		faceGroups = Dictionary(#integer)
@@ -259,14 +314,14 @@
 			return false
 		)
 		
-		setMeshGroupIDs obj useMapChannel maxGroupCount faceGroups
+		setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups
 			
-		--setMeshGroupBounds obj useMapChannel maxGroupCount faceGroups
+		setMeshFaceGroupBounds obj maxGroupCount faceGroups
 		
 		return true
 	)	
 	
-	-------------------------------------------------------------------------
+	-- ================================================================================
 	fn setCrossSectionFace obj useMapChannel faces isCrossSection = 
 	(
 		vertexPerFace = 3
