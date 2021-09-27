@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 class PhysicsBase
 {
     protected Matrix4x4 transform = Matrix4x4.identity;
@@ -9,7 +8,7 @@ class PhysicsBase
     protected Vector4 rotation = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
     protected Vector4 scale = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     protected bool sleeping = false;
-
+    
     public PhysicsBase()
     {
     }
@@ -43,7 +42,6 @@ class PhysicsBase
         return new Vector4(scale.x, scale.y, scale.z, 1.0f);
     }
 };
-
 
 class SimplePhysics : PhysicsBase
 {
@@ -156,14 +154,17 @@ class RigidbodyPhysics : PhysicsBase
     }
 };
 
-public class Destructable1 : MonoBehaviour
+public class Demolishable : MonoBehaviour
 {
     private SimplePhysics[] physics = new SimplePhysics[16];
+    public FaceGroups faceGroups;
 
     // Start is void called before the first frame update
     void Start()
     {
         Init();
+
+        //faceGroups = JsonUtility.FromJson<FaceGroups>();
     }
 
     void Reset()
@@ -248,14 +249,14 @@ public class Destructable1 : MonoBehaviour
         }
     }
 
-    public void Destruct(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
-        StartCoroutine(DestructCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
+        StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
     }
 
-    private IEnumerator DestructCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
+    private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
     {
-        BeginDestruct(explosionForce, explosionRadius, upwardsModifier, mode);
+        BeginDemolish(explosionForce, explosionRadius, upwardsModifier, mode);
 
         // yield return WaitAllRigidBodySleptOrTimeOut(Random.Range((rigidBodyMaxLifetime - 1.0f)/2, rigidBodyMaxLifetime - 1.0f));
         yield return WaitAllRigidBodySleptOrTimeOut(rigidBodyMaxLifetime);
@@ -270,7 +271,7 @@ public class Destructable1 : MonoBehaviour
         }
     }
 
-    public void BeginDestruct(float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    public void BeginDemolish(float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
         // make sure visible
         this.gameObject.SetActive(true);

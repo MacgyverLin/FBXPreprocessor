@@ -8,15 +8,20 @@ struct BoundingCapsule
 	height=2, 
 	radius=0.5
 )
+
+struct BoundingBox
+(
+	center,
+	size = [1, 1, 1]
+)
 	
 struct FaceGroup
 (
 	groupID, 
 	faceIndices=#(), 
-	bound=(BoundingCapsule [0, 0, 0]),
+	bound = BoundingBox [0, 0, 0],
 	center=[0, 0, 0]
 )
-
 	
 struct DemolitionTool
 (
@@ -24,47 +29,69 @@ struct DemolitionTool
 	running from commandline
 	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
 	*/
+	fn formatVector3 fptr v = 
+	(
+		format "\t\t\t{\n"
+			format "\t\t\t\t\"x\":%,\n" v.x
+			format "\t\t\t\t\"y\":%,\n" v.y
+			format "\t\t\t\t\"z\":%\n" v.z
+		format "\t\t\t}\n"
+	),
+	
+	fn formatFaceBoundingBox fptr bound = 
+	(
+		format "\t\t{\n"
+			format "\t\t\t\"center\":\n"
+			formatVector3 fptr bound.center
+			format "\t\t\t,\n"
+		
+			format "\t\t\t\"size\":\n"
+			formatVector3 fptr bound.size
+		format "\t\t}\n"
+	),
+	
+	fn formatFaceGroup fptr faceGroupValue = 
+	(
+		format "\t{\n"
+			format "\t\t\"groupID\":%,\n" faceGroupValue.groupID
+			format "\t\t\"bound\":\n"
+			
+			formatFaceBoundingBox fptr faceGroupValue.bound
+		format "\t}\n"
+	),
+	
+	fn formatFaceGroups fptr faceGroups = 
+	(
+		groupIdx = 0
+		
+		format "[\n"
+		
+		for faceGroupKeyValue in faceGroups do
+		(
+			formatFaceGroup fptr faceGroupKeyValue.value
+
+			groupIdx += 1;
+			if(groupIdx<faceGroups.count) then
+				format "\t,\n"
+			else
+				format "\n"
+		)
+		
+		format "]\n"
+	),	
+	
 	fn exportJSON filename faceGroups = 
 	(
 		fptr = openFile filename mode:"wt"
 		if(fptr==undefined) then
 			return false
-	
-		groupIdx = 0
 
-		format "[\n" to:fptr
-		for faceGroup in faceGroups do
-		(
-			format "\t{\n" to:fptr
-			
-				format "\t\t\"groupID\":%,\n" faceGroup.key to:fptr
-			
-					format "\t\t\"faceIndices\":[" to:fptr
-					for i = 1 to faceGroup.value.count do
-					(
-						format "%" faceGroup.value[i] to:fptr
-						if(i<faceGroup.value.count) then
-						format ", " to:fptr
-					)
-
-				format "]\n" to:fptr
-						
-			format "\t}" to:fptr
-
-			groupIdx += 1;						
-			if(groupIdx<faceGroups.count) then
-			format "," to:fptr
-					
-			format "\n" to:fptr
-		)
-		
-		format "]\n" to:fptr
+		formatFaceGroups fptr faceGroups
 		
 		close fptr
 		
 		return true
-	)
-	,
+	),
 	
 	-------------------------------------------------------------------------
 	fn vector3Max v1 v2 = 
@@ -111,63 +138,64 @@ struct DemolitionTool
 	)
 	,
 	
-	fn computeAABBTest obj = 
+	fn createConvexHull meshObj numVertex hullScale borderScale as_Unreal_Collision = 
 	(
-		format "------------\n"
-		
-		minV = obj.min
-		maxV = obj.max
-		center = (obj.min + obj.max) / 2
-		
-		format "% % %\n" center minV maxV
-		
-		return true
-	)
-	,
-	
-	fn computeAABB obj = 
-	(
-		format "------------\n"
-		
-		minV = [999999, 999999, 999999]
-		maxV = [-999999, -999999, -999999]
-		center = [0, 0, 0]
-		vertexcount = 0
-		
-		for face in obj.faces do
+		-- First, delete old hull
 		(
-			faceIdx = face.index
-			vertexIdxs = (meshop.getFace obj faceIdx)
+			hull_name = meshObj.name + " hull"
+			ucx_name = "UCX_" + meshObj.name
 			
-			for v = 1 to vertexIdxs.count do
+			old_hull = getnodebyname hull_name
+			if old_hull != undefined then 
 			(
-				p = meshop.getVert obj vertexIdxs[v]
-				center = center + p
-				vertexcount = vertexcount + 1
-				
-				minV = vector3Min minV p
-				maxV = vector3Max maxV p
+				delete old_hull
+			)
+
+			old_hull = getnodebyname ucx_name
+			if old_hull != undefined then
+			(
+				delete old_hull
 			)
 		)
 		
-		if(vertexcount) then
-			center = center / vertexcount;
+		-- MassFX is able to generate the convex hull.  Here we add the modifier
+		Mass_FX_Modifier = MassFX_RBody()
+		addModifier meshObj Mass_FX_Modifier
 		
-		format "% % %\n" center minV maxV
+		-- Assign the max vert and buffer value from the spinner to the modifier
+		Mass_FX_Modifier.meshVerticesLimit = numVertex
+		Mass_FX_Modifier.meshInflation = borderScale
 		
-		return true
-	)
+		-- Now extract the mesh and delete the modifier
+		Mass_FX_Modifier.RBMeshCustomNodeExtract 1
+		deleteModifier meshObj 1
+		
+		-- Scale the hull
+		hull = getnodebyname hull_name
+		hull.pivot = hull.center
+		hull.scale = [hullScale,hullScale,hullScale]
+		
+		-- Name the hull UCX_ selectedmesh if it is for an unreal collision box.
+		if as_Unreal_Collision == True then
+		(
+			hull.name = ucx_name
+		)
+
+		-- delete hull
+	)		
+
+	----------------------------------------------------------
 	,
 	
-	fn computeFaceGroups obj =
+	fn computeFaceGroups meshObj =
 	(
-		assert(obj!=undefined)
+		assert(meshObj!=undefined)
 
 		currentGroup = -1
 		
 		faceIDArray = #()
 		faceGroups = Dictionary(#integer)
-		for i = 1 to obj.numfaces do
+		for i = 1 to meshObj.numfaces do
 		(
 			if(faceIDArray[i]==undefined) then
 			(
@@ -175,7 +203,7 @@ struct DemolitionTool
 				faceGroups[currentGroup] = (FaceGroup currentGroup)
 			)
 
-			elementFaceIndices = meshop.GetElementsUsingFace obj i as Array
+			elementFaceIndices = meshop.GetElementsUsingFace meshObj i as Array
 			for j = 1 to elementFaceIndices.count do
 			(
 				elementFaceIndex = elementFaceIndices[j]
@@ -192,6 +220,11 @@ struct DemolitionTool
 	,
 		
 	----------------------------------------------------
+	fn computeSphere vertexPositions =
+	(
+	)
+	,
+		
 	fn computeCapsule vertexPositions =
 	(
 		for vertexPosition in vertexPositions do
@@ -200,11 +233,20 @@ struct DemolitionTool
 	)
 	,
 	
-	fn computeOBB vertexPositions =
+	fn computeAABB vertexPositions =
 	(
+		minV = [999999, 999999, 999999]
+		maxV = [-999999, -999999, -999999]
+
 		for vertexPosition in vertexPositions do
-		(	
+		(
+			minV = vector3Min minV vertexPosition
+			maxV = vector3Max maxV vertexPosition
 		)
+		center = (maxV + minV) * 0.5
+		size = maxV - minV
+	
+		return BoundingBox center size
 	)
 	,	
 	
@@ -216,33 +258,34 @@ struct DemolitionTool
 	)
 	,
 	
-	fn setFaceGroupBound obj faceGroupValue =
+	fn setFaceGroupBound meshObj faceGroupValue =
 	(
 		vertexPositions = #()
 		for faceIdx in faceGroupValue.faceIndices do
 		(		
-			vertexIdxs = meshop.getFace obj faceIdx
+			vertexIdxs = meshop.getFace meshObj faceIdx
 		
 			for v = 1 to vertexIdxs.count do
 			(
-				append vertexPositions (meshop.getVert obj vertexIdxs[v])
+				append vertexPositions (meshop.getVert meshObj vertexIdxs[v])
 			)
 		)
 		
-		faceGroupValue.bound = computeCapsule vertexPositions
-		faceGroupValue.bound = computeConvexHull vertexPositions
-		faceGroupValue.bound = computeOBB vertexPositions
+		--faceGroupValue.bound = computeSphere vertexPositions
+		--faceGroupValue.bound = computeCapsule vertexPositions
+		--faceGroupValue.bound = computeConvexHull vertexPositions
+		faceGroupValue.bound = computeAABB vertexPositions
 	)
 	,
 
-	fn setMeshFaceGroupBounds obj maxGroupCount faceGroups = 
+	fn setMeshFaceGroupBounds meshObj maxGroupCount faceGroups = 
 	(
 		for faceGroupKeyValue in faceGroups do
 		(
 			faceGroupKey = faceGroupKeyValue.key
 			faceGroupValue = faceGroupKeyValue.value
 
-			setFaceGroupBound obj faceGroupValue
+			setFaceGroupBound meshObj faceGroupValue
 		)
 		
 		return true
@@ -250,42 +293,42 @@ struct DemolitionTool
 	,
 
 	------------------------------------	
-	fn setFaceGroupID obj vertexPerFace useMapChannel faceGroupValue =
+	fn setFaceGroupID meshObj vertexPerFace useMapChannel faceGroupValue =
 	(
 		for faceIdx in faceGroupValue.faceIndices do
 		(		
 			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
+			meshop.setMapFace meshObj useMapChannel faceIdx vertexIdxs
 		
 			for v = 1 to vertexIdxs.count do
 			(
-				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
+				p = meshop.getMapVert meshObj useMapChannel vertexIdxs[v]
 				p.x = faceGroupValue.groupID
-				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
+				meshop.setMapVert meshObj useMapChannel vertexIdxs[v] p
 			)
 		)
 	)
 	,
 
-	fn setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups = 
+	fn setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups = 
 	(
 		vertexPerFace = 3
-		maxChannel = meshop.getNumMaps obj
-		numFaces = meshop.getNumFaces obj
+		maxChannel = meshop.getNumMaps meshObj
+		numFaces = meshop.getNumFaces meshObj
 		
 		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps obj (useMapChannel+1) keep:true
+			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
 		
-		meshop.buildMapFaces obj useMapChannel keep:true
+		meshop.buildMapFaces meshObj useMapChannel keep:true
 
-		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
+		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
 		
 		for faceGroupKeyValue in faceGroups do
 		(
 			faceGroupKey = faceGroupKeyValue.key
 			faceGroupValue = faceGroupKeyValue.value
 			
-			setFaceGroupID obj vertexPerFace useMapChannel faceGroupValue
+			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroupValue
 		)
 		
 		return true
@@ -293,9 +336,9 @@ struct DemolitionTool
 	,
 	
 	----------------------------------------------------
-	fn computeMeshFaceGroups obj useMapChannel maxGroupCount = 
+	fn computeMeshFaceGroups meshObj useMapChannel maxGroupCount = 
 	(
-		faceGroups = computeFaceGroups obj
+		faceGroups = computeFaceGroups meshObj
 		if(faceGroups.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
@@ -303,19 +346,21 @@ struct DemolitionTool
 			return false
 		)
 		
-		setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
 
-		setMeshFaceGroupBounds obj maxGroupCount faceGroups
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		
+		exportJSON "D:/FBXPreprocessor/build/3.json" faceGroups
 		
 		return true
 	)
 	,
 	
 	----------------------------------------------------
-	fn convertToFacesIndices obj =
+	fn convertToFacesIndices meshObj =
 	(
 		result = #()
-		for face in obj.faces do
+		for face in meshObj.faces do
 		(
 			append result face.index
 		)
@@ -324,10 +369,10 @@ struct DemolitionTool
 	)
 	,
 
-	fn clearMeshFaceGroups obj useMapChannel maxGroupCount = 
+	fn clearMeshFaceGroups meshObj useMapChannel maxGroupCount = 
 	(
 		faceGroups = Dictionary(#integer)
-		faceGroups[0] = (FaceGroup 0 (convertToFacesIndices obj))
+		faceGroups[0] = (FaceGroup 0 (convertToFacesIndices meshObj))
 		if(faceGroups.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
@@ -335,41 +380,43 @@ struct DemolitionTool
 			return false
 		)
 		
-		setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups
-			
-		setMeshFaceGroupBounds obj maxGroupCount faceGroups
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
+
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		
+		exportJSON "D:/FBXPreprocessor/build/1.json" faceGroups
 		
 		return true
 	)
 	,
 	
 	-- ================================================================================
-	fn setCrossSectionFace obj useMapChannel faces isCrossSection = 
+	fn setCrossSectionFace meshObj useMapChannel faces isCrossSection = 
 	(
 		vertexPerFace = 3
-		maxChannel = meshop.getNumMaps obj
-		numFaces = meshop.getNumFaces obj
+		maxChannel = meshop.getNumMaps meshObj
+		numFaces = meshop.getNumFaces meshObj
 		
 		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps obj (useMapChannel+1) keep:true
+			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
 		
-		meshop.buildMapFaces obj useMapChannel keep:true
+		meshop.buildMapFaces meshObj useMapChannel keep:true
 		
-		meshop.setNumMapVerts obj useMapChannel (numFaces * vertexPerFace) keep:true
+		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
 		
 		for face in faces do
 		(
 			faceIdx = face.index
 			
 			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace obj useMapChannel faceIdx vertexIdxs
+			meshop.setMapFace meshObj useMapChannel faceIdx vertexIdxs
 			
-			vertexIdxs = (meshop.getMapFace obj useMapChannel faceIdx)
+			vertexIdxs = (meshop.getMapFace meshObj useMapChannel faceIdx)
 			for v = 1 to vertexIdxs.count do
 			(
-				p = meshop.getMapVert obj useMapChannel vertexIdxs[v]
+				p = meshop.getMapVert meshObj useMapChannel vertexIdxs[v]
 				p.y = isCrossSection
-				meshop.setMapVert obj useMapChannel vertexIdxs[v] p
+				meshop.setMapVert meshObj useMapChannel vertexIdxs[v] p
 			)			
 		)		
 		
@@ -377,22 +424,22 @@ struct DemolitionTool
 	)
 	,
 	
-	fn addSelectedToCrossSection obj useMapChannel = 
+	fn addSelectedToCrossSection meshObj useMapChannel = 
 	(
-		return setCrossSectionFace obj useMapChannel obj.selectedFaces 1
+		return setCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 1
 	)
 	,
 	
-	fn removeSelectedFromCrossSection obj useMapChannel = 
+	fn removeSelectedFromCrossSection meshObj useMapChannel = 
 	(
-		return setCrossSectionFace obj useMapChannel obj.selectedFaces 0
+		return setCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 0
 	)
 	,
 	
-	fn clearAllCrossSection obj useMapChannel = 
+	fn clearAllCrossSection meshObj useMapChannel = 
 	(
-		return setCrossSectionFace obj useMapChannel obj.faces 0
-	)		
+		return setCrossSectionFace meshObj useMapChannel meshObj.faces 0
+	)
 )
 
 demolitionTool = DemolitionTool()
@@ -407,11 +454,20 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
 		)
+		
+		group "Convex Hull Params"
+		(
+			spinner convexHullVertexCountUI "Convex Hull Vertex Count:" range:[1,1000, 32] type:#integer
+			spinner convexHullScalarUI "Convex Hull Scaler:" range:[0.1,1000, 1]
+			spinner convexHullBorderSizeUI "Convex Hull Border Size:" range:[-1000,1000, 0]			
+		)		
 			
 		group "Mesh Face Groups"
 		(
 			button computeMeshFaceGroupsUI "Compute Face Groups"
 			button clearMeshFaceGroupsUI "Clear Face Groups"
+			
+			button createConvexHullUI "Create Convex Hull"
 		)
 		
 		group "Cross Section"
@@ -419,6 +475,11 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			button addSelectedToCrossSectionUI "Add Selected Face"
 			button removeSelectedFromCrossSectionUI "Remove Selected Face"
 			button clearAllCrossSectionUI "Clear All"
+		)
+
+		on createConvexHullUI pressed do
+		(
+			demolitionTool.createConvexHull $ convexHullVertexCountUI.value convexHullScalarUI.value convexHullBorderSizeUI.value false
 		)
 		
 		on computeMeshFaceGroupsUI pressed do
@@ -430,11 +491,11 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			else
 			(
 				succeeded = true
-				for obj in $* do
+				for meshObj in $* do
 				(
-					convertToMesh obj
+					convertToMesh meshObj
 
-					if( not (demolitionTool.computeMeshFaceGroups obj mapChannelUI.value 16)) then
+					if( not (demolitionTool.computeMeshFaceGroups meshObj mapChannelUI.value 16)) then
 					(
 						succeeded = false
 						break
@@ -457,11 +518,11 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			else
 			(
 				succeeded = true
-				for obj in $* do
+				for meshObj in $* do
 				(
-					convertToMesh obj
+					convertToMesh meshObj
 				
-					if( not (demolitionTool.clearMeshFaceGroups obj mapChannelUI.value 16)) then
+					if( not (demolitionTool.clearMeshFaceGroups meshObj mapChannelUI.value 16)) then
 					(
 						succeeded = false
 						break
@@ -484,11 +545,11 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			else
 			(
 				succeeded = true
-				for obj in $* do
+				for meshObj in $* do
 				(
-					convertToMesh obj
+					convertToMesh meshObj
 				
-					if( not (demolitionTool.addSelectedToCrossSection obj mapChannelUI.value)) then
+					if( not (demolitionTool.addSelectedToCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
 						break
@@ -511,11 +572,11 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			else
 			(
 				succeeded = true
-				for obj in $* do
+				for meshObj in $* do
 				(
-					convertToMesh obj
+					convertToMesh meshObj
 				
-					if( not (demolitionTool.removeSelectedFromCrossSection obj mapChannelUI.value)) then
+					if( not (demolitionTool.removeSelectedFromCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
 						break
@@ -538,11 +599,11 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			else
 			(
 				succeeded = true
-				for obj in $* do
+				for meshObj in $* do
 				(
-					convertToMesh obj
+					convertToMesh meshObj
 				
-					if( not (demolitionTool.clearAllCrossSection obj mapChannelUI.value)) then
+					if( not (demolitionTool.clearAllCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
 						break
@@ -556,5 +617,5 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		)
 	)
 	
-	createDialog DemolitionToolUI_Panel height:250 width:250 pos:[150,200]
+	createDialog DemolitionToolUI_Panel height:300 width:400 pos:[150,200]
 )
