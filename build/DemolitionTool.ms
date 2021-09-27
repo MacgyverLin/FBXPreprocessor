@@ -397,158 +397,164 @@ struct DemolitionTool
 
 demolitionTool = DemolitionTool()
 
-utility ExportFBXWithElement "Export Fbx With Element"
+macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
+--utility DemolitionToolUI "Demolition Tool"
 (
-	-------------------------------------------------------------------------
-	group "MapChannel"
+	rollout DemolitionToolUI_Panel "DemolitionTool"
 	(
-		spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
-	)
+		-------------------------------------------------------------------------
+		group "MapChannel"
+		(
+			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
+		)
+			
+		group "Mesh Face Groups"
+		(
+			button computeMeshFaceGroupsUI "Compute Face Groups"
+			button clearMeshFaceGroupsUI "Clear Face Groups"
+		)
 		
-	group "Mesh Face Groups"
-	(
-		button computeMeshFaceGroupsUI "Compute Face Groups"
-		button clearMeshFaceGroupsUI "Clear Face Groups"
-	)
-	
-	group "Cross Section"
-	(
-		button addSelectedToCrossSectionUI "Add Selected Face"
-		button removeSelectedFromCrossSectionUI "Remove Selected Face"
-		button clearAllCrossSectionUI "Clear All"
-	)
-	
-	on computeMeshFaceGroupsUI pressed do
-	(
-		if($==undefined) then
+		group "Cross Section"
 		(
-			messageBox "Please select at least 1 mesh."
+			button addSelectedToCrossSectionUI "Add Selected Face"
+			button removeSelectedFromCrossSectionUI "Remove Selected Face"
+			button clearAllCrossSectionUI "Clear All"
 		)
-		else
+		
+		on computeMeshFaceGroupsUI pressed do
 		(
-			succeeded = true
-			for obj in $* do
+			if($==undefined) then
 			(
-				convertToMesh obj
-
-				if( not (demolitionTool.computeMeshFaceGroups obj mapChannelUI.value 16)) then
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for obj in $* do
 				(
-					succeeded = false
-					break
+					convertToMesh obj
+
+					if( not (demolitionTool.computeMeshFaceGroups obj mapChannelUI.value 16)) then
+					(
+						succeeded = false
+						break
+					)
 				)
-			)
 
-			if(succeeded) then
-				messageBox "Compute Mesh Face Groups succeeded."
+				if(succeeded) then
+					messageBox "Compute Mesh Face Groups succeeded."
+				else
+					messageBox "Compute Mesh Face Groups failed."
+			)
+		)
+		
+		on clearMeshFaceGroupsUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
 			else
-				messageBox "Compute Mesh Face Groups failed."
+			(
+				succeeded = true
+				for obj in $* do
+				(
+					convertToMesh obj
+				
+					if( not (demolitionTool.clearMeshFaceGroups obj mapChannelUI.value 16)) then
+					(
+						succeeded = false
+						break
+					)					
+				)
+				
+				if(succeeded) then
+					messageBox "Clear Mesh Face Groups succeeded."
+				else
+					messageBox "Clear Mesh Face Groups failed."		
+			)
+		)	
+		
+		on addSelectedToCrossSectionUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for obj in $* do
+				(
+					convertToMesh obj
+				
+					if( not (demolitionTool.addSelectedToCrossSection obj mapChannelUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				
+				if(succeeded) then
+					messageBox "Selected Faces are added as Cross Section, succeeded"
+				else
+					messageBox "Selected Faces are added as Cross Section, failed"
+			)
+		)
+		
+		on removeSelectedFromCrossSectionUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for obj in $* do
+				(
+					convertToMesh obj
+				
+					if( not (demolitionTool.removeSelectedFromCrossSection obj mapChannelUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				
+				if(succeeded) then
+					messageBox "Selected Faces are removed from Cross Section, succeeded"
+				else
+					messageBox "Selected Faces are removed from Cross Section, failed"	
+			)
+		)
+		
+		on clearAllCrossSectionUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for obj in $* do
+				(
+					convertToMesh obj
+				
+					if( not (demolitionTool.clearAllCrossSection obj mapChannelUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				if(succeeded) then
+					messageBox "all Faces are removed from Cross Section, succeeded"
+				else
+					messageBox "all Faces are removed from Cross Section, failed"
+			)
 		)
 	)
 	
-	on clearMeshFaceGroupsUI pressed do
-	(
-		if($==undefined) then
-		(
-			messageBox "Please select at least 1 mesh."
-		)
-		else
-		(
-			succeeded = true
-			for obj in $* do
-			(
-				convertToMesh obj
-			
-				if( not (demolitionTool.clearMeshFaceGroups obj mapChannelUI.value 16)) then
-				(
-					succeeded = false
-					break
-				)					
-			)
-			
-			if(succeeded) then
-				messageBox "Clear Mesh Face Groups succeeded."
-			else
-				messageBox "Clear Mesh Face Groups failed."		
-		)
-	)	
-	
-	on addSelectedToCrossSectionUI pressed do
-	(
-		if($==undefined) then
-		(
-			messageBox "Please select at least 1 mesh."
-		)
-		else
-		(
-			succeeded = true
-			for obj in $* do
-			(
-				convertToMesh obj
-			
-				if( not (demolitionTool.addSelectedToCrossSection obj mapChannelUI.value)) then
-				(
-					succeeded = false
-					break
-				)	
-			)
-			
-			if(succeeded) then
-				messageBox "Selected Faces are added as Cross Section, succeeded"
-			else
-				messageBox "Selected Faces are added as Cross Section, failed"
-		)
-	)
-	
-	on removeSelectedFromCrossSectionUI pressed do
-	(
-		if($==undefined) then
-		(
-			messageBox "Please select at least 1 mesh."
-		)
-		else
-		(
-			succeeded = true
-			for obj in $* do
-			(
-				convertToMesh obj
-			
-				if( not (demolitionTool.removeSelectedFromCrossSection obj mapChannelUI.value)) then
-				(
-					succeeded = false
-					break
-				)	
-			)
-			
-			if(succeeded) then
-				messageBox "Selected Faces are removed from Cross Section, succeeded"
-			else
-				messageBox "Selected Faces are removed from Cross Section, failed"	
-		)
-	)
-	
-	on clearAllCrossSectionUI pressed do
-	(
-		if($==undefined) then
-		(
-			messageBox "Please select at least 1 mesh."
-		)
-		else
-		(
-			succeeded = true
-			for obj in $* do
-			(
-				convertToMesh obj
-			
-				if( not (demolitionTool.clearAllCrossSection obj mapChannelUI.value)) then
-				(
-					succeeded = false
-					break
-				)	
-			)
-			if(succeeded) then
-				messageBox "all Faces are removed from Cross Section, succeeded"
-			else
-				messageBox "all Faces are removed from Cross Section, failed"
-		)
-	)		
+	createDialog DemolitionToolUI_Panel height:250 width:250 pos:[150,200]
 )
