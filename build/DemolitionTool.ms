@@ -22,7 +22,74 @@ struct FaceGroup
 	bound = BoundingBox [0, 0, 0],
 	center=[0, 0, 0]
 )
+
+struct JSONExporter
+(
+	fn formatVector3 fptr v = 
+	(
+		format "\t\t\t{\n"
+			format "\t\t\t\t\"x\":%,\n" v.x
+			format "\t\t\t\t\"y\":%,\n" v.y
+			format "\t\t\t\t\"z\":%\n" v.z
+		format "\t\t\t}\n"
+	),
 	
+	fn formatFaceBoundingBox fptr bound = 
+	(
+		format "\t\t{\n"
+			format "\t\t\t\"center\":\n"
+			formatVector3 fptr bound.center
+			format "\t\t\t,\n"
+		
+			format "\t\t\t\"size\":\n"
+			formatVector3 fptr bound.size
+		format "\t\t}\n"
+	),
+	
+	fn formatFaceGroup fptr faceGroupValue = 
+	(
+		format "\t{\n"
+			format "\t\t\"groupID\":%,\n" faceGroupValue.groupID
+			format "\t\t\"bound\":\n"
+			
+			formatFaceBoundingBox fptr faceGroupValue.bound
+		format "\t}\n"
+	),
+	
+	fn formatFaceGroups fptr faceGroups = 
+	(
+		groupIdx = 0
+		
+		format "[\n"
+		
+		for faceGroupKeyValue in faceGroups do
+		(
+			formatFaceGroup fptr faceGroupKeyValue.value
+
+			groupIdx += 1;
+			if(groupIdx<faceGroups.count) then
+				format "\t,\n"
+			else
+				format "\n"
+		)
+		
+		format "]\n"
+	),	
+	
+	fn exportJSON filename faceGroups = 
+	(
+		fptr = openFile filename mode:"wt"
+		if(fptr==undefined) then
+			return false
+
+		formatFaceGroups fptr faceGroups
+		
+		close fptr
+		
+		return true
+	)
+)
+
 struct DemolitionTool
 (
 	/*
