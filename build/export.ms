@@ -1,4 +1,24 @@
-﻿utility ExportFBXWithElement "Export Fbx With Element"
+﻿/*
+	running from commandline
+	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
+*/
+struct BoundingCapsule
+(
+	center, 
+	height=2, 
+	radius=0.5
+)
+	
+struct FaceGroup
+(
+	groupID, 
+	faceIndices=#(), 
+	bound=(BoundingCapsule [0, 0, 0]),
+	center=[0, 0, 0]
+)
+
+	
+struct DemolitionTool
 (
 	/*
 	running from commandline
@@ -44,6 +64,7 @@
 		
 		return true
 	)
+	,
 	
 	-------------------------------------------------------------------------
 	fn vector3Max v1 v2 = 
@@ -66,6 +87,7 @@
 		
 		return result
 	)
+	,
 	
 	fn vector3Min v1 v2 = 
 	(
@@ -87,6 +109,7 @@
 		
 		return result
 	)
+	,
 	
 	fn computeAABBTest obj = 
 	(
@@ -99,7 +122,8 @@
 		format "% % %\n" center minV maxV
 		
 		return true
-	)	
+	)
+	,
 	
 	fn computeAABB obj = 
 	(
@@ -133,21 +157,8 @@
 		
 		return true
 	)
+	,
 	
-	struct BoundingCapsule
-	(
-		center, 
-		height=2, 
-		radius=0.5
-	)
-	
-	struct FaceGroup
-	(
-		groupID, 
-		faceIndices=#(), 
-		bound=(BoundingCapsule [0, 0, 0])
-	)
-  
 	fn computeFaceGroups obj =
 	(
 		assert(obj!=undefined)
@@ -178,6 +189,7 @@
 		
 		return faceGroups
 	)
+	,
 		
 	----------------------------------------------------
 	fn computeCapsule vertexPositions =
@@ -186,20 +198,23 @@
 		(	
 		)
 	)
+	,
 	
 	fn computeOBB vertexPositions =
 	(
 		for vertexPosition in vertexPositions do
 		(	
 		)
-	)	
+	)
+	,	
 	
 	fn computeConvexHull vertexPositions =
 	(
 		for vertexPosition in vertexPositions do
 		(	
 		)
-	)		
+	)
+	,
 	
 	fn setFaceGroupBound obj faceGroupValue =
 	(
@@ -214,10 +229,11 @@
 			)
 		)
 		
-		faceGroupValue.bound = (computeCapsule vertexPositions)
-		faceGroupValue.bound = (computeConvexHull vertexPositions)
-		faceGroupValue.bound = (computeOBBs vertexPositions)
+		faceGroupValue.bound = computeCapsule vertexPositions
+		faceGroupValue.bound = computeConvexHull vertexPositions
+		faceGroupValue.bound = computeOBB vertexPositions
 	)
+	,
 
 	fn setMeshFaceGroupBounds obj maxGroupCount faceGroups = 
 	(
@@ -231,6 +247,7 @@
 		
 		return true
 	)
+	,
 
 	------------------------------------	
 	fn setFaceGroupID obj vertexPerFace useMapChannel faceGroupValue =
@@ -248,6 +265,7 @@
 			)
 		)
 	)
+	,
 
 	fn setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups = 
 	(
@@ -272,6 +290,7 @@
 		
 		return true
 	)
+	,
 	
 	----------------------------------------------------
 	fn computeMeshFaceGroups obj useMapChannel maxGroupCount = 
@@ -285,11 +304,12 @@
 		)
 		
 		setMeshFaceGroupIDs obj useMapChannel maxGroupCount faceGroups
-		
+
 		setMeshFaceGroupBounds obj maxGroupCount faceGroups
 		
 		return true
 	)
+	,
 	
 	----------------------------------------------------
 	fn convertToFacesIndices obj =
@@ -302,6 +322,7 @@
 		
 		return result
 	)
+	,
 
 	fn clearMeshFaceGroups obj useMapChannel maxGroupCount = 
 	(
@@ -319,7 +340,8 @@
 		setMeshFaceGroupBounds obj maxGroupCount faceGroups
 		
 		return true
-	)	
+	)
+	,
 	
 	-- ================================================================================
 	fn setCrossSectionFace obj useMapChannel faces isCrossSection = 
@@ -352,23 +374,31 @@
 		)		
 		
 		return true
-	)	
+	)
+	,
 	
 	fn addSelectedToCrossSection obj useMapChannel = 
 	(
 		return setCrossSectionFace obj useMapChannel obj.selectedFaces 1
 	)
+	,
 	
 	fn removeSelectedFromCrossSection obj useMapChannel = 
 	(
 		return setCrossSectionFace obj useMapChannel obj.selectedFaces 0
 	)
+	,
 	
 	fn clearAllCrossSection obj useMapChannel = 
 	(
 		return setCrossSectionFace obj useMapChannel obj.faces 0
 	)		
-	
+)
+
+demolitionTool = DemolitionTool()
+
+utility ExportFBXWithElement "Export Fbx With Element"
+(
 	-------------------------------------------------------------------------
 	group "MapChannel"
 	(
@@ -396,11 +426,19 @@
 		)
 		else
 		(
-			obj = $
+			succeeded = true
+			for obj in $* do
+			(
+				convertToMesh obj
 
-			convertToMesh obj
-			
-			if( (computeMeshFaceGroups obj mapChannelUI.value 16)) then
+				if( not (demolitionTool.computeMeshFaceGroups obj mapChannelUI.value 16)) then
+				(
+					succeeded = false
+					break
+				)
+			)
+
+			if(succeeded) then
 				messageBox "Compute Mesh Face Groups succeeded."
 			else
 				messageBox "Compute Mesh Face Groups failed."
@@ -415,14 +453,22 @@
 		)
 		else
 		(
-			obj = $
-
-			convertToMesh obj
+			succeeded = true
+			for obj in $* do
+			(
+				convertToMesh obj
 			
-			if( (clearMeshFaceGroups obj mapChannelUI.value 16)) then
+				if( not (demolitionTool.clearMeshFaceGroups obj mapChannelUI.value 16)) then
+				(
+					succeeded = false
+					break
+				)					
+			)
+			
+			if(succeeded) then
 				messageBox "Clear Mesh Face Groups succeeded."
 			else
-				messageBox "Clear Mesh Face Groups failed."			
+				messageBox "Clear Mesh Face Groups failed."		
 		)
 	)	
 	
@@ -434,13 +480,22 @@
 		)
 		else
 		(
-			obj = $
-
-			convertToMesh obj
+			succeeded = true
+			for obj in $* do
+			(
+				convertToMesh obj
 			
-			addSelectedToCrossSection obj mapChannelUI.value
-
-			messageBox "Selected Faces are added as Cross Section"
+				if( not (demolitionTool.addSelectedToCrossSection obj mapChannelUI.value)) then
+				(
+					succeeded = false
+					break
+				)	
+			)
+			
+			if(succeeded) then
+				messageBox "Selected Faces are added as Cross Section, succeeded"
+			else
+				messageBox "Selected Faces are added as Cross Section, failed"
 		)
 	)
 	
@@ -452,13 +507,22 @@
 		)
 		else
 		(
-			obj = $
-
-			convertToMesh obj
+			succeeded = true
+			for obj in $* do
+			(
+				convertToMesh obj
 			
-			removeSelectedFromCrossSection obj mapChannelUI.value
-
-			messageBox "Selected Faces are removed from Cross Section"
+				if( not (demolitionTool.removeSelectedFromCrossSection obj mapChannelUI.value)) then
+				(
+					succeeded = false
+					break
+				)	
+			)
+			
+			if(succeeded) then
+				messageBox "Selected Faces are removed from Cross Section, succeeded"
+			else
+				messageBox "Selected Faces are removed from Cross Section, failed"	
 		)
 	)
 	
@@ -470,13 +534,21 @@
 		)
 		else
 		(
-			obj = $
-
-			convertToMesh obj
+			succeeded = true
+			for obj in $* do
+			(
+				convertToMesh obj
 			
-			clearAllCrossSection obj mapChannelUI.value
-
-			messageBox "all Faces are removed from Cross Section"
+				if( not (demolitionTool.clearAllCrossSection obj mapChannelUI.value)) then
+				(
+					succeeded = false
+					break
+				)	
+			)
+			if(succeeded) then
+				messageBox "all Faces are removed from Cross Section, succeeded"
+			else
+				messageBox "all Faces are removed from Cross Section, failed"
 		)
 	)		
 )
