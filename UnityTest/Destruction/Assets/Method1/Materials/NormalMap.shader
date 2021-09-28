@@ -55,11 +55,31 @@
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
 	
+			// Base Input Structs
+			struct vertexInput 
+			{
+				float4 vertex: POSITION;
+				float3 normal: NORMAL;
+				float4 texcoord: TEXCOORD0;
+				float4 groupID_CrossSection: TEXCOORD2;
+				float4 tangent: TANGENT;
+			};
+		
+			struct vertexOutput 
+			{
+				float4 pos: SV_POSITION;
+				float4 tex: TEXCOORD0;
+				float4 posWorld: TEXCOORD1;
+				float3 normalWorld: TEXCOORD2;
+				float3 tangentWorld: TEXCOORD3;
+				float3 binormalWorld: TEXCOORD4;
+			};
+
 			float4x4 getTransform(int groupID)
 			{
 				return _Transforms[groupID];
 				float4x4 m;
- 
+
 				float4 rotation = _Rotation[groupID];
 				float4 translate = _Translate[groupID];
 
@@ -80,26 +100,6 @@
 
 				return m;
 			}
-
-			// Base Input Structs
-			struct vertexInput 
-			{
-				float4 vertex: POSITION;
-				float3 normal: NORMAL;
-				float4 texcoord: TEXCOORD0;
-				float4 groupID_CrossSection: TEXCOORD2;
-				float4 tangent: TANGENT;
-			};
-		
-			struct vertexOutput 
-			{
-				float4 pos: SV_POSITION;
-				float4 tex: TEXCOORD0;
-				float4 posWorld: TEXCOORD1;
-				float3 normalWorld: TEXCOORD2;
-				float3 tangentWorld: TEXCOORD3;
-				float3 binormalWorld: TEXCOORD4;
-			};
 
 			void demolish(inout vertexInput v, int groupID, int crossSection)
 			{
@@ -194,7 +194,6 @@
 			ENDCG
 		}
 
-		/*
 		Pass
 		{
 			Tags
@@ -252,9 +251,11 @@
 
 			float4x4 getTransform(int groupID)
 			{
+				return _Transforms[groupID];
 				float4x4 m;
 
 				float4 rotation = _Rotation[groupID];
+				float4 translate = _Translate[groupID];
 
 				float yy2 = 2.0 * rotation.y * rotation.y;
 				float zz2 = 2.0 * rotation.z * rotation.z;
@@ -266,14 +267,27 @@
 				float yz2 = 2.0 * rotation.y * rotation.z;
 				float sx2 = 2.0 * rotation.w * rotation.x;
 
-				m[0] = float4(1.0 - yy2 - zz2, xy2 - sz2, xz2 + sy2, 0.0);
-				m[1] = float4(xy2 + sz2, 1.0 - xx2 - zz2, yz2 - sx2, 0.0);
-				m[2] = float4(xz2 - sy2, yz2 + sx2, 1.0 - xx2 - yy2, 0.0);
+				m[0] = float4(1.0 - yy2 - zz2, xy2 + sz2, xz2 - sy2, translate.x);
+				m[1] = float4(xy2 - sz2, 1.0 - xx2 - zz2, yz2 + sx2, translate.y);
+				m[2] = float4(xz2 + sy2, yz2 - sx2, 1.0 - xx2 - yy2, translate.z);
 				m[3] = float4(0.0, 0.0, 0.0, 1.0);
 
 				return m;
+			}
 
-				// return _Transforms[groupID]);
+			void demolish(inout vertexInput v, int groupID, int crossSection)
+			{
+				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
+
+				// Convert Physics Transform to Object Space
+				if (_IsDestructed == 1.0)
+				{
+					float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
+					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
+
+					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
+				}
 			}
 
 			// Vertex Function
@@ -284,15 +298,7 @@
 				int groupID = (int)v.groupID_CrossSection.x;
 				int crossSection = (int)v.groupID_CrossSection.y;
 
-				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
-
-				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
-				if (_IsDestructed == 1.0)
-				{
-					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
-					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
-				}
+				demolish(v, groupID, crossSection);
 
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 				o.normalWorld = normalize(mul(unity_ObjectToWorld, v.normal).xyz);
@@ -408,28 +414,40 @@
 			 
 			float4x4 getTransform(int groupID)
 			{
+				return _Transforms[groupID];
 				float4x4 m;
 
 				float4 rotation = _Rotation[groupID];
+				float4 translate = _Translate[groupID];
 
 				float yy2 = 2.0 * rotation.y * rotation.y;
 				float zz2 = 2.0 * rotation.z * rotation.z;
 				float xy2 = 2.0 * rotation.x * rotation.y;
+				float sz2 = 2.0 * rotation.w * rotation.z;
 				float xz2 = 2.0 * rotation.x * rotation.z;
+				float sy2 = 2.0 * rotation.w * rotation.y;
 				float xx2 = 2.0 * rotation.x * rotation.x;
 				float yz2 = 2.0 * rotation.y * rotation.z;
-				float sz2 = 2.0 * rotation.w * rotation.z;
-				float sy2 = 2.0 * rotation.w * rotation.y;
 				float sx2 = 2.0 * rotation.w * rotation.x;
 
-				m[0] = float4(1.0 - yy2 - zz2, xy2 - sz2, xz2 + sy2, 0.0);
-				m[1] = float4(xy2 + sz2, 1.0 - xx2 - zz2, yz2 - sx2, 0.0);
-				m[2] = float4(xz2 - sy2, yz2 + sx2, 1.0 - xx2 - yy2, 0.0);
+				m[0] = float4(1.0 - yy2 - zz2, xy2 + sz2, xz2 - sy2, translate.x);
+				m[1] = float4(xy2 - sz2, 1.0 - xx2 - zz2, yz2 + sx2, translate.y);
+				m[2] = float4(xz2 + sy2, yz2 - sx2, 1.0 - xx2 - yy2, translate.z);
 				m[3] = float4(0.0, 0.0, 0.0, 1.0);
 
 				return m;
+			}
 
-				// return _Transforms[groupID]);
+			void demolish(inout vertexInput v, int groupID, int crossSection)
+			{
+				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
+
+				// Convert Physics Transform to Object Space
+				if (_IsDestructed == 1.0)
+				{
+					float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
+					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
+				}
 			}
 
 			// Vertex Function
@@ -440,13 +458,7 @@
 				int groupID = (int)v.groupID_CrossSection.x;
 				int crossSection = (int)v.groupID_CrossSection.y;
 
-				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
-
-				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
-				if (_IsDestructed == 1.0)
-				{	
-					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
-				}
+				demolish(v, groupID, crossSection);
 
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 				o.pos = UnityObjectToClipPos(v.vertex);
@@ -461,6 +473,5 @@
 			}
 			ENDCG
 		}
-		*/
 	}
 }
