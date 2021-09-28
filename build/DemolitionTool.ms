@@ -98,40 +98,41 @@ struct DemolitionTool
 	*/
 	fn formatVector3 fptr v = 
 	(
-		format "\t\t\t{\n"
-			format "\t\t\t\t\"x\":%,\n" v.x
-			format "\t\t\t\t\"y\":%,\n" v.y
-			format "\t\t\t\t\"z\":%\n" v.z
-		format "\t\t\t}\n"
+		format "\t\t\t\t{\n"
+			format "\t\t\t\t\t\"x\":%,\n" v.x
+			format "\t\t\t\t\t\"y\":%,\n" v.y
+			format "\t\t\t\t\t\"z\":%\n" v.z
+		format "\t\t\t\t}\n"
 	),
 	
 	fn formatFaceBoundingBox fptr bound = 
 	(
-		format "\t\t{\n"
-			format "\t\t\t\"center\":\n"
+		format "\t\t\t{\n"
+			format "\t\t\t\t\"center\":\n"
 			formatVector3 fptr bound.center
-			format "\t\t\t,\n"
+			format "\t\t\t\t,\n"
 		
-			format "\t\t\t\"size\":\n"
+			format "\t\t\t\t\"size\":\n"
 			formatVector3 fptr bound.size
-		format "\t\t}\n"
+		format "\t\t\t}\n"
 	),
 	
 	fn formatFaceGroup fptr faceGroupValue = 
 	(
-		format "\t{\n"
-			format "\t\t\"groupID\":%,\n" faceGroupValue.groupID
-			format "\t\t\"bound\":\n"
+		format "\t\t{\n"
+			format "\t\t\t\"groupID\":%,\n" faceGroupValue.groupID
+			format "\t\t\t\"bound\":\n"
 			
 			formatFaceBoundingBox fptr faceGroupValue.bound
-		format "\t}\n"
+		format "\t\t}\n"
 	),
 	
 	fn formatFaceGroups fptr faceGroups = 
 	(
 		groupIdx = 0
 		
-		format "[\n"
+		format "\t\"faceGroups\":\n"
+		format "\t[\n"
 		
 		for faceGroupKeyValue in faceGroups do
 		(
@@ -139,12 +140,23 @@ struct DemolitionTool
 
 			groupIdx += 1;
 			if(groupIdx<faceGroups.count) then
-				format "\t,\n"
+				format "\t\t,\n"
 			else
 				format "\n"
 		)
 		
-		format "]\n"
+		format "\t]\n"
+	),	
+	
+	fn formatDemolitionData fptr faceGroups = 
+	(
+		format "{\n"
+		
+		formatFaceGroups fptr faceGroups
+		
+		format "}\n"
+		
+		return true
 	),	
 	
 	fn formatJSON filename faceGroups = 
@@ -153,7 +165,7 @@ struct DemolitionTool
 		if(fptr==undefined) then
 			return false
 
-		formatFaceGroups fptr faceGroups
+		formatDemolitionData fptr faceGroups
 		
 		close fptr
 		

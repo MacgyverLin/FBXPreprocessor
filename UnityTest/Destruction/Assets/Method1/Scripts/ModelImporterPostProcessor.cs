@@ -14,21 +14,20 @@ public class ModelImporterPostProcessor : AssetPostprocessor
 
         string jsonPath = modelImporter.assetPath.Replace(".fbx", ".json");
         string scriptableObjectPath = modelImporter.assetPath.Replace(".fbx", ".asset");
-        //Debug.Log(jsonPath);
-        //Debug.Log(scriptableObjectPath);
 
         TextAsset jsonText = AssetDatabase.LoadAssetAtPath<TextAsset>(jsonPath);
-        //Debug.Log(textAsset.text);
-
+        Debug.Log(jsonText.text);
         DemolishableData demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
-        demolishableData.faceGroups.Add(new FaceGroup(0, new Bound(new Vector3(1, 2, 3), new Vector3(4, 5, 6))));
-        demolishableData.faceGroups.Add(new FaceGroup(1, new Bound(new Vector3(10, 20, 30), new Vector3(40, 50, 60))));
-        demolishableData.faceGroups.Add(new FaceGroup(1, new Bound(new Vector3(11, 21, 31), new Vector3(41, 51, 61))));
-
-        string text = JsonUtility.ToJson(demolishableData);
-        Debug.Log(text);
-        demolishableData.faceGroups.Clear();
-        JsonUtility.FromJsonOverwrite(text, demolishableData);
+        JsonUtility.FromJsonOverwrite(jsonText.text, demolishableData);
+        
+        //DemolishableData demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
+        //demolishableData.faceGroups.Add(new FaceGroup(0, new Bound(new Vector3(1, 2, 3), new Vector3(4, 5, 6))));
+        //demolishableData.faceGroups.Add(new FaceGroup(1, new Bound(new Vector3(10, 20, 30), new Vector3(40, 50, 60))));
+        //demolishableData.faceGroups.Add(new FaceGroup(1, new Bound(new Vector3(11, 21, 31), new Vector3(41, 51, 61))));
+        //string text = JsonUtility.ToJson(demolishableData);
+        //Debug.Log(text);
+        //demolishableData.faceGroups.Clear();
+        //JsonUtility.FromJsonOverwrite(text, demolishableData);
 
         AssetDatabase.CreateAsset(demolishableData, jsonPath);
         AssetDatabase.SaveAssets();

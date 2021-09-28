@@ -157,7 +157,7 @@ class RigidbodyPhysics : PhysicsBase
 public class Demolishable : MonoBehaviour
 {
     private SimplePhysics[] physics = new SimplePhysics[16];
-    public FaceGroups faceGroups;
+    public DemolishableData demolishableData;
 
     // Start is void called before the first frame update
     void Start()
