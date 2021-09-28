@@ -2,7 +2,69 @@
 #include "FBXMeshBuilder.h"
 #include "MeshSeparator.h"
 
-#define NO_SLICE
+#include "Common.h"
+#include "Argument.h"
+#include "Mesh.h"
+
+void ProcessMeshNode(FbxNode* fbxNode)
+{
+	FbxNodeAttribute::EType lAttributeType;
+	FbxMesh* mesh;
+
+	if (fbxNode->GetNodeAttribute() == NULL)
+	{
+		FBXSDK_printf("NULL Node Attribute\n\n");
+	}
+	else
+	{
+		lAttributeType = (fbxNode->GetNodeAttribute()->GetAttributeType());
+
+		switch (lAttributeType)
+		{
+		case FbxNodeAttribute::eMesh:
+			mesh = fbxNode->GetMesh();
+			mesh->SetUserDataPtr("test 1");
+			break;
+
+		case FbxNodeAttribute::eMarker:
+		case FbxNodeAttribute::eSkeleton:
+		case FbxNodeAttribute::eNurbs:
+		case FbxNodeAttribute::ePatch:
+		case FbxNodeAttribute::eCamera:
+		case FbxNodeAttribute::eLight:
+		case FbxNodeAttribute::eLODGroup:
+		default:
+			break;
+		}
+	}
+
+	//DisplayUserProperties(pNode);
+	//DisplayTarget(pNode);
+	//DisplayPivotsAndLimits(pNode);
+	//DisplayTransformPropagation(pNode);
+	//DisplayGeometricTransform(pNode);
+
+	for (int i = 0; i < fbxNode->GetChildCount(); i++)
+	{
+		ProcessMeshNode(fbxNode->GetChild(i));
+	}
+}
+
+void ProcessSceneMeshNode(FbxScene* fbxScene)
+{
+	fbxScene->SetUserDataPtr("test 2");
+
+	FbxNode* fbxNode = fbxScene->GetRootNode();
+
+	if (fbxNode)
+	{
+		for (int i = 0; i < fbxNode->GetChildCount(); i++)
+		{
+			ProcessMeshNode(fbxNode->GetChild(i));
+		}
+	}
+}
+
 
 int main(int argc, const char** argv)
 {
@@ -14,6 +76,7 @@ int main(int argc, const char** argv)
 	{
 		"0.fbx",
 		"1.fbx",
+		"1open.fbx",
 		"2.fbx",
 		"3.fbx",
 		"4.fbx",
@@ -23,17 +86,18 @@ int main(int argc, const char** argv)
 
 	const char* fileouts[] =
 	{
-		"0out.fbx",
-		"1out.fbx",
-		"2out.fbx",
-		"3out.fbx",
-		"4out.fbx",
-		"5out.fbx",
-		"6out.fbx"
+		"0.fbx",
+		"1.fbx",
+		"1open.fbx",
+		"2.fbx",
+		"3.fbx",
+		"4.fbx",
+		"5.fbx",
+		"6.fbx"
 	};
 
-	// for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
-	int i = 1;
+	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
+	//int i = 1;
 #else
 #endif
 	{
@@ -44,7 +108,7 @@ int main(int argc, const char** argv)
 		const char* filein = args.inputPath;
 		const char* fileout = args.outputPath;
 #endif
-		remove(fileout);
+		//remove(fileout);
 
 		Math::RandSeed();
 
@@ -62,6 +126,9 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 
+		ProcessSceneMeshNode(fbxScene);
+
+		/*
 		/////////////////////////////////////////////////////////////////////
 		MeshBuilder meshBuilder;
 		std::vector<FbxNode*> fbxNodes;
@@ -88,6 +155,7 @@ int main(int argc, const char** argv)
 			Debug::Error("\n\nAn error in building fbxNodes...");
 			return -1;
 		}
+		*/
 		
 		if (!SaveScene(sdkManager, fbxScene, fileout, args.binary))
 		{

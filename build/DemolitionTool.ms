@@ -76,7 +76,7 @@ struct JSONExporter
 		format "]\n"
 	),	
 	
-	fn exportJSON filename faceGroups = 
+	fn formatJSON filename faceGroups = 
 	(
 		fptr = openFile filename mode:"wt"
 		if(fptr==undefined) then
@@ -147,7 +147,7 @@ struct DemolitionTool
 		format "]\n"
 	),	
 	
-	fn exportJSON filename faceGroups = 
+	fn formatJSON filename faceGroups = 
 	(
 		fptr = openFile filename mode:"wt"
 		if(fptr==undefined) then
@@ -417,7 +417,7 @@ struct DemolitionTool
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
 		
-		exportJSON "D:/FBXPreprocessor/build/3.json" faceGroups
+		formatJSON "D:/FBXPreprocessor/build/3.json" faceGroups
 		
 		return true
 	)
@@ -451,7 +451,7 @@ struct DemolitionTool
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
 		
-		exportJSON "D:/FBXPreprocessor/build/1.json" faceGroups
+		formatJSON "D:/FBXPreprocessor/build/1.json" faceGroups
 		
 		return true
 	)

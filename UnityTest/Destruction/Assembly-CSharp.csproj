@@ -58,9 +58,10 @@
   <ItemGroup>
     <Compile Include="Assets\CameraController.cs" />
     <Compile Include="Assets\DisableCulling.cs" />
-    <Compile Include="Assets\Method1\Scenes\FaceGroups.cs" />
-    <Compile Include="Assets\Method1\Scripts\Demolish.cs" />
     <Compile Include="Assets\Method1\Scripts\DemolishController.cs" />
+    <Compile Include="Assets\Method1\Scripts\Demolishable.cs" />
+    <Compile Include="Assets\Method1\Scripts\DemolishableData.cs" />
+    <Compile Include="Assets\Method1\Scripts\ModelImporterPostProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Method1\Materials\NormalMap.shader" />
