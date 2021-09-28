@@ -14,6 +14,8 @@ public class ModelImporterPostProcessor : AssetPostprocessor
 
         string jsonPath = modelImporter.assetPath.Replace(".fbx", ".json");
         string scriptableObjectPath = modelImporter.assetPath.Replace(".fbx", ".asset");
+        Debug.Log(jsonPath);
+        Debug.Log(scriptableObjectPath);
 
         TextAsset jsonText = AssetDatabase.LoadAssetAtPath<TextAsset>(jsonPath);
         Debug.Log(jsonText.text);
@@ -29,8 +31,8 @@ public class ModelImporterPostProcessor : AssetPostprocessor
         //demolishableData.faceGroups.Clear();
         //JsonUtility.FromJsonOverwrite(text, demolishableData);
 
-        AssetDatabase.CreateAsset(demolishableData, jsonPath);
+        AssetDatabase.CreateAsset(demolishableData, scriptableObjectPath);
         AssetDatabase.SaveAssets();
-        // AssetDatabase.DeleteAsset(jsonPath);
+        //AssetDatabase.DeleteAsset(jsonPath);
     }
 }

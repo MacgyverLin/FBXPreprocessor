@@ -35,9 +35,15 @@ public class DemolishController : MonoBehaviour
 
         while (i < destructables.Count)
         {
-            destructables[i++].GetComponent<Demolishable>().Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+            if (destructables[i].isActiveAndEnabled)
+            {
+                Debug.Log(i);
+                destructables[i].GetComponent<Demolishable>().Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+            }
+
+            i++;
             
-            yield return new WaitForSeconds(Random.Range(0.0f, 0.1f));
+            yield return new WaitForSeconds(Random.Range(0.0f, 1.0f));
         }
     }
 }

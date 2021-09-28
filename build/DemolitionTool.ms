@@ -27,40 +27,41 @@ struct JSONExporter
 (
 	fn formatVector3 fptr v = 
 	(
-		format "\t\t\t{\n"
-			format "\t\t\t\t\"x\":%,\n" v.x
-			format "\t\t\t\t\"y\":%,\n" v.y
-			format "\t\t\t\t\"z\":%\n" v.z
-		format "\t\t\t}\n"
+		format "\t\t\t\t{\n" to:fptr
+			format "\t\t\t\t\t\"x\":%,\n" v.x to:fptr
+			format "\t\t\t\t\t\"y\":%,\n" v.y to:fptr
+			format "\t\t\t\t\t\"z\":%\n" v.z to:fptr
+		format "\t\t\t\t}\n" to:fptr
 	),
 	
 	fn formatFaceBoundingBox fptr bound = 
 	(
-		format "\t\t{\n"
-			format "\t\t\t\"center\":\n"
+		format "\t\t\t{\n" to:fptr
+			format "\t\t\t\t\"center\":\n" to:fptr
 			formatVector3 fptr bound.center
-			format "\t\t\t,\n"
+			format "\t\t\t\t,\n" to:fptr
 		
-			format "\t\t\t\"size\":\n"
+			format "\t\t\t\t\"size\":\n" to:fptr
 			formatVector3 fptr bound.size
-		format "\t\t}\n"
+		format "\t\t\t}\n" to:fptr
 	),
 	
 	fn formatFaceGroup fptr faceGroupValue = 
 	(
-		format "\t{\n"
-			format "\t\t\"groupID\":%,\n" faceGroupValue.groupID
-			format "\t\t\"bound\":\n"
+		format "\t\t{\n" to:fptr
+			format "\t\t\t\"groupID\":%,\n" faceGroupValue.groupID to:fptr
+			format "\t\t\t\"bound\":\n" to:fptr
 			
 			formatFaceBoundingBox fptr faceGroupValue.bound
-		format "\t}\n"
+		format "\t\t}\n" to:fptr
 	),
 	
 	fn formatFaceGroups fptr faceGroups = 
 	(
 		groupIdx = 0
 		
-		format "[\n"
+		format "\t\"faceGroups\":\n" to:fptr
+		format "\t[\n" to:fptr
 		
 		for faceGroupKeyValue in faceGroups do
 		(
@@ -68,27 +69,27 @@ struct JSONExporter
 
 			groupIdx += 1;
 			if(groupIdx<faceGroups.count) then
-				format "\t,\n"
+				format "\t\t,\n" to:fptr
 			else
-				format "\n"
+				format "" to:fptr
 		)
 		
-		format "]\n"
+		format "\t]\n" to:fptr
 	),	
 	
-	fn formatJSON filename faceGroups = 
+	
+	fn formatDemolitionData fptr faceGroups = 
 	(
-		fptr = openFile filename mode:"wt"
-		if(fptr==undefined) then
-			return false
-
+		format "{\n" to:fptr
+		
 		formatFaceGroups fptr faceGroups
 		
-		close fptr
+		format "}\n" to:fptr
 		
 		return true
 	)
 )
+jsonExporter = JSONExporter()
 
 struct DemolitionTool
 (
@@ -96,68 +97,6 @@ struct DemolitionTool
 	running from commandline
 	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
 	*/
-	fn formatVector3 fptr v = 
-	(
-		format "\t\t\t\t{\n"
-			format "\t\t\t\t\t\"x\":%,\n" v.x
-			format "\t\t\t\t\t\"y\":%,\n" v.y
-			format "\t\t\t\t\t\"z\":%\n" v.z
-		format "\t\t\t\t}\n"
-	),
-	
-	fn formatFaceBoundingBox fptr bound = 
-	(
-		format "\t\t\t{\n"
-			format "\t\t\t\t\"center\":\n"
-			formatVector3 fptr bound.center
-			format "\t\t\t\t,\n"
-		
-			format "\t\t\t\t\"size\":\n"
-			formatVector3 fptr bound.size
-		format "\t\t\t}\n"
-	),
-	
-	fn formatFaceGroup fptr faceGroupValue = 
-	(
-		format "\t\t{\n"
-			format "\t\t\t\"groupID\":%,\n" faceGroupValue.groupID
-			format "\t\t\t\"bound\":\n"
-			
-			formatFaceBoundingBox fptr faceGroupValue.bound
-		format "\t\t}\n"
-	),
-	
-	fn formatFaceGroups fptr faceGroups = 
-	(
-		groupIdx = 0
-		
-		format "\t\"faceGroups\":\n"
-		format "\t[\n"
-		
-		for faceGroupKeyValue in faceGroups do
-		(
-			formatFaceGroup fptr faceGroupKeyValue.value
-
-			groupIdx += 1;
-			if(groupIdx<faceGroups.count) then
-				format "\t\t,\n"
-			else
-				format "\n"
-		)
-		
-		format "\t]\n"
-	),	
-	
-	fn formatDemolitionData fptr faceGroups = 
-	(
-		format "{\n"
-		
-		formatFaceGroups fptr faceGroups
-		
-		format "}\n"
-		
-		return true
-	),	
 	
 	fn formatJSON filename faceGroups = 
 	(
@@ -165,7 +104,7 @@ struct DemolitionTool
 		if(fptr==undefined) then
 			return false
 
-		formatDemolitionData fptr faceGroups
+		jsonExporter.formatDemolitionData fptr faceGroups
 		
 		close fptr
 		
@@ -429,8 +368,6 @@ struct DemolitionTool
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
 		
-		formatJSON "D:/FBXPreprocessor/build/3.json" faceGroups
-		
 		return true
 	)
 	,
@@ -462,8 +399,6 @@ struct DemolitionTool
 		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
-		
-		formatJSON "D:/FBXPreprocessor/build/1.json" faceGroups
 		
 		return true
 	)
@@ -518,35 +453,66 @@ struct DemolitionTool
 	fn clearAllCrossSection meshObj useMapChannel = 
 	(
 		return setCrossSectionFace meshObj useMapChannel meshObj.faces 0
+	),
+	
+	fn exportDemolition meshObj useMapChannel maxGroupCount = 
+	(
+		jsonFilePath = getSaveFileName types:"Json(*.json)|*.json"
+		if(jsonFilePath==undefined) then
+			return false
+		
+		faceGroups = computeFaceGroups meshObj
+		if(faceGroups.count>=maxGroupCount) then
+		(
+			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
+			
+			return false
+		)
+		
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
+
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+
+		print faceGroups
+		formatJSON jsonFilePath faceGroups
+		
+		return true
 	)
 )
 
 demolitionTool = DemolitionTool()
 
 macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
---utility DemolitionToolUI "Demolition Tool"
 (
 	rollout DemolitionToolUI_Panel "DemolitionTool"
 	(
+		/*
+		group "Convex Hull Params"
+		(
+			spinner convexHullVertexCountUI "Convex Hull Vertex Count:" range:[1,1000, 32] type:#integer
+			spinner convexHullScalarUI "Convex Hull Scaler:" range:[0.1,1000, 1]
+			spinner convexHullBorderSizeUI "Convex Hull Border Size:" range:[-1000,1000, 0]			
+		
+			button createConvexHullUI "Create Convex Hull"		
+		)
+		*/		
+		/*
+		on createConvexHullUI pressed do
+		(
+			demolitionTool.createConvexHull $ convexHullVertexCountUI.value convexHullScalarUI.value convexHullBorderSizeUI.value false
+		)
+		*/
+				
 		-------------------------------------------------------------------------
 		group "MapChannel"
 		(
 			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
 		)
 		
-		group "Convex Hull Params"
-		(
-			spinner convexHullVertexCountUI "Convex Hull Vertex Count:" range:[1,1000, 32] type:#integer
-			spinner convexHullScalarUI "Convex Hull Scaler:" range:[0.1,1000, 1]
-			spinner convexHullBorderSizeUI "Convex Hull Border Size:" range:[-1000,1000, 0]			
-		)		
-			
 		group "Mesh Face Groups"
 		(
 			button computeMeshFaceGroupsUI "Compute Face Groups"
 			button clearMeshFaceGroupsUI "Clear Face Groups"
-			
-			button createConvexHullUI "Create Convex Hull"
 		)
 		
 		group "Cross Section"
@@ -555,11 +521,39 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			button removeSelectedFromCrossSectionUI "Remove Selected Face"
 			button clearAllCrossSectionUI "Clear All"
 		)
-
-		on createConvexHullUI pressed do
+		
+		group "Export"
 		(
-			demolitionTool.createConvexHull $ convexHullVertexCountUI.value convexHullScalarUI.value convexHullBorderSizeUI.value false
+			button exportDemolitionUI "Export Demolition"
 		)
+
+		on exportDemolitionUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					convertToMesh meshObj
+
+					if( not (demolitionTool.exportDemolition meshObj mapChannelUI.value 32)) then
+					(
+						succeeded = false
+						break
+					)
+				)
+
+				if(succeeded) then
+					messageBox "Export Demolition succeeded."
+				else
+					messageBox "Export Demolition failed."
+			)
+		)
+				
 		
 		on computeMeshFaceGroupsUI pressed do
 		(
@@ -574,7 +568,7 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				(
 					convertToMesh meshObj
 
-					if( not (demolitionTool.computeMeshFaceGroups meshObj mapChannelUI.value 16)) then
+					if( not (demolitionTool.computeMeshFaceGroups meshObj mapChannelUI.value 32)) then
 					(
 						succeeded = false
 						break
@@ -601,7 +595,7 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				(
 					convertToMesh meshObj
 				
-					if( not (demolitionTool.clearMeshFaceGroups meshObj mapChannelUI.value 16)) then
+					if( not (demolitionTool.clearMeshFaceGroups meshObj mapChannelUI.value 32)) then
 					(
 						succeeded = false
 						break

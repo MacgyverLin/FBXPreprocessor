@@ -9,7 +9,119 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1d7d822e0b154643b3873a8b3b6e761, type: 3}
+  m_Script: {fileID: 11500000, guid: 243407377858d5a4d894598e8c1be363, type: 3}
   m_Name: 6
   m_EditorClassIdentifier: 
-  faceGroups: []
+  faceGroups:
+  - groupID: 0
+    bound:
+      center: {x: 0.469184, y: -1.95627, z: 0.30877}
+      size: {x: 0.480001, y: 0.501267, z: 0.494514}
+  - groupID: 17
+    bound:
+      center: {x: 0.607807, y: 0.079475, z: -0.785146}
+      size: {x: 0.770041, y: 3.61469, z: 0.202367}
+  - groupID: 1
+    bound:
+      center: {x: 0.464442, y: -2.02163, z: 0.308772}
+      size: {x: 0.439999, y: 0.475189, z: 0.454518}
+  - groupID: 18
+    bound:
+      center: {x: -4.3023, y: 0.0817715, z: -0.790873}
+      size: {x: 0.562744, y: 3.59441, z: 0.213823}
+  - groupID: 2
+    bound:
+      center: {x: 0.469184, y: 2.14383, z: 0.308771}
+      size: {x: 0.480001, y: 0.501266, z: 0.494514}
+  - groupID: 19
+    bound:
+      center: {x: -1.52524, y: -0.0215915, z: -0.790873}
+      size: {x: 0.562744, y: 3.80049, z: 0.213823}
+  - groupID: 3
+    bound:
+      center: {x: 0.464442, y: 2.07847, z: 0.308773}
+      size: {x: 0.439999, y: 0.475204, z: 0.454518}
+  - groupID: 20
+    bound:
+      center: {x: -3.6995, y: 0.123069, z: -0.793095}
+      size: {x: 0.661285, y: 3.49536, z: 0.218266}
+  - groupID: 4
+    bound:
+      center: {x: -2.35327, y: 0.0824124, z: -0.797499}
+      size: {x: 0.59581, y: 3.58727, z: 0.227075}
+  - groupID: 21
+    bound:
+      center: {x: 3.82519, y: 0.0960995, z: -0.791697}
+      size: {x: 0.565338, y: 3.5656, z: 0.21547}
+  - groupID: 5
+    bound:
+      center: {x: 2.52659, y: 0.161064, z: -0.775111}
+      size: {x: 0.489624, y: 3.43423, z: 0.182298}
+  - groupID: 22
+    bound:
+      center: {x: 4.41146, y: -0.0373157, z: -0.773468}
+      size: {x: 0.630524, y: 3.83817, z: 0.179014}
+  - groupID: 6
+    bound:
+      center: {x: 0.464427, y: -1.29592, z: -0.583964}
+      size: {x: 10, y: 0.5, z: 0.199997}
+  - groupID: 23
+    bound:
+      center: {x: 0.464419, y: -1.29484, z: 0.133535}
+      size: {x: 2.2, y: 0.500008, z: 0.904999}
+  - groupID: 7
+    bound:
+      center: {x: 0.464427, y: -1.29224, z: -0.171466}
+      size: {x: 10, y: 0.400009, z: 0.625}
+  - groupID: 24
+    bound:
+      center: {x: 0.464419, y: 1.37882, z: 0.133535}
+      size: {x: 2.2, y: 0.5, z: 0.904999}
+  - groupID: 8
+    bound:
+      center: {x: 0.467336, y: 0.0392978, z: 0.308775}
+      size: {x: 0.4, y: 5.28162, z: 0.414523}
+  - groupID: 25
+    bound:
+      center: {x: 0.466502, y: 1.45715, z: 0.254589}
+      size: {x: 3.46185, y: 0.430283, z: 1.45992}
+  - groupID: 9
+    bound:
+      center: {x: 0.464427, y: 1.38567, z: -0.171465}
+      size: {x: 10, y: 0.400002, z: 0.625}
+  - groupID: 26
+    bound:
+      center: {x: 0.466494, y: -1.29907, z: 0.254588}
+      size: {x: 3.46187, y: 0.430291, z: 1.45992}
+  - groupID: 10
+    bound:
+      center: {x: 0.464427, y: 1.38198, z: -0.284542}
+      size: {x: 10, y: 0.500001, z: 0.398846}
+  - groupID: 27
+    bound:
+      center: {x: 1.24268, y: 0.0123974, z: -0.789937}
+      size: {x: 0.525028, y: 3.73209, z: 0.211949}
+  - groupID: 11
+    bound:
+      center: {x: 3.1667, y: 0.0508953, z: -0.785882}
+      size: {x: 0.702026, y: 3.68088, z: 0.203839}
+  - groupID: 12
+    bound:
+      center: {x: 5.08227, y: 0.0654522, z: -0.794402}
+      size: {x: 0.621002, y: 3.62512, z: 0.22088}
+  - groupID: 13
+    bound:
+      center: {x: -0.764741, y: 0.0319973, z: -0.789317}
+      size: {x: 0.917519, y: 3.58635, z: 0.21071}
+  - groupID: 14
+    bound:
+      center: {x: -0.0912061, y: 0.0607373, z: -0.775424}
+      size: {x: 0.587481, y: 3.63168, z: 0.182924}
+  - groupID: 15
+    bound:
+      center: {x: 1.95871, y: 0.0592343, z: -0.789731}
+      size: {x: 0.595444, y: 3.52296, z: 0.211538}
+  - groupID: 16
+    bound:
+      center: {x: -3.0591, y: 0.0316311, z: -0.789937}
+      size: {x: 0.830688, y: 3.72957, z: 0.21195}

@@ -8,7 +8,9 @@ class PhysicsBase
     protected Vector4 rotation = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
     protected Vector4 scale = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     protected bool sleeping = false;
-    
+
+    protected FaceGroup faceGroup;
+
     public PhysicsBase()
     {
     }
@@ -41,6 +43,11 @@ class PhysicsBase
     {
         return new Vector4(scale.x, scale.y, scale.z, 1.0f);
     }
+
+    public FaceGroup GetFaceGroup()
+    {
+        return faceGroup;
+    }
 };
 
 class SimplePhysics : PhysicsBase
@@ -61,7 +68,8 @@ class SimplePhysics : PhysicsBase
 
     public void Init(GameObject gameobject, Vector3 linearPosition, Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
                      Vector3 angularPosition, Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
-                     Vector3 scale)
+                     Vector3 scale, 
+                     FaceGroup faceGroup)
     {
         this.sleeping = false;
         this.linearPosition = linearPosition;
@@ -75,6 +83,8 @@ class SimplePhysics : PhysicsBase
         this.angularDrag = angularDrag;
 
         this.scale = new Vector4(scale.x, scale.y, scale.z, 1.0f);
+        
+        this.faceGroup = faceGroup;
     }
 
     public override void Update()
@@ -126,7 +136,23 @@ class SimplePhysics : PhysicsBase
         q.eulerAngles = angularPosition;
         rotation = new Vector4(q.x, q.y, q.z, q.w);
 
-        transform.SetTRS(this.linearPosition, q, scale);
+        Vector3 v = faceGroup.bound.center;
+        Vector3 vv = new Vector3(-v.x, v.z, -v.y);
+
+        Matrix4x4 m1 = Matrix4x4.identity;
+        m1.SetTRS(-vv, Quaternion.identity, Vector3.one);
+
+        Matrix4x4 m2 = Matrix4x4.identity;
+        q.eulerAngles = new Vector3(36.0f, 0.0f, 0.0f) * Time.time;
+        m2.SetTRS(Vector3.zero, q, Vector3.one);
+
+        Matrix4x4 m3 = Matrix4x4.identity;
+        m3.SetTRS(vv, Quaternion.identity, Vector3.one);
+
+        Matrix4x4 m4 = Matrix4x4.identity;
+        m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
+        
+        transform = m4 * m3 * m2 * m1;
     }
 };
 
@@ -163,8 +189,6 @@ public class Demolishable : MonoBehaviour
     void Start()
     {
         Init();
-
-        //faceGroups = JsonUtility.FromJson<FaceGroups>();
     }
 
     void Reset()
@@ -175,9 +199,6 @@ public class Demolishable : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-        //MeshFilter meshFilter = meshRenderer.GetComponent<MeshFilter>();
-        //meshFilter.mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100.0f);
     }
 
     private void Init(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
@@ -185,6 +206,7 @@ public class Demolishable : MonoBehaviour
         float linearSpeed = 10.0f * explosionForce;
         float angularSpeed = 360.0f * explosionForce;
 
+        physics = new SimplePhysics[demolishableData.GetFaceGroupCount()];
         for (int i = 0; i < physics.Length; i++)
         {
             physics[i] = new SimplePhysics();
@@ -199,36 +221,21 @@ public class Demolishable : MonoBehaviour
                 new Vector3(Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed)),
                 new Vector3(0.0f, 0.0f, 0.0f),
                 0.01f,
-                this.transform.localScale
+                this.transform.localScale,
+                demolishableData.GetFaceGroup(i)
             );
         }
 
-        Matrix4x4[] transforms = new Matrix4x4[16];
-        Vector4[] translations = new Vector4[16];
-        Vector4[] rotations = new Vector4[16];
-        for (int i = 0; i < transforms.Length; i++)
-        {
-            transforms[i] = physics[i].GetTransform();
-            translations[i] = physics[i].GetTranslation();
-            rotations[i] = physics[i].GetRotation();
-        }
-
-        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-        for (int i = 0; i < meshRenderer.materials.Length; i++)
-        {
-            meshRenderer.materials[i].SetFloat("_IsDestructed", 0.0f);
-            meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
-
-            meshRenderer.materials[i].SetVectorArray("_Translate", translations);
-            meshRenderer.materials[i].SetVectorArray("_Rotation", rotations);
-        }
+        UpdatePhysics(false);
     }
 
-    void UpdatePhysics()
+    void UpdatePhysics(bool showCrossSection)
     {
-        Matrix4x4[] transforms = new Matrix4x4[16];
-        Vector4[] translations = new Vector4[16];
-        Vector4[] rotations = new Vector4[16];
+        Matrix4x4[] transforms = new Matrix4x4[physics.Length];
+        Vector4[] translations = new Vector4[physics.Length];
+        Vector4[] rotations = new Vector4[physics.Length];
+        Vector4[] pivots = new Vector4[physics.Length];
+
         for (int i = 0; i < physics.Length; i++)
         {
             physics[i].Update();
@@ -236,16 +243,18 @@ public class Demolishable : MonoBehaviour
 
             translations[i] = physics[i].GetTranslation();
             rotations[i] = physics[i].GetRotation();
+            pivots[i] = physics[i].GetFaceGroup().bound.center;
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         for (int i = 0; i < meshRenderer.materials.Length; i++)
         {
-            meshRenderer.materials[i].SetFloat("_IsDestructed", 1.0f);
+            meshRenderer.materials[i].SetFloat("_IsDestructed", showCrossSection ? 1.0f : 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
 
             meshRenderer.materials[i].SetVectorArray("_Translate", translations);
             meshRenderer.materials[i].SetVectorArray("_Rotation", rotations);
+            meshRenderer.materials[i].SetVectorArray("_Pivot", pivots);
         }
     }
 
@@ -288,7 +297,7 @@ public class Demolishable : MonoBehaviour
         bool done = false;
         while (!done/* && (Time.time-startTime<timeout)*/)
         {
-            UpdatePhysics();
+            UpdatePhysics(true);
 
             done = true;
             foreach (var rb in physics)

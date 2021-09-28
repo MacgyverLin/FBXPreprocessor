@@ -32,4 +32,14 @@ public class FaceGroup
 public class DemolishableData : ScriptableObject
 {
     public List<FaceGroup> faceGroups = new List<FaceGroup>();
+
+    public int GetFaceGroupCount()
+    {
+        return faceGroups.Count;
+    }
+
+    public FaceGroup GetFaceGroup(int i)
+    {
+        return faceGroups[i];
+    }
 }

@@ -47,10 +47,10 @@
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float _IsDestructed;
-			uniform float4x4 _Transforms[16];
+			uniform float4x4 _Transforms[32];
 
-			uniform float4 _Rotation[16];
-			uniform float4 _Translate[16];
+			uniform float4 _Rotation[32];
+			uniform float4 _Translate[32];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -100,6 +100,21 @@
 				float3 tangentWorld: TEXCOORD3;
 				float3 binormalWorld: TEXCOORD4;
 			};
+
+			void demolish(inout vertexInput v, int groupID, int crossSection)
+			{
+				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
+
+				// Convert Physics Transform to Object Space
+				if (_IsDestructed == 1.0)
+				{
+					float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
+					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
+
+					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
+					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
+				}
+			}
 	
 			// Vertex Function
 			vertexOutput vert(vertexInput v) 
@@ -109,16 +124,7 @@
 				int groupID = (int)(v.groupID_CrossSection.x);
 				int crossSection = (int)(v.groupID_CrossSection.y);
 
-				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
-
-				// Convert Physics Transform to Object Space
-				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
-				if (_IsDestructed == 1.0)
-				{
-					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
-					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
-				}
+				demolish(v, groupID, crossSection);
 
 				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 				o.normalWorld = normalize(mul(unity_ObjectToWorld, v.normal).xyz);

@@ -9,7 +9,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1d7d822e0b154643b3873a8b3b6e761, type: 3}
+  m_Script: {fileID: 11500000, guid: 243407377858d5a4d894598e8c1be363, type: 3}
   m_Name: 4
   m_EditorClassIdentifier: 
-  faceGroups: []
+  faceGroups:
+  - groupID: 0
+    bound:
+      center: {x: 0.00000077486, y: -0.250002, z: 0.0101791}
+      size: {x: 1, y: 0.5, z: 0.030353}
+  - groupID: 1
+    bound:
+      center: {x: -0.355891, y: -0.500001, z: 0.010179}
+      size: {x: 0.288217, y: 0.999998, z: 0.0303533}
+  - groupID: 2
+    bound:
+      center: {x: -0.336323, y: -0.750001, z: 0.0101789}
+      size: {x: 0.327353, y: 0.499997, z: 0.0303529}
+  - groupID: 3
+    bound:
+      center: {x: 0.00000077486, y: -0.500001, z: 0.010179}
+      size: {x: 1, y: 0.999998, z: 0.0303533}
+  - groupID: 4
+    bound:
+      center: {x: 0.00000077486, y: -0.926694, z: 0.0101787}
+      size: {x: 1, y: 0.146612, z: 0.0303528}
+  - groupID: 5
+    bound:
+      center: {x: -0.397497, y: -0.899048, z: -0.260516}
+      size: {x: 0.0882238, y: 0.0794551, z: 0.511037}
+  - groupID: 6
+    bound:
+      center: {x: -0.399046, y: -0.102504, z: -0.260516}
+      size: {x: 0.0794549, y: 0.0882236, z: 0.511037}
+  - groupID: 7
+    bound:
+      center: {x: 0.397499, y: -0.100955, z: -0.260516}
+      size: {x: 0.0882238, y: 0.0794552, z: 0.511037}
+  - groupID: 8
+    bound:
+      center: {x: 0.399049, y: -0.897499, z: -0.260516}
+      size: {x: 0.079455, y: 0.0882235, z: 0.511037}
