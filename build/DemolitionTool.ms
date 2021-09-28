@@ -25,14 +25,38 @@ struct FaceGroup
 
 struct JSONExporter
 (
+	fn formatVector3Unity fptr v = 
+	(
+		format "\t\t\t\t{\n" to:fptr
+			format "\t\t\t\t\t\"x\":%,\n" -v.x to:fptr
+			format "\t\t\t\t\t\"y\":%,\n" v.z to:fptr
+			format "\t\t\t\t\t\"z\":%\n" -v.y to:fptr
+		format "\t\t\t\t}\n" to:fptr
+	),
+	
+	fn formatVector3Unreal fptr v = 
+	(
+		format "\t\t\t\t{\n" to:fptr
+			format "\t\t\t\t\t\"x\":%,\n" -v.x to:fptr
+			format "\t\t\t\t\t\"y\":%,\n" v.z to:fptr
+			format "\t\t\t\t\t\"z\":%\n" -v.y to:fptr
+		format "\t\t\t\t}\n" to:fptr
+	),
+
 	fn formatVector3 fptr v = 
+	(
+		formatVector3Unity fptr v
+		--formatVector3Unreal fptr v
+	),	
+	
+	fn formatSize fptr v = 
 	(
 		format "\t\t\t\t{\n" to:fptr
 			format "\t\t\t\t\t\"x\":%,\n" v.x to:fptr
 			format "\t\t\t\t\t\"y\":%,\n" v.y to:fptr
 			format "\t\t\t\t\t\"z\":%\n" v.z to:fptr
 		format "\t\t\t\t}\n" to:fptr
-	),
+	),		
 	
 	fn formatFaceBoundingBox fptr bound = 
 	(
@@ -42,7 +66,7 @@ struct JSONExporter
 			format "\t\t\t\t,\n" to:fptr
 		
 			format "\t\t\t\t\"size\":\n" to:fptr
-			formatVector3 fptr bound.size
+			formatSize fptr bound.size
 		format "\t\t\t}\n" to:fptr
 	),
 	
@@ -457,10 +481,6 @@ struct DemolitionTool
 	
 	fn exportDemolition meshObj useMapChannel maxGroupCount = 
 	(
-		jsonFilePath = getSaveFileName types:"Json(*.json)|*.json"
-		if(jsonFilePath==undefined) then
-			return false
-		
 		faceGroups = computeFaceGroups meshObj
 		if(faceGroups.count>=maxGroupCount) then
 		(
@@ -473,8 +493,26 @@ struct DemolitionTool
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
 
-		print faceGroups
-		formatJSON jsonFilePath faceGroups
+		fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx"
+		if(fbxFilePath==undefined) then
+		(
+			messageBox "Please select a file to save"
+			
+			return false
+		)
+		jsonFilePath = (getFilenamePath fbxFilePath) + (getFilenameFile fbxFilePath) + ".json"
+
+		if(not exportFile fbxFilePath using:FBXEXP) then
+		(
+			messageBox "Failed to Export fbx file"			
+			return false
+		)		
+
+		if(not formatJSON jsonFilePath faceGroups) then
+		(
+			messageBox "Failed to Export Json file"
+			return false
+		)
 		
 		return true
 	)

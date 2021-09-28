@@ -87,7 +87,39 @@ class SimplePhysics : PhysicsBase
         this.faceGroup = faceGroup;
     }
 
-    public override void Update()
+    public void TestUpdate()
+    {
+        if (sleeping)
+            return;
+
+        //////////////////////////////
+        translation = this.linearPosition;
+
+        Quaternion q = new Quaternion();
+        q.eulerAngles = angularPosition;
+        rotation = new Vector4(q.x, q.y, q.z, q.w);
+
+        //Vector3 v = faceGroup.bound.center;
+        //Vector3 pivot = new Vector3(-v.x, v.z, -v.y);
+        Vector3 pivot = faceGroup.bound.center;
+
+        Matrix4x4 m1 = Matrix4x4.identity;
+        m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
+
+        Matrix4x4 m2 = Matrix4x4.identity;
+        q.eulerAngles = new Vector3(36.0f, 0.0f, 0.0f) * Time.time;
+        m2.SetTRS(Vector3.zero, q, Vector3.one);
+
+        Matrix4x4 m3 = Matrix4x4.identity;
+        m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
+
+        Matrix4x4 m4 = Matrix4x4.identity;
+        //m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
+
+        transform = m4 * m3 * m2 * m1;
+    }
+
+    public void Update1()
     {
         if (sleeping)
             return;
@@ -129,6 +161,7 @@ class SimplePhysics : PhysicsBase
 
         //if (this.linearPosition.y < 1)
             //sleeping = true;
+        
         //////////////////////////////
         translation = this.linearPosition;
 
@@ -136,23 +169,30 @@ class SimplePhysics : PhysicsBase
         q.eulerAngles = angularPosition;
         rotation = new Vector4(q.x, q.y, q.z, q.w);
 
-        Vector3 v = faceGroup.bound.center;
-        Vector3 vv = new Vector3(-v.x, v.z, -v.y);
+        //Vector3 v = faceGroup.bound.center;
+        //Vector3 pivot = new Vector3(-v.x, v.z, -v.y);
+        Vector3 pivot = faceGroup.bound.center;
 
         Matrix4x4 m1 = Matrix4x4.identity;
-        m1.SetTRS(-vv, Quaternion.identity, Vector3.one);
+        m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
-        q.eulerAngles = new Vector3(36.0f, 0.0f, 0.0f) * Time.time;
+        // q.eulerAngles = new Vector3(36.0f, 0.0f, 0.0f) * Time.time;
         m2.SetTRS(Vector3.zero, q, Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
-        m3.SetTRS(vv, Quaternion.identity, Vector3.one);
+        m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m4 = Matrix4x4.identity;
         m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
-        
+
         transform = m4 * m3 * m2 * m1;
+    }
+
+    public override void Update()
+    {
+        TestUpdate();
+        //Update1();
     }
 };
 
