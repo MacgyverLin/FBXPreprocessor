@@ -15,13 +15,13 @@ MonoBehaviour:
   faceGroups:
   - groupID: 0
     bound:
-      center: {x: 2.37973, y: -1.08521, z: 0}
+      center: {x: -2.45888, y: 0.000000715256, z: 0.10573}
       size: {x: 3, y: 6, z: 6}
   - groupID: 1
     bound:
-      center: {x: -2.61444, y: -1.08521, z: 2.96952}
+      center: {x: 2.5353, y: 2.96952, z: 0.105729}
       size: {x: 3, y: 6, z: 3}
   - groupID: 2
     bound:
-      center: {x: -2.61444, y: -1.08521, z: -1.9089}
+      center: {x: 2.5353, y: -1.9089, z: 0.10573}
       size: {x: 3, y: 6, z: 3}

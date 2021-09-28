@@ -15,9 +15,9 @@ MonoBehaviour:
   faceGroups:
   - groupID: 0
     bound:
-      center: {x: -1.51333, y: -0.00625515, z: 0}
+      center: {x: 1.46756, y: 0, z: 1.08521}
       size: {x: 3, y: 6, z: 6}
   - groupID: 1
     bound:
-      center: {x: 1.48514, y: -0.00625515, z: 0}
+      center: {x: -1.53091, y: 0, z: 1.08521}
       size: {x: 3, y: 6, z: 6}

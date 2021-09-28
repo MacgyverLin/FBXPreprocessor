@@ -317,6 +317,10 @@ struct DemolitionTool
 		--faceGroupValue.bound = computeCapsule vertexPositions
 		--faceGroupValue.bound = computeConvexHull vertexPositions
 		faceGroupValue.bound = computeAABB vertexPositions
+		
+		v1 = faceGroupValue.bound.center + [0, faceGroupValue.bound.size.y/2, 0]
+		v2 = [faceGroupValue.bound.size.x, faceGroupValue.bound.size.z, faceGroupValue.bound.size.y]
+		format "Box transform:(matrix3 [1,0,0] [0,0,1] [0,-1,0] %) isSelected:on width:% length:% height:%\n" v1 v2.x v2.y v2.z
 	)
 	,
 
@@ -504,15 +508,23 @@ struct DemolitionTool
 
 		if(not exportFile fbxFilePath using:FBXEXP) then
 		(
-			messageBox "Failed to Export fbx file"			
+			messageBox "Failed to Export fbx file"
 			return false
 		)		
-
+		else
+		(
+			messageBox "Success to Export fbx file"
+		)
+		
 		if(not formatJSON jsonFilePath faceGroups) then
 		(
 			messageBox "Failed to Export Json file"
 			return false
 		)
+		else
+		(
+			messageBox "Success to Export Json file"
+		)		
 		
 		return true
 	)

@@ -224,7 +224,10 @@
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float _IsDestructed;
-			uniform float4x4 _Transforms[16];
+			uniform float4x4 _Transforms[32];
+
+			uniform float4 _Rotation[32];
+			uniform float4 _Translate[32];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -392,7 +395,10 @@
 			uniform float _RimPower;
 			uniform float _Alpha;
 			uniform float _IsDestructed;
-			uniform float4x4 _Transforms[16];
+			uniform float4x4 _Transforms[32];
+
+			uniform float4 _Rotation[32];
+			uniform float4 _Translate[32];
 
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
@@ -455,8 +461,8 @@
 			{
 				vertexOutput o;
 
-				int groupID = (int)v.groupID_CrossSection.x;
-				int crossSection = (int)v.groupID_CrossSection.y;
+				int groupID = (int)(v.groupID_CrossSection.x);
+				int crossSection = (int)(v.groupID_CrossSection.y);
 
 				demolish(v, groupID, crossSection);
 

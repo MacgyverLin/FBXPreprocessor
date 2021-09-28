@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 243407377858d5a4d894598e8c1be363, type: 3}
+  m_Name: m_jz_kongtiao_01
+  m_EditorClassIdentifier: 
+  faceGroups:
+  - groupID: 0
+    bound:
+      center: {x: -0.0915139, y: 0.45805, z: 0.143925}
+      size: {x: 0.211262, y: 0.04198, z: 0.211261}
+  - groupID: 1
+    bound:
+      center: {x: 0.0327046, y: 0.455775, z: 0.0207448}
+      size: {x: 0.606503, y: 0.324656, z: 0.464814}
+  - groupID: 2
+    bound:
+      center: {x: 0.322475, y: 0.459912, z: 0.0237892}
+      size: {x: 0.0172569, y: 0.192655, z: 0.234064}
+  - groupID: 3
+    bound:
+      center: {x: 0.151971, y: 0.458918, z: 0.164459}
+      size: {x: 0.193888, y: 0.0276857, z: 0.309528}
+  - groupID: 4
+    bound:
+      center: {x: -0.273662, y: 0.489336, z: 0.0600534}
+      size: {x: 0.0479362, y: 0.11353, z: 0.110074}
+  - groupID: 5
+    bound:
+      center: {x: -0.257766, y: 0.362752, z: 0.0237778}
+      size: {x: 0.0155099, y: 0.0587944, z: 0.111464}
+  - groupID: 6
+    bound:
+      center: {x: 0.258025, y: 0.239829, z: -0.0178065}
+      size: {x: 0.053763, y: 0.330533, z: 0.472143}
+  - groupID: 7
+    bound:
+      center: {x: 0.258025, y: 0.135051, z: -0.149215}
+      size: {x: 0.0432411, y: 0.0432408, z: 0.0918592}
+  - groupID: 8
+    bound:
+      center: {x: -0.190304, y: 0.239829, z: -0.0178065}
+      size: {x: 0.053763, y: 0.330533, z: 0.472143}
+  - groupID: 9
+    bound:
+      center: {x: -0.190304, y: 0.135051, z: -0.149215}
+      size: {x: 0.043241, y: 0.0432408, z: 0.0918592}
+  - groupID: 10
+    bound:
+      center: {x: -0.0913509, y: 0.45931, z: 0.138657}
+      size: {x: 0.0299605, y: 0.0453335, z: 0.0299607}
+  - groupID: 11
+    bound:
+      center: {x: -0.285379, y: 0.386484, z: -0.0678116}
+      size: {x: 0.101154, y: 0.226583, z: 0.0382583}
+  - groupID: 12
+    bound:
+      center: {x: -0.285379, y: 0.340482, z: -0.0678116}
+      size: {x: 0.101154, y: 0.226583, z: 0.0382583}

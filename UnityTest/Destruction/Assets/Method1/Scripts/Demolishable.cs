@@ -62,6 +62,8 @@ class SimplePhysics : PhysicsBase
     protected Vector3 angularAcc = new Vector3(0.0f, 0.0f, 0.0f);
     protected float angularDrag = 0.0f;
 
+    protected float test = Random.Range(10.0f, 36.0f) * 4.0f;
+
     public SimplePhysics()
     {
     }
@@ -107,7 +109,7 @@ class SimplePhysics : PhysicsBase
         m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
-        q.eulerAngles = new Vector3(36.0f, 0.0f, 0.0f) * Time.time;
+        q.eulerAngles = new Vector3(0.0f, test, 0.0f) * Time.time;
         m2.SetTRS(Vector3.zero, q, Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
@@ -191,8 +193,8 @@ class SimplePhysics : PhysicsBase
 
     public override void Update()
     {
-        TestUpdate();
-        //Update1();
+        //TestUpdate();
+        Update1();
     }
 };
 
@@ -222,7 +224,7 @@ class RigidbodyPhysics : PhysicsBase
 
 public class Demolishable : MonoBehaviour
 {
-    private SimplePhysics[] physics = new SimplePhysics[16];
+    private SimplePhysics[] physics;
     public DemolishableData demolishableData;
 
     // Start is void called before the first frame update

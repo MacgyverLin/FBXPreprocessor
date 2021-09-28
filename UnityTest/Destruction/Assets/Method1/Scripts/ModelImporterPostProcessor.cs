@@ -18,10 +18,10 @@ public class ModelImporterPostProcessor : AssetPostprocessor
         Debug.Log(scriptableObjectPath);
 
         TextAsset jsonText = AssetDatabase.LoadAssetAtPath<TextAsset>(jsonPath);
-        Debug.Log(jsonText.text);
+        ///Debug.Log(jsonText.text);
         DemolishableData demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
         JsonUtility.FromJsonOverwrite(jsonText.text, demolishableData);
-        
+
         //DemolishableData demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
         //demolishableData.faceGroups.Add(new FaceGroup(0, new Bound(new Vector3(1, 2, 3), new Vector3(4, 5, 6))));
         //demolishableData.faceGroups.Add(new FaceGroup(1, new Bound(new Vector3(10, 20, 30), new Vector3(40, 50, 60))));
@@ -31,6 +31,7 @@ public class ModelImporterPostProcessor : AssetPostprocessor
         //demolishableData.faceGroups.Clear();
         //JsonUtility.FromJsonOverwrite(text, demolishableData);
 
+        AssetDatabase.DeleteAsset(scriptableObjectPath);
         AssetDatabase.CreateAsset(demolishableData, scriptableObjectPath);
         AssetDatabase.SaveAssets();
         //AssetDatabase.DeleteAsset(jsonPath);
