@@ -43,7 +43,7 @@ public class DemolishController : MonoBehaviour
 
             i++;
             
-            yield return new WaitForSeconds(Random.Range(0.0f, 0.5f));
+            yield return new WaitForSeconds(0.1f);
         }
     }
 }

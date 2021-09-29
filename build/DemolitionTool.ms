@@ -25,21 +25,37 @@ struct FaceGroup
 
 struct JSONExporter
 (
-	fn formatVector3Unity fptr v = 
+	fn toUnityVector3 v3dsmax =
 	(
+		vunity = [-v3dsmax.x, v3dsmax.y, v3dsmax.z]
+		
+		return vunity
+	),
+	
+	fn toUnrealVector3 v3dsmax =
+	(
+		vunreal = [v3dsmax.x, v3dsmax.y, v3dsmax.z]
+		
+		return vunreal
+	),
+			
+	fn formatVector3Unity fptr v3dsmax = 
+	(
+		vunity = toUnityVector3 v3dsmax
 		format "\t\t\t\t{\n" to:fptr
-			format "\t\t\t\t\t\"x\":%,\n" -v.x to:fptr
-			format "\t\t\t\t\t\"y\":%,\n" v.z to:fptr
-			format "\t\t\t\t\t\"z\":%\n" -v.y to:fptr
+			format "\t\t\t\t\t\"x\":%,\n" vunity.x to:fptr
+			format "\t\t\t\t\t\"y\":%,\n" vunity.y to:fptr
+			format "\t\t\t\t\t\"z\":%\n" vunity.z to:fptr
 		format "\t\t\t\t}\n" to:fptr
 	),
 	
-	fn formatVector3Unreal fptr v = 
+	fn formatVector3Unreal fptr v3dsmax = 
 	(
+		vunreal = toUnrealVector3 v3dsmax
 		format "\t\t\t\t{\n" to:fptr
-			format "\t\t\t\t\t\"x\":%,\n" -v.x to:fptr
-			format "\t\t\t\t\t\"y\":%,\n" v.z to:fptr
-			format "\t\t\t\t\t\"z\":%\n" -v.y to:fptr
+			format "\t\t\t\t\t\"x\":%,\n" vunreal.x to:fptr
+			format "\t\t\t\t\t\"y\":%,\n" vunreal.y to:fptr
+			format "\t\t\t\t\t\"z\":%\n" vunreal.z to:fptr
 		format "\t\t\t\t}\n" to:fptr
 	),
 
@@ -279,14 +295,17 @@ struct DemolitionTool
 	(
 		minV = [999999, 999999, 999999]
 		maxV = [-999999, -999999, -999999]
-
+		
+		center = [0, 0, 0]
 		for vertexPosition in vertexPositions do
 		(
+			center += vertexPosition
+			
 			minV = vector3Min minV vertexPosition
 			maxV = vector3Max maxV vertexPosition
 		)
-		center = (maxV + minV) * 0.5
-		size = maxV - minV
+		center /= vertexPositions.count
+		size = maxV - center
 	
 		return BoundingBox center size
 	)
@@ -302,6 +321,8 @@ struct DemolitionTool
 	
 	fn setFaceGroupBound meshObj faceGroupValue =
 	(
+		meshInvTransform = (inverse $.transform)
+		
 		vertexPositions = #()
 		for faceIdx in faceGroupValue.faceIndices do
 		(		
@@ -309,7 +330,10 @@ struct DemolitionTool
 		
 			for v = 1 to vertexIdxs.count do
 			(
-				append vertexPositions (meshop.getVert meshObj vertexIdxs[v])
+				--vertexPosition = in coordsys local meshop.getVert meshObj vertexIdxs[v]
+				--vertexPosition = meshop.getVert meshObj vertexIdxs[v]
+				vertexPosition = (in coordsys world meshop.getVert meshObj vertexIdxs[v]) * meshInvTransform
+				append vertexPositions vertexPosition
 			)
 		)
 		
@@ -318,9 +342,13 @@ struct DemolitionTool
 		--faceGroupValue.bound = computeConvexHull vertexPositions
 		faceGroupValue.bound = computeAABB vertexPositions
 		
-		v1 = faceGroupValue.bound.center + [0, faceGroupValue.bound.size.y/2, 0]
-		v2 = [faceGroupValue.bound.size.x, faceGroupValue.bound.size.z, faceGroupValue.bound.size.y]
-		format "Box transform:(matrix3 [1,0,0] [0,0,1] [0,-1,0] %) isSelected:on width:% length:% height:%\n" v1 v2.x v2.y v2.z
+		format "% %\n" faceGroupValue.bound.center faceGroupValue.bound.size
+		
+		v1 = faceGroupValue.bound.center
+		v2 = [faceGroupValue.bound.size.x, faceGroupValue.bound.size.y, faceGroupValue.bound.size.z]
+		trans = meshObj.transform
+		trans[4] = v1 + [0, 0, -v2.z * 0.5]
+		--format "Box transform:% isSelected:on width:% length:% height:%\n" trans 0.1 0.1 0.1
 	)
 	,
 
@@ -483,7 +511,7 @@ struct DemolitionTool
 		return setCrossSectionFace meshObj useMapChannel meshObj.faces 0
 	),
 	
-	fn exportDemolition meshObj useMapChannel maxGroupCount = 
+	fn exportDemolition meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
 		faceGroups = computeFaceGroups meshObj
 		if(faceGroups.count>=maxGroupCount) then
@@ -496,15 +524,6 @@ struct DemolitionTool
 		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
-
-		fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx"
-		if(fbxFilePath==undefined) then
-		(
-			messageBox "Please select a file to save"
-			
-			return false
-		)
-		jsonFilePath = (getFilenamePath fbxFilePath) + (getFilenameFile fbxFilePath) + ".json"
 
 		if(not exportFile fbxFilePath using:FBXEXP) then
 		(
@@ -590,7 +609,24 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				(
 					convertToMesh meshObj
 
-					if( not (demolitionTool.exportDemolition meshObj mapChannelUI.value 32)) then
+					fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx"
+					if(fbxFilePath==undefined) then
+					(
+						messageBox "Please select a fbx file to save"
+			
+						return false
+					)
+					
+					jsonFilePath = getSaveFileName types:"JSON(*.json)|*.json"
+					if(jsonFilePath==undefined) then
+					(
+						messageBox "Please select a json file to save"
+			
+						return false
+					)					
+					-- jsonFilePath = (getFilenamePath fbxFilePath) + (getFilenameFile fbxFilePath) + ".json"
+		
+					if( not (demolitionTool.exportDemolition meshObj mapChannelUI.value 32 fbxFilePath jsonFilePath)) then
 					(
 						succeeded = false
 						break

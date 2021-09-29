@@ -26,7 +26,7 @@
 			}
 
 			Blend SrcAlpha OneMinusSrcAlpha
-			// Cull Off
+			Cull Off
 			// ZWrite Off
 
 			CGPROGRAM

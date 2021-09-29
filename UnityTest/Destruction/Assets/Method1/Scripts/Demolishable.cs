@@ -9,13 +9,14 @@ class PhysicsBase
     protected Vector4 scale = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     protected bool sleeping = false;
 
-    protected FaceGroup faceGroup;
+    protected DemolishableData demolishableData;
+    protected int idx = 0;
 
     public PhysicsBase()
     {
     }
 
-    virtual public void Update()
+    virtual public void Update(bool testPivot)
     {
     }
 
@@ -44,9 +45,9 @@ class PhysicsBase
         return new Vector4(scale.x, scale.y, scale.z, 1.0f);
     }
 
-    public FaceGroup GetFaceGroup()
+    public FaceGroup GetFaceGroup(int i)
     {
-        return faceGroup;
+        return demolishableData.GetFaceGroup(i);
     }
 };
 
@@ -71,7 +72,8 @@ class SimplePhysics : PhysicsBase
     public void Init(GameObject gameobject, Vector3 linearPosition, Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
                      Vector3 angularPosition, Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
                      Vector3 scale, 
-                     FaceGroup faceGroup)
+                     int i,
+                     DemolishableData demolishableData)
     {
         this.sleeping = false;
         this.linearPosition = linearPosition;
@@ -85,11 +87,12 @@ class SimplePhysics : PhysicsBase
         this.angularDrag = angularDrag;
 
         this.scale = new Vector4(scale.x, scale.y, scale.z, 1.0f);
-        
-        this.faceGroup = faceGroup;
+
+        this.idx = i;
+        this.demolishableData = demolishableData;
     }
 
-    public void TestUpdate()
+    public void TestPivot(bool testPivot)
     {
         if (sleeping)
             return;
@@ -101,15 +104,13 @@ class SimplePhysics : PhysicsBase
         q.eulerAngles = angularPosition;
         rotation = new Vector4(q.x, q.y, q.z, q.w);
 
-        //Vector3 v = faceGroup.bound.center;
-        //Vector3 pivot = new Vector3(-v.x, v.z, -v.y);
-        Vector3 pivot = faceGroup.bound.center;
+        Vector3 pivot = this.demolishableData.GetFaceGroup(idx).bound.center;
 
         Matrix4x4 m1 = Matrix4x4.identity;
         m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
-        q.eulerAngles = new Vector3(0.0f, test, 0.0f) * Time.time;
+        q.eulerAngles = new Vector3(test, test, test) * Time.time;
         m2.SetTRS(Vector3.zero, q, Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
@@ -121,7 +122,7 @@ class SimplePhysics : PhysicsBase
         transform = m4 * m3 * m2 * m1;
     }
 
-    public void Update1()
+    public void UpdateDynamics()
     {
         if (sleeping)
             return;
@@ -171,19 +172,16 @@ class SimplePhysics : PhysicsBase
         q.eulerAngles = angularPosition;
         rotation = new Vector4(q.x, q.y, q.z, q.w);
 
-        //Vector3 v = faceGroup.bound.center;
-        //Vector3 pivot = new Vector3(-v.x, v.z, -v.y);
-        Vector3 pivot = faceGroup.bound.center;
+        Vector3 pivot = this.demolishableData.GetFaceGroup(idx).bound.center;
 
         Matrix4x4 m1 = Matrix4x4.identity;
         m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
-        // q.eulerAngles = new Vector3(36.0f, 0.0f, 0.0f) * Time.time;
         m2.SetTRS(Vector3.zero, q, Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
-        m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
+        //m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m4 = Matrix4x4.identity;
         m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
@@ -191,10 +189,12 @@ class SimplePhysics : PhysicsBase
         transform = m4 * m3 * m2 * m1;
     }
 
-    public override void Update()
+    public override void Update(bool testPivot)
     {
-        //TestUpdate();
-        Update1();
+        if(testPivot)
+            TestPivot(testPivot);
+        else
+            UpdateDynamics();
     }
 };
 
@@ -213,7 +213,7 @@ class RigidbodyPhysics : PhysicsBase
 
     }
 
-    public override void Update()
+    public override void Update(bool testPivot)
     {
         float dt = Time.deltaTime;
         if (sleeping)
@@ -226,6 +226,7 @@ public class Demolishable : MonoBehaviour
 {
     private SimplePhysics[] physics;
     public DemolishableData demolishableData;
+    public bool testPivot = false;
 
     // Start is void called before the first frame update
     void Start()
@@ -249,7 +250,7 @@ public class Demolishable : MonoBehaviour
         float angularSpeed = 360.0f * explosionForce;
 
         physics = new SimplePhysics[demolishableData.GetFaceGroupCount()];
-        for (int i = 0; i < physics.Length; i++)
+        for (int i = 0; i < demolishableData.GetFaceGroupCount(); i++)
         {
             physics[i] = new SimplePhysics();
             physics[i].Init
@@ -264,7 +265,8 @@ public class Demolishable : MonoBehaviour
                 new Vector3(0.0f, 0.0f, 0.0f),
                 0.01f,
                 this.transform.localScale,
-                demolishableData.GetFaceGroup(i)
+                i,
+                demolishableData
             );
         }
 
@@ -280,12 +282,14 @@ public class Demolishable : MonoBehaviour
 
         for (int i = 0; i < physics.Length; i++)
         {
-            physics[i].Update();
-            transforms[i] = physics[i].GetTransform();
+            int groupID = physics[i].GetFaceGroup(i).groupID;
+            physics[i].Update(testPivot);
 
-            translations[i] = physics[i].GetTranslation();
-            rotations[i] = physics[i].GetRotation();
-            pivots[i] = physics[i].GetFaceGroup().bound.center;
+            transforms[groupID] = physics[i].GetTransform();
+
+            translations[groupID] = physics[i].GetTranslation();
+            rotations[groupID] = physics[i].GetRotation();
+            pivots[groupID] = physics[i].GetFaceGroup(i).bound.center;
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
