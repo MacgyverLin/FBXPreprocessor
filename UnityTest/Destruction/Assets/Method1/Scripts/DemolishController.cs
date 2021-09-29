@@ -4,7 +4,12 @@ using UnityEngine;
 
 public class DemolishController : MonoBehaviour
 {
-    public List<Demolishable> destructables = new List<Demolishable>();
+    public List<GameObject> gameObjs;
+
+    public float timeInterval = 0.7f;
+    public int count = 80;
+
+    public List<Demolishable> demolishables = new List<Demolishable>();
 
     public float explosionForce = 100.0f;
     public float explosionRadius = 10.0f;
@@ -17,10 +22,40 @@ public class DemolishController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown("space"))
+        if (Input.GetKeyDown(KeyCode.M))
         {
-            Debug.Log("space key was pressed");
+            AddDemolishables();
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
             Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+        }
+    }
+
+    void AddDemolishables()
+    {
+        for (int i = 0; i < count; i++)
+        {
+            //if (testGameObj != null)
+            {
+                float randomAngle = Random.Range(-10.0f, 10.0f);
+                float randomX = Random.Range(-0.2f, 0.2f);
+                float randomZ = Random.Range(-0.2f, 0.2f);
+                float idx = Random.Range(0, gameObjs.Count);
+                Debug.Log(idx);
+                if ((i % 2)==0)
+                {
+                    Quaternion q = new Quaternion();
+                    q.eulerAngles = new Vector3(0, randomAngle, 0);
+                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i/2 * 4.5f + randomX, 0, randomZ), q).GetComponent<Demolishable>());
+                }
+                else
+                {
+                    Quaternion q = new Quaternion();
+                    q.eulerAngles = new Vector3(0, -180 + randomAngle, 0);
+                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i / 2 * 4.5f + randomX, 0, 10 + randomZ), q).GetComponent<Demolishable>());
+                }
+            }
         }
     }
 
@@ -33,17 +68,17 @@ public class DemolishController : MonoBehaviour
     {
         int i = 0;
 
-        while (i < destructables.Count)
+        while (i < demolishables.Count)
         {
-            if (destructables[i].isActiveAndEnabled)
+            if (demolishables[i].isActiveAndEnabled)
             {
                 Debug.Log(i);
-                destructables[i].GetComponent<Demolishable>().Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+                demolishables[i].GetComponent<Demolishable>().Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
             }
 
             i++;
             
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(Random.Range(timeInterval * 0.3f, timeInterval));
         }
     }
 }

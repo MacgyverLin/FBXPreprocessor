@@ -86,13 +86,13 @@ struct JSONExporter
 		format "\t\t\t}\n" to:fptr
 	),
 	
-	fn formatFaceGroup fptr faceGroupValue = 
+	fn formatFaceGroup fptr faceGroup = 
 	(
 		format "\t\t{\n" to:fptr
-			format "\t\t\t\"groupID\":%,\n" faceGroupValue.groupID to:fptr
+			format "\t\t\t\"groupID\":%,\n" faceGroup.groupID to:fptr
 			format "\t\t\t\"bound\":\n" to:fptr
 			
-			formatFaceBoundingBox fptr faceGroupValue.bound
+			formatFaceBoundingBox fptr faceGroup.bound
 		format "\t\t}\n" to:fptr
 	),
 	
@@ -103,12 +103,12 @@ struct JSONExporter
 		format "\t\"faceGroups\":\n" to:fptr
 		format "\t[\n" to:fptr
 		
-		for faceGroupKeyValue in faceGroups do
+		for i = 1 to faceGroups.count do
 		(
-			formatFaceGroup fptr faceGroupKeyValue.value
+			formatFaceGroup fptr faceGroups[i]
 
 			groupIdx += 1;
-			if(groupIdx<faceGroups.count) then
+			if(groupIdx < faceGroups.count) then
 				format "\t\t,\n" to:fptr
 			else
 				format "" to:fptr
@@ -252,13 +252,13 @@ struct DemolitionTool
 		currentGroup = -1
 		
 		faceIDArray = #()
-		faceGroups = Dictionary(#integer)
+		faceGroupMap = Dictionary(#integer)
 		for i = 1 to meshObj.numfaces do
 		(
 			if(faceIDArray[i]==undefined) then
 			(
 				currentGroup = currentGroup + 1;
-				faceGroups[currentGroup] = (FaceGroup currentGroup)
+				faceGroupMap[currentGroup] = (FaceGroup currentGroup)
 			)
 
 			elementFaceIndices = meshop.GetElementsUsingFace meshObj i as Array
@@ -268,9 +268,23 @@ struct DemolitionTool
 				if(faceIDArray[elementFaceIndex]==undefined) then
 				(
 					faceIDArray[elementFaceIndex] = currentGroup
-					appendIfUnique faceGroups[currentGroup].faceIndices elementFaceIndex
+					appendIfUnique faceGroupMap[currentGroup].faceIndices elementFaceIndex
 				)
 			)
+		)
+		
+		faceGroups = #()
+		for faceGroupKeyValue in faceGroupMap do
+		(
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+
+			faceGroups[faceGroupKey+1] = faceGroupValue
+		)
+		
+		for i = 1 to faceGroups.count do
+		(
+			-- format "% % %\n" i faceGroups[i].groupID faceGroups[i]
 		)
 		
 		return faceGroups
@@ -319,47 +333,34 @@ struct DemolitionTool
 	)
 	,
 	
-	fn setFaceGroupBound meshObj faceGroupValue =
+	fn setFaceGroupBound meshObj faceGroup =
 	(
 		meshInvTransform = (inverse $.transform)
 		
 		vertexPositions = #()
-		for faceIdx in faceGroupValue.faceIndices do
+		for faceIdx in faceGroup.faceIndices do
 		(		
 			vertexIdxs = meshop.getFace meshObj faceIdx
 		
 			for v = 1 to vertexIdxs.count do
 			(
-				--vertexPosition = in coordsys local meshop.getVert meshObj vertexIdxs[v]
-				--vertexPosition = meshop.getVert meshObj vertexIdxs[v]
 				vertexPosition = (in coordsys world meshop.getVert meshObj vertexIdxs[v]) * meshInvTransform
 				append vertexPositions vertexPosition
 			)
 		)
 		
-		--faceGroupValue.bound = computeSphere vertexPositions
-		--faceGroupValue.bound = computeCapsule vertexPositions
-		--faceGroupValue.bound = computeConvexHull vertexPositions
-		faceGroupValue.bound = computeAABB vertexPositions
-		
-		format "% %\n" faceGroupValue.bound.center faceGroupValue.bound.size
-		
-		v1 = faceGroupValue.bound.center
-		v2 = [faceGroupValue.bound.size.x, faceGroupValue.bound.size.y, faceGroupValue.bound.size.z]
-		trans = meshObj.transform
-		trans[4] = v1 + [0, 0, -v2.z * 0.5]
-		--format "Box transform:% isSelected:on width:% length:% height:%\n" trans 0.1 0.1 0.1
+		--faceGroup.bound = computeSphere vertexPositions
+		--faceGroup.bound = computeCapsule vertexPositions
+		--faceGroup.bound = computeConvexHull vertexPositions
+		faceGroup.bound = computeAABB vertexPositions
 	)
 	,
 
 	fn setMeshFaceGroupBounds meshObj maxGroupCount faceGroups = 
 	(
-		for faceGroupKeyValue in faceGroups do
+		for i = 1 to faceGroups.count do
 		(
-			faceGroupKey = faceGroupKeyValue.key
-			faceGroupValue = faceGroupKeyValue.value
-
-			setFaceGroupBound meshObj faceGroupValue
+			setFaceGroupBound meshObj faceGroups[i]
 		)
 		
 		return true
@@ -367,9 +368,9 @@ struct DemolitionTool
 	,
 
 	------------------------------------	
-	fn setFaceGroupID meshObj vertexPerFace useMapChannel faceGroupValue =
+	fn setFaceGroupID meshObj vertexPerFace useMapChannel faceGroup =
 	(
-		for faceIdx in faceGroupValue.faceIndices do
+		for faceIdx in faceGroup.faceIndices do
 		(		
 			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
 			meshop.setMapFace meshObj useMapChannel faceIdx vertexIdxs
@@ -377,7 +378,7 @@ struct DemolitionTool
 			for v = 1 to vertexIdxs.count do
 			(
 				p = meshop.getMapVert meshObj useMapChannel vertexIdxs[v]
-				p.x = faceGroupValue.groupID
+				p.x = faceGroup.groupID
 				meshop.setMapVert meshObj useMapChannel vertexIdxs[v] p
 			)
 		)
@@ -397,12 +398,9 @@ struct DemolitionTool
 
 		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
 		
-		for faceGroupKeyValue in faceGroups do
+		for i = 1 to faceGroups.count do
 		(
-			faceGroupKey = faceGroupKeyValue.key
-			faceGroupValue = faceGroupKeyValue.value
-			
-			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroupValue
+			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroups[i]
 		)
 		
 		return true

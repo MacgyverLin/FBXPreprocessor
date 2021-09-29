@@ -22,7 +22,8 @@ public class CameraController : MonoBehaviour
         //Keyboard commands
         Vector3 p = GetBaseInput();
         if (p.sqrMagnitude > 0)
-        { // only move while a direction key is pressed
+        { 
+            // only move while a direction key is pressed
             if (Input.GetKey(KeyCode.LeftShift))
             {
                 totalRun += Time.deltaTime;
@@ -39,7 +40,7 @@ public class CameraController : MonoBehaviour
 
             p = p * Time.deltaTime;
             Vector3 newPosition = transform.position;
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.LeftControl))
             { //If player wants to move on X and Z axis only
                 transform.Translate(p);
                 newPosition.x = transform.position.x;
@@ -54,7 +55,8 @@ public class CameraController : MonoBehaviour
     }
 
     private Vector3 GetBaseInput()
-    { //returns the basic values, if it's 0 than it's not active.
+    { 
+        //returns the basic values, if it's 0 than it's not active.
         Vector3 p_Velocity = new Vector3();
         if (Input.GetKey(KeyCode.W))
         {

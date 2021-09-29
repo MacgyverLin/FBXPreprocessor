@@ -4,13 +4,10 @@ using UnityEngine;
 class PhysicsBase
 {
     protected Matrix4x4 transform = Matrix4x4.identity;
-    protected Vector4 translation = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
-    protected Vector4 rotation = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
     protected Vector4 scale = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     protected bool sleeping = false;
 
-    protected DemolishableData demolishableData;
-    protected int idx = 0;
+    protected FaceGroup faceGroup;
 
     public PhysicsBase()
     {
@@ -30,24 +27,9 @@ class PhysicsBase
         return transform;
     }
 
-    public Vector4 GetTranslation()
+    public FaceGroup GetFaceGroup()
     {
-        return translation;
-    }
-
-    public Vector4 GetRotation()
-    {
-        return rotation;
-    }
-
-    public Vector4 GetScale()
-    {
-        return new Vector4(scale.x, scale.y, scale.z, 1.0f);
-    }
-
-    public FaceGroup GetFaceGroup(int i)
-    {
-        return demolishableData.GetFaceGroup(i);
+        return faceGroup;
     }
 };
 
@@ -72,8 +54,7 @@ class SimplePhysics : PhysicsBase
     public void Init(GameObject gameobject, Vector3 linearPosition, Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
                      Vector3 angularPosition, Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
                      Vector3 scale, 
-                     int i,
-                     DemolishableData demolishableData)
+                     FaceGroup faceGroup)
     {
         this.sleeping = false;
         this.linearPosition = linearPosition;
@@ -88,8 +69,7 @@ class SimplePhysics : PhysicsBase
 
         this.scale = new Vector4(scale.x, scale.y, scale.z, 1.0f);
 
-        this.idx = i;
-        this.demolishableData = demolishableData;
+        this.faceGroup = faceGroup;
     }
 
     public void TestPivot(bool testPivot)
@@ -98,18 +78,13 @@ class SimplePhysics : PhysicsBase
             return;
 
         //////////////////////////////
-        translation = this.linearPosition;
-
-        Quaternion q = new Quaternion();
-        q.eulerAngles = angularPosition;
-        rotation = new Vector4(q.x, q.y, q.z, q.w);
-
-        Vector3 pivot = this.demolishableData.GetFaceGroup(idx).bound.center;
+        Vector3 pivot = faceGroup.bound.center;
 
         Matrix4x4 m1 = Matrix4x4.identity;
         m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
+        Quaternion q = new Quaternion();
         q.eulerAngles = new Vector3(test, test, test) * Time.time;
         m2.SetTRS(Vector3.zero, q, Vector3.one);
 
@@ -127,7 +102,9 @@ class SimplePhysics : PhysicsBase
         if (sleeping)
             return;
 
-        float dt = Time.deltaTime;
+        float dt = Time.deltaTime * 0.1f;
+        if (Input.GetKey(KeyCode.B))
+            dt = dt * 10.0f;
 
         RaycastHit hitInfo = new RaycastHit();
         bool hit = Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt);
@@ -163,25 +140,21 @@ class SimplePhysics : PhysicsBase
         }
 
         //if (this.linearPosition.y < 1)
-            //sleeping = true;
-        
+        //sleeping = true;
+
         //////////////////////////////
-        translation = this.linearPosition;
-
-        Quaternion q = new Quaternion();
-        q.eulerAngles = angularPosition;
-        rotation = new Vector4(q.x, q.y, q.z, q.w);
-
-        Vector3 pivot = this.demolishableData.GetFaceGroup(idx).bound.center;
+        Vector3 pivot = faceGroup.bound.center;
 
         Matrix4x4 m1 = Matrix4x4.identity;
         m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
+        Quaternion q = new Quaternion();
+        q.eulerAngles = angularPosition;
         m2.SetTRS(Vector3.zero, q, Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
-        //m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
+        m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m4 = Matrix4x4.identity;
         m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
@@ -209,8 +182,6 @@ class RigidbodyPhysics : PhysicsBase
                      Vector3 scale)
     {
         this.sleeping = false;
-
-
     }
 
     public override void Update(bool testPivot)
@@ -218,7 +189,6 @@ class RigidbodyPhysics : PhysicsBase
         float dt = Time.deltaTime;
         if (sleeping)
             return;
-    
     }
 };
 
@@ -231,12 +201,12 @@ public class Demolishable : MonoBehaviour
     // Start is void called before the first frame update
     void Start()
     {
-        Init();
+        Initialize();
     }
 
     void Reset()
     {
-        Init();
+        Initialize();
     }
 
     // Update is called once per frame
@@ -244,7 +214,7 @@ public class Demolishable : MonoBehaviour
     {
     }
 
-    private void Init(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    private void Initialize(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
         float linearSpeed = 10.0f * explosionForce;
         float angularSpeed = 360.0f * explosionForce;
@@ -252,6 +222,8 @@ public class Demolishable : MonoBehaviour
         physics = new SimplePhysics[demolishableData.GetFaceGroupCount()];
         for (int i = 0; i < demolishableData.GetFaceGroupCount(); i++)
         {
+            FaceGroup faceGroup = demolishableData.GetFaceGroup(i);
+
             physics[i] = new SimplePhysics();
             physics[i].Init
             (
@@ -265,8 +237,7 @@ public class Demolishable : MonoBehaviour
                 new Vector3(0.0f, 0.0f, 0.0f),
                 0.01f,
                 this.transform.localScale,
-                i,
-                demolishableData
+                demolishableData.GetFaceGroup(i)
             );
         }
 
@@ -276,20 +247,19 @@ public class Demolishable : MonoBehaviour
     void UpdatePhysics(bool showCrossSection)
     {
         Matrix4x4[] transforms = new Matrix4x4[physics.Length];
-        Vector4[] translations = new Vector4[physics.Length];
-        Vector4[] rotations = new Vector4[physics.Length];
-        Vector4[] pivots = new Vector4[physics.Length];
+        //Vector4[] translations = new Vector4[physics.Length];
+        //Vector4[] rotations = new Vector4[physics.Length];
+        //Vector4[] pivots = new Vector4[physics.Length];
 
         for (int i = 0; i < physics.Length; i++)
         {
-            int groupID = physics[i].GetFaceGroup(i).groupID;
             physics[i].Update(testPivot);
 
-            transforms[groupID] = physics[i].GetTransform();
+            transforms[i] = physics[i].GetTransform();
 
-            translations[groupID] = physics[i].GetTranslation();
-            rotations[groupID] = physics[i].GetRotation();
-            pivots[groupID] = physics[i].GetFaceGroup(i).bound.center;
+            //translations[i] = physics[i].GetTranslation();
+            //rotations[i] = physics[i].GetRotation();
+            //pivots[i] = physics[i].GetFaceGroup().bound.center;
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
@@ -298,12 +268,12 @@ public class Demolishable : MonoBehaviour
             meshRenderer.materials[i].SetFloat("_IsDestructed", showCrossSection ? 1.0f : 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
 
-            meshRenderer.materials[i].SetVectorArray("_Translate", translations);
-            meshRenderer.materials[i].SetVectorArray("_Rotation", rotations);
-            meshRenderer.materials[i].SetVectorArray("_Pivot", pivots);
+            //meshRenderer.materials[i].SetVectorArray("_Translate", translations);
+            //meshRenderer.materials[i].SetVectorArray("_Rotation", rotations);
         }
     }
 
+    /// ////////////////////////////////////////////////////////////////////////////////////
     public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
         StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
@@ -333,7 +303,7 @@ public class Demolishable : MonoBehaviour
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
-        Init(explosionForce, explosionRadius, upwardsModifier, mode);
+        Initialize(explosionForce, explosionRadius, upwardsModifier, mode);
     }
 
     IEnumerator WaitAllRigidBodySleptOrTimeOut(float timeout)
