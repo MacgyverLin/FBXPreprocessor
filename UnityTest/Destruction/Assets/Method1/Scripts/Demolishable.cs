@@ -51,18 +51,19 @@ class SimplePhysics : PhysicsBase
     {
     }
 
-    public void Init(GameObject gameobject, Vector3 linearPosition, Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
-                     Vector3 angularPosition, Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
+    public void Init(GameObject gameobject, 
+                     Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
+                     Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
                      Vector3 scale, 
                      FaceGroup faceGroup)
     {
         this.sleeping = false;
-        this.linearPosition = linearPosition;
+        this.linearPosition = gameobject.transform.TransformPoint(faceGroup.bound.center);
         this.linearVelocity = linearVelocity;
         this.linearAcc = linearAcc;
         this.linearDrag = linearDrag;
 
-        this.angularPosition = angularPosition;
+        this.angularPosition = gameobject.transform.eulerAngles;
         this.angularVelocity = angularVelocity;
         this.angularAcc = angularAcc;
         this.angularDrag = angularDrag;
@@ -92,7 +93,7 @@ class SimplePhysics : PhysicsBase
         m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m4 = Matrix4x4.identity;
-        //m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
+        m4.SetTRS(Vector3.zero, Quaternion.identity, scale);
 
         transform = m4 * m3 * m2 * m1;
     }
@@ -107,7 +108,13 @@ class SimplePhysics : PhysicsBase
             dt = dt * 10.0f;
 
         RaycastHit hitInfo = new RaycastHit();
-        bool hit = Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt);
+        //bool hit = Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt);
+
+        //Quaternion rotationQ = new Quaternion();
+        //rotationQ.eulerAngles = angularPosition;
+        //bool hit = Physics.BoxCast(this.linearPosition, faceGroup.bound.size, this.linearVelocity, out hitInfo, rotationQ, this.linearVelocity.magnitude * dt);
+
+        bool hit = Physics.SphereCast(this.linearPosition, 0.3f, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt);
         if (hit)
         {
             float fraction = hitInfo.distance / this.linearVelocity.magnitude;
@@ -121,7 +128,7 @@ class SimplePhysics : PhysicsBase
             this.angularPosition += this.angularVelocity * dt * fraction;
             this.angularVelocity -= this.angularVelocity * this.angularDrag * dt;
 
-            this.linearPosition = hitInfo.point;
+            //this.linearPosition = hitInfo.point;
             //this.angularPosition = new Vector3(0.0f, 0.0f, 0.0f);// hitInfo.normal;
 
             sleeping = true;
@@ -154,7 +161,7 @@ class SimplePhysics : PhysicsBase
         m2.SetTRS(Vector3.zero, q, Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
-        m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
+        //m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m4 = Matrix4x4.identity;
         m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
@@ -228,11 +235,9 @@ public class Demolishable : MonoBehaviour
             physics[i].Init
             (
                 this.gameObject,
-                this.transform.position,
                 new Vector3(Random.Range(-linearSpeed, linearSpeed), Random.Range(0.0f, linearSpeed * upwardsModifier), Random.Range(-linearSpeed, linearSpeed)),
                 new Vector3(0.0f, -9.8f, 0.0f),
                 0.01f,
-                this.transform.rotation.eulerAngles,
                 new Vector3(Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed)),
                 new Vector3(0.0f, 0.0f, 0.0f),
                 0.01f,

@@ -24,7 +24,7 @@ public class DemolishController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.M))
         {
-            AddDemolishables();
+            AddMoreDemolishables();
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -32,7 +32,7 @@ public class DemolishController : MonoBehaviour
         }
     }
 
-    void AddDemolishables()
+    void AddMoreDemolishables()
     {
         for (int i = 0; i < count; i++)
         {
@@ -42,7 +42,6 @@ public class DemolishController : MonoBehaviour
                 float randomX = Random.Range(-0.2f, 0.2f);
                 float randomZ = Random.Range(-0.2f, 0.2f);
                 float idx = Random.Range(0, gameObjs.Count);
-                Debug.Log(idx);
                 if ((i % 2)==0)
                 {
                     Quaternion q = new Quaternion();
@@ -53,7 +52,7 @@ public class DemolishController : MonoBehaviour
                 {
                     Quaternion q = new Quaternion();
                     q.eulerAngles = new Vector3(0, -180 + randomAngle, 0);
-                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i / 2 * 4.5f + randomX, 0, 10 + randomZ), q).GetComponent<Demolishable>());
+                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i / 2 * 4.5f + randomX, 0, 30 + randomZ), q).GetComponent<Demolishable>());
                 }
             }
         }
@@ -66,9 +65,9 @@ public class DemolishController : MonoBehaviour
 
     private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
     {
-        int i = 0;
+        int i = demolishables.Count-1;
 
-        while (i < demolishables.Count)
+        while (i>=0)
         {
             if (demolishables[i].isActiveAndEnabled)
             {
@@ -76,7 +75,7 @@ public class DemolishController : MonoBehaviour
                 demolishables[i].GetComponent<Demolishable>().Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
             }
 
-            i++;
+            i--;
             
             yield return new WaitForSeconds(Random.Range(timeInterval * 0.3f, timeInterval));
         }
