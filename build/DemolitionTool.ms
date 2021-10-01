@@ -97,19 +97,21 @@ struct JSONExporter
 		format "\t\t}\n" to:fptr
 	),
 	
-	fn formatFaceGroups fptr faceGroups = 
+	fn formatFaceGroupMap fptr faceGroupMap = 
 	(
-		groupIdx = 0
-		
 		format "\t\"faceGroups\":\n" to:fptr
 		format "\t[\n" to:fptr
 		
-		for i = 1 to faceGroups.count do
+		groupCount = 0
+		for faceGroupKeyValue in faceGroupMap do
 		(
-			formatFaceGroup fptr faceGroups[i]
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+			
+			formatFaceGroup fptr faceGroupValue
 
-			groupIdx += 1;
-			if(groupIdx < faceGroups.count) then
+			groupCount += 1;
+			if(groupCount < faceGroupMap.count) then
 				format "\t\t,\n" to:fptr
 			else
 				format "" to:fptr
@@ -119,11 +121,11 @@ struct JSONExporter
 	),	
 	
 	
-	fn formatDemolitionData fptr faceGroups = 
+	fn formatDemolitionData fptr faceGroupMap = 
 	(
 		format "{\n" to:fptr
 		
-		formatFaceGroups fptr faceGroups
+		formatFaceGroupMap fptr faceGroupMap
 		
 		format "}\n" to:fptr
 		
@@ -140,13 +142,13 @@ struct DemolitionTool
 	*/
 	
 	----------------------------------------------------------
-	fn formatJSON filename faceGroups = 
+	fn formatJSON filename faceGroupMap = 
 	(
 		fptr = openFile filename mode:"wt"
 		if(fptr==undefined) then
 			return false
 
-		jsonExporter.formatDemolitionData fptr faceGroups
+		jsonExporter.formatDemolitionData fptr faceGroupMap
 		
 		close fptr
 		
@@ -408,11 +410,14 @@ struct DemolitionTool
 	)
 	,
 
-	fn setMeshFaceGroupBounds meshObj maxGroupCount faceGroups = 
+	fn setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap = 
 	(
-		for i = 1 to faceGroups.count do
+		for faceGroupKeyValue in faceGroupMap do
 		(
-			setFaceGroupBound meshObj faceGroups[i]
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+			
+			setFaceGroupBound meshObj faceGroupValue
 		)
 		
 		return true
@@ -439,7 +444,7 @@ struct DemolitionTool
 	)
 	,
 
-	fn setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups = 
+	fn setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroupMap = 
 	(
 		validMapChannel meshObj useMapChannel
 		
@@ -447,9 +452,12 @@ struct DemolitionTool
 		maxChannel = meshop.getNumMaps meshObj
 		numFaces = meshop.getNumFaces meshObj
 				
-		for i = 1 to faceGroups.count do
+		for faceGroupKeyValue in faceGroupMap do
 		(
-			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroups[i].faceIndices faceGroups[i].groupID
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+			
+			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroupValue.faceIndices faceGroupValue.groupID
 		)
 		
 		return true
@@ -536,12 +544,13 @@ struct DemolitionTool
 	-- UI callback handler
 	fn initializeMesh meshObj useMapChannel maxGroupCount = 
 	(
-		faceGroups = #()
-		faceGroups[1] = FaceGroup 0 density:1 faceIndices:(convertFacesToFaceIndices meshObj.faces) bound:(BoundingBox [0, 0, 0]) 
+		faceGroupMap = Dictionary(#integer)
 		
-		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
+		faceGroupMap[0] = FaceGroup 0 density:1 faceIndices:(convertFacesToFaceIndices meshObj.faces) bound:(BoundingBox [0, 0, 0]) 
+		
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroupMap
 
-		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap
 		
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
 
@@ -552,17 +561,17 @@ struct DemolitionTool
 	------------------------------------------------------------------
 	fn computeFaceGroupByMeshElement meshObj useMapChannel maxGroupCount = 
 	(
-		faceGroups = computeFaceGroupArrayByMeshElements meshObj
-		if(faceGroups.count>=maxGroupCount) then
+		faceGroupMap = computeFaceGroupMapByMeshElements meshObj
+		if(faceGroupMap.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
 			
 			return false
 		)
 		
-		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroupMap
 
-		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap
 		
 		return true
 	)
@@ -616,16 +625,16 @@ struct DemolitionTool
 	
 	fn exportFBXAndJson meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
-		faceGroups = collectFaceGroupArray meshObj useMapChannel
+		faceGroupMap = collectFaceGroupMap meshObj useMapChannel
 		
-		if(faceGroups.count>=maxGroupCount) then
+		if(faceGroupMap.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
 			
 			return false
 		)
 		
-		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap
 
 		if(not exportFile fbxFilePath using:FBXEXP) then
 		(
@@ -637,7 +646,7 @@ struct DemolitionTool
 			messageBox "Success to Export fbx file"
 		)
 		
-		if(not formatJSON jsonFilePath faceGroups) then
+		if(not formatJSON jsonFilePath faceGroupMap) then
 		(
 			messageBox "Failed to Export Json file"
 			return false
@@ -651,19 +660,19 @@ struct DemolitionTool
 	),
 	
 	
-	fn exportFBXAndJson1 meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
+	fn exportFBXAndJsonUIOld meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
-		faceGroups = computeFaceGroupArrayByMeshElements meshObj
-		if(faceGroups.count>=maxGroupCount) then
+		faceGroupMap = computeFaceGroupMapByMeshElements meshObj
+		if(faceGroupMap.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
 			
 			return false
 		)
 		
-		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroupMap
 
-		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap
 
 		if(not exportFile fbxFilePath using:FBXEXP) then
 		(
@@ -675,7 +684,7 @@ struct DemolitionTool
 			messageBox "Success to Export fbx file"
 		)
 		
-		if(not formatJSON jsonFilePath faceGroups) then
+		if(not formatJSON jsonFilePath faceGroupMap) then
 		(
 			messageBox "Failed to Export Json file"
 			return false

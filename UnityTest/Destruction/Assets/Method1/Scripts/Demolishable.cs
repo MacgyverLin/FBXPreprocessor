@@ -251,20 +251,21 @@ public class Demolishable : MonoBehaviour
 
     void UpdatePhysics(bool showCrossSection)
     {
-        Matrix4x4[] transforms = new Matrix4x4[physics.Length];
-        //Vector4[] translations = new Vector4[physics.Length];
-        //Vector4[] rotations = new Vector4[physics.Length];
-        //Vector4[] pivots = new Vector4[physics.Length];
+        Matrix4x4[] transforms = new Matrix4x4[32];
+        //Vector4[] translations = new Vector4[32];
+        //Vector4[] rotations = new Vector4[32];
+        //Vector4[] pivots = new Vector4[32];
 
         for (int i = 0; i < physics.Length; i++)
         {
+            int groupID = demolishableData.GetFaceGroup(i).groupID;
+
             physics[i].Update(testPivot);
+            transforms[groupID] = physics[i].GetTransform();
 
-            transforms[i] = physics[i].GetTransform();
-
-            //translations[i] = physics[i].GetTranslation();
-            //rotations[i] = physics[i].GetRotation();
-            //pivots[i] = physics[i].GetFaceGroup().bound.center;
+            //translations[groupID] = physics[i].GetTranslation();
+            //rotations[groupID] = physics[i].GetRotation();
+            //pivots[groupID] = physics[i].GetFaceGroup().bound.center;
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();

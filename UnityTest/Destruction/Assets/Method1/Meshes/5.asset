@@ -23,7 +23,7 @@ MonoBehaviour:
       size: {x: 60.5026, y: 86.1414, z: 158.255}
   - groupID: 2
     bound:
-      center: {x: -6.94985, y: 15.9288, z: -182.11}
+      center: {x: -6.94986, y: 15.9288, z: -182.11}
       size: {x: 17.747, y: 78.1377, z: 16.548}
   - groupID: 3
     bound:
@@ -35,7 +35,7 @@ MonoBehaviour:
       size: {x: 102.653, y: 52.8944, z: 227.21}
   - groupID: 5
     bound:
-      center: {x: -75.2657, y: -53.0744, z: -0.00587229}
+      center: {x: -75.2657, y: -53.0744, z: -0.00587264}
       size: {x: 145.608, y: 36.9251, z: 230.463}
   - groupID: 6
     bound:
@@ -56,4 +56,4 @@ MonoBehaviour:
   - groupID: 10
     bound:
       center: {x: -108.743, y: 26.0209, z: 165.527}
-      size: {x: 43.6877, y: 67.7494, z: 83.2737}
+      size: {x: 43.6877, y: 67.7495, z: 83.2737}
