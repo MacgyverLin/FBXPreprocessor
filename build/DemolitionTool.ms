@@ -621,17 +621,6 @@ struct DemolitionTool
 	)
 	,	
 	
-	fn setSelectedFacesGroupID meshObj useMapChannel groupID =
-	(
-		vertexPerFace = 3
-	
-		format "setSelectedFacesGroupID\n" 
-		setFaceGroupID meshObj vertexPerFace useMapChannel (convertFacesToFaceIndices meshObj.selectedfaces) groupID
-		
-		return true
-	)
-	,
-
 	fn selectFacesByGroupID meshObj useMapChannel groupID clearSelectedFaces =
 	(
 		if(clearSelectedFaces) then
@@ -639,6 +628,25 @@ struct DemolitionTool
 		else
 			meshObj.selectedFaces = getFaceIndicesByGroupID meshObj useMapChannel groupID (convertFacesToFaceIndices meshObj.selectedfaces)
 			
+		max modify mode
+
+		subObjectLevel = 4
+
+		return true
+	)
+	,	
+	
+	fn setSelectedFacesGroupID meshObj useMapChannel groupID =
+	(
+		vertexPerFace = 3
+	
+		setFaceGroupID meshObj vertexPerFace useMapChannel (convertFacesToFaceIndices meshObj.selectedfaces) groupID
+
+		selectFacesByGroupID meshObj useMapChannel groupID true
+		
+		max modify mode
+
+		subObjectLevel = 4
 		
 		return true
 	)
@@ -648,9 +656,17 @@ struct DemolitionTool
 	fn selectFacesByCrossSectionID meshObj useMapChannel crossSectionID clearSelectedFaces = 
 	(
 		if(clearSelectedFaces) then
+		(
 			meshObj.selectedFaces = getFaceIndicesByCrossSectionID meshObj useMapChannel crossSectionID #()
+		)
 		else
+		(
 			meshObj.selectedFaces = getFaceIndicesByCrossSectionID meshObj useMapChannel crossSectionID (convertFacesToFaceIndices meshObj.selectedfaces)
+		)
+		
+		max modify mode
+
+		subObjectLevel = 4
 		
 		return true
 	)
@@ -660,13 +676,9 @@ struct DemolitionTool
 	(
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 1
 		
-		return true
-	)
-	,
-	
-	fn removeAllFacesFromCrossSection meshObj useMapChannel = 
-	(
-		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 0
+		max modify mode
+
+		subObjectLevel = 4
 		
 		return true
 	)
@@ -674,10 +686,27 @@ struct DemolitionTool
 	
 	fn removeSelectedFacesFromCrossSection meshObj useMapChannel = 
 	(
-		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 0
+		
+		max modify mode
+
+		subObjectLevel = 4		
 		
 		return true
-	),
+	)
+	,
+	
+	fn removeAllFacesFromCrossSection meshObj useMapChannel = 
+	(
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
+		
+		max modify mode
+
+		subObjectLevel = 4		
+		
+		return true
+	)
+	,
 	
 	fn exportFBXAndJson meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
