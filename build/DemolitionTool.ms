@@ -217,7 +217,7 @@ struct DemolitionTool
 	)
 	,	
 	
-	fn computeFaceGroupByMeshElements meshObj =
+	fn computeFaceGroupArrayByMeshElements meshObj =
 	(
 		faceGroupMap = computeFaceGroupMapByMeshElements meshObj
 		
@@ -274,35 +274,36 @@ struct DemolitionTool
 
 			if(allVertexSameGroupID) then
 			(
-				if(faceGroups[faceGroupID+1]==undefined) then
+				if(faceGroupMap[faceGroupID]==undefined) then
 				(
-					faceGroups[faceGroupID+1] = (FaceGroup faceGroupID)
+					faceGroupMap[faceGroupID] = (FaceGroup faceGroupID)
 				)
 				
-				appendIfUnique faceGroups[faceGroupID+1].faceIndices faceIdx
+				appendIfUnique faceGroupMap[faceGroupID].faceIndices faceIdx
 			)
 		)	
 		
-		return faceGroups
+		return faceGroupMap
 	)
 	,
 	
-	fn collectFaceGroups meshObj =
+	fn collectFaceGroupArray meshObj useMapChannel =
 	(
-		faceGroupMap = collectFaceGroupMap meshObj
+		faceGroupMap = collectFaceGroupMap meshObj useMapChannel
 		
 		faceGroups = #()
 		for faceGroupKeyValue in faceGroupMap do
 		(
 			faceGroupKey = faceGroupKeyValue.key
 			faceGroupValue = faceGroupKeyValue.value
-
+			
 			faceGroups[faceGroupKey+1] = faceGroupValue
 		)
 		
 		for i = 1 to faceGroups.count do
 		(
-			-- format "% % %\n" i faceGroups[i].groupID faceGroups[i]
+			if(not faceGroups[i]==undefined) then
+				format "% % %\n" i faceGroups[i].groupID faceGroups[i]
 		)
 		
 		return faceGroups
@@ -551,7 +552,7 @@ struct DemolitionTool
 	------------------------------------------------------------------
 	fn computeFaceGroupByMeshElement meshObj useMapChannel maxGroupCount = 
 	(
-		faceGroups = computeFaceGroupByMeshElements meshObj
+		faceGroups = computeFaceGroupArrayByMeshElements meshObj
 		if(faceGroups.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
@@ -615,7 +616,7 @@ struct DemolitionTool
 	
 	fn exportFBXAndJson meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
-		faceGroups = collectFaceGroups meshObj useMapChannel
+		faceGroups = collectFaceGroupArray meshObj useMapChannel
 		
 		if(faceGroups.count>=maxGroupCount) then
 		(
@@ -652,7 +653,7 @@ struct DemolitionTool
 	
 	fn exportFBXAndJson1 meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
-		faceGroups = computeFaceGroupByMeshElements meshObj
+		faceGroups = computeFaceGroupArrayByMeshElements meshObj
 		if(faceGroups.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
