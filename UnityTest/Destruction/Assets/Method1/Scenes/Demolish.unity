@@ -565,7 +565,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 29eb6ea0a44804b4c896ced616f9af04, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!21 &594175239
 Material:
   serializedVersion: 6
@@ -765,7 +764,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 354e29d9cfd12ff409a3d1cc04c8e498, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!1001 &706790313
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -865,7 +863,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 66328937aae4c9e4b9b57f6a2a0253b3, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!21 &777410480
 Material:
   serializedVersion: 6
@@ -1135,7 +1132,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: c5bcd7ed275330a4eb09b4be70ce7519, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!1001 &901578055
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1250,7 +1246,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 1d3bf001c4d2e1840bc6bcdf5c73aff9, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!21 &941305039
 Material:
   serializedVersion: 6
@@ -1435,7 +1430,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: b310dca7f0a38cf4698e4afadabec05a, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!1001 &1076269606
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1555,7 +1549,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 0da2b22eec9d2334488ff08026027420, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!1001 &1141435662
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1655,7 +1648,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 9a4f1fa0c448f564d84d019b76a82e4e, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!1 &1155083353
 GameObject:
   m_ObjectHideFlags: 0
@@ -1863,8 +1855,8 @@ MonoBehaviour:
   - {fileID: 959155985}
   - {fileID: 706790315}
   - {fileID: 1141435664}
-  explosionForce: 1000
-  explosionRadius: 20
+  explosionForce: 1
+  explosionRadius: 30
   upwardsModifier: 1
   mode: 1
   doFading: 0
@@ -2267,7 +2259,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 519076bcee0a05b4aafc488804b041ed, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!1001 &1621560394
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2367,7 +2358,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   demolishableData: {fileID: 11400000, guid: 9b477d52615b68d41b40214372c425cd, type: 2}
   testPivot: 0
-  bulletTime: 0
 --- !u!21 &1927546586
 Material:
   serializedVersion: 6

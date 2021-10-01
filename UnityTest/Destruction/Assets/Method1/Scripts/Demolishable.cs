@@ -126,7 +126,7 @@ class SimplePhysics : PhysicsBase
 
             ///////////////////////////////////////
             this.angularPosition += this.angularVelocity * dt * fraction;
-            this.angularVelocity -= this.angularVelocity * this.angularDrag * dt;
+            this.angularVelocity -= this.angularVelocity * this.angularDrag;
 
             //this.linearPosition = hitInfo.point;
             //this.angularPosition = new Vector3(0.0f, 0.0f, 0.0f);// hitInfo.normal;

@@ -18,9 +18,9 @@ struct BoundingBox
 struct FaceGroup
 (
 	groupID, 
-	faceIndices=#(), 
+	density = 1,
 	bound = BoundingBox [0, 0, 0],
-	center=[0, 0, 0]
+	faceIndices=#()
 )
 
 struct JSONExporter
@@ -90,6 +90,7 @@ struct JSONExporter
 	(
 		format "\t\t{\n" to:fptr
 			format "\t\t\t\"groupID\":%,\n" faceGroup.groupID to:fptr
+			format "\t\t\t\"density\":%,\n" faceGroup.density to:fptr
 			format "\t\t\t\"bound\":\n" to:fptr
 			
 			formatFaceBoundingBox fptr faceGroup.bound
@@ -196,55 +197,7 @@ struct DemolitionTool
 	)
 	,
 	
-	fn createConvexHull meshObj numVertex hullScale borderScale as_Unreal_Collision = 
-	(
-		-- First, delete old hull
-		(
-			hull_name = meshObj.name + " hull"
-			ucx_name = "UCX_" + meshObj.name
-			
-			old_hull = getnodebyname hull_name
-			if old_hull != undefined then 
-			(
-				delete old_hull
-			)
-
-			old_hull = getnodebyname ucx_name
-			if old_hull != undefined then
-			(
-				delete old_hull
-			)
-		)
-		
-		-- MassFX is able to generate the convex hull.  Here we add the modifier
-		Mass_FX_Modifier = MassFX_RBody()
-		addModifier meshObj Mass_FX_Modifier
-		
-		-- Assign the max vert and buffer value from the spinner to the modifier
-		Mass_FX_Modifier.meshVerticesLimit = numVertex
-		Mass_FX_Modifier.meshInflation = borderScale
-		
-		-- Now extract the mesh and delete the modifier
-		Mass_FX_Modifier.RBMeshCustomNodeExtract 1
-		deleteModifier meshObj 1
-		
-		-- Scale the hull
-		hull = getnodebyname hull_name
-		hull.pivot = hull.center
-		hull.scale = [hullScale,hullScale,hullScale]
-		
-		-- Name the hull UCX_ selectedmesh if it is for an unreal collision box.
-		if as_Unreal_Collision == True then
-		(
-			hull.name = ucx_name
-		)
-
-		-- delete hull
-	)		
-
 	----------------------------------------------------------
-	,
-	
 	fn computeFaceGroups meshObj =
 	(
 		assert(meshObj!=undefined)
@@ -284,7 +237,7 @@ struct DemolitionTool
 		
 		for i = 1 to faceGroups.count do
 		(
-			-- format "% % %\n" i faceGroups[i].groupID faceGroups[i]
+			format "% % %\n" i faceGroups[i].groupID faceGroups[i]
 		)
 		
 		return faceGroups
@@ -292,19 +245,6 @@ struct DemolitionTool
 	,
 		
 	----------------------------------------------------
-	fn computeSphere vertexPositions =
-	(
-	)
-	,
-		
-	fn computeCapsule vertexPositions =
-	(
-		for vertexPosition in vertexPositions do
-		(	
-		)
-	)
-	,
-	
 	fn computeAABB vertexPositions =
 	(
 		minV = [999999, 999999, 999999]
@@ -323,14 +263,6 @@ struct DemolitionTool
 	
 		return BoundingBox center size
 	)
-	,	
-	
-	fn computeConvexHull vertexPositions =
-	(
-		for vertexPosition in vertexPositions do
-		(	
-		)
-	)
 	,
 	
 	fn setFaceGroupBound meshObj faceGroup =
@@ -348,10 +280,7 @@ struct DemolitionTool
 				append vertexPositions vertexPosition
 			)
 		)
-		
-		--faceGroup.bound = computeSphere vertexPositions
-		--faceGroup.bound = computeCapsule vertexPositions
-		--faceGroup.bound = computeConvexHull vertexPositions
+
 		faceGroup.bound = computeAABB vertexPositions
 	)
 	,
@@ -368,9 +297,9 @@ struct DemolitionTool
 	,
 
 	------------------------------------	
-	fn setFaceGroupID meshObj vertexPerFace useMapChannel faceGroup =
+	fn setFaceGroupID meshObj vertexPerFace useMapChannel faceIndices groupID =
 	(
-		for faceIdx in faceGroup.faceIndices do
+		for faceIdx in faceIndices do
 		(		
 			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
 			meshop.setMapFace meshObj useMapChannel faceIdx vertexIdxs
@@ -378,7 +307,7 @@ struct DemolitionTool
 			for v = 1 to vertexIdxs.count do
 			(
 				p = meshop.getMapVert meshObj useMapChannel vertexIdxs[v]
-				p.x = faceGroup.groupID
+				p.x = groupID
 				meshop.setMapVert meshObj useMapChannel vertexIdxs[v] p
 			)
 		)
@@ -400,66 +329,16 @@ struct DemolitionTool
 		
 		for i = 1 to faceGroups.count do
 		(
-			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroups[i]
+			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroups[i].faceIndices faceGroups[i].groupID
 		)
 		
 		return true
 	)
 	,
 	
-	----------------------------------------------------
-	fn computeMeshFaceGroups meshObj useMapChannel maxGroupCount = 
-	(
-		faceGroups = computeFaceGroups meshObj
-		if(faceGroups.count>=maxGroupCount) then
-		(
-			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
-			
-			return false
-		)
-		
-		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
-
-		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
-		
-		return true
-	)
-	,
-	
-	----------------------------------------------------
-	fn convertToFacesIndices meshObj =
-	(
-		result = #()
-		for face in meshObj.faces do
-		(
-			append result face.index
-		)
-		
-		return result
-	)
-	,
-
-	fn clearMeshFaceGroups meshObj useMapChannel maxGroupCount = 
-	(
-		faceGroups = Dictionary(#integer)
-		faceGroups[0] = (FaceGroup 0 (convertToFacesIndices meshObj))
-		if(faceGroups.count>=maxGroupCount) then
-		(
-			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
-			
-			return false
-		)
-		
-		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
-
-		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
-		
-		return true
-	)
-	,
-	
-	-- ================================================================================
-	fn setCrossSectionFace meshObj useMapChannel faces isCrossSection = 
+	-------------------------------------------------------------------
+	-- internal Face
+	fn setMeshCrossSectionFace meshObj useMapChannel faces isCrossSection = 
 	(
 		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps meshObj
@@ -491,25 +370,46 @@ struct DemolitionTool
 		return true
 	)
 	,
-	
-	fn addSelectedToCrossSection meshObj useMapChannel = 
+
+	-------------------------------------------------------------------
+	fn initializeMesh meshObj useMapChannel maxGroupCount = 
 	(
-		return setCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 1
+		faceGroups = computeFaceGroups meshObj
+		if(faceGroups.count>=maxGroupCount) then
+		(
+			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
+			
+			return false
+		)
+		
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
+
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
+		
+		return true
 	)
 	,
 	
-	fn removeSelectedFromCrossSection meshObj useMapChannel = 
+	fn addSelectedFacesToCrossSection meshObj useMapChannel = 
 	(
-		return setCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 0
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 1
 	)
 	,
 	
-	fn clearAllCrossSection meshObj useMapChannel = 
+	fn removeAllFacesFromCrossSection meshObj useMapChannel = 
 	(
-		return setCrossSectionFace meshObj useMapChannel meshObj.faces 0
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 0
+	)
+	,
+	
+	fn removeSelectedFacesFromCrossSection meshObj useMapChannel = 
+	(
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
 	),
 	
-	fn exportDemolition meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
+	fn exportFBXAndJson meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
 		faceGroups = computeFaceGroups meshObj
 		if(faceGroups.count>=maxGroupCount) then
@@ -553,48 +453,141 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 (
 	rollout DemolitionToolUI_Panel "DemolitionTool"
 	(
-		/*
-		group "Convex Hull Params"
-		(
-			spinner convexHullVertexCountUI "Convex Hull Vertex Count:" range:[1,1000, 32] type:#integer
-			spinner convexHullScalarUI "Convex Hull Scaler:" range:[0.1,1000, 1]
-			spinner convexHullBorderSizeUI "Convex Hull Border Size:" range:[-1000,1000, 0]			
-		
-			button createConvexHullUI "Create Convex Hull"		
-		)
-		*/		
-		/*
-		on createConvexHullUI pressed do
-		(
-			demolitionTool.createConvexHull $ convexHullVertexCountUI.value convexHullScalarUI.value convexHullBorderSizeUI.value false
-		)
-		*/
-				
 		-------------------------------------------------------------------------
 		group "MapChannel"
 		(
-			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true
-		)
+			spinner maxMeshGroupUI "Max Mesh Group:" range:[16,32,32] type:#integer enabled:false  width:100
+			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true  width:100
+			button initializeMeshUI "Initialize Mesh" width:200
+		)		
 		
+		-------------------------------------------------------------------------		
 		group "Mesh Face Groups"
 		(
-			button computeMeshFaceGroupsUI "Compute Face Groups"
-			button clearMeshFaceGroupsUI "Clear Face Groups"
 		)
 		
+		on initializeMeshUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					convertToMesh meshObj
+					
+					if( not (demolitionTool.initializeMesh meshObj mapChannelUI.value maxMeshGroupUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				
+				if(succeeded) then
+					messageBox "Succeed in Initialize Mesh"
+				else
+					messageBox "Succeed in Initialize Mesh"
+			)
+		)		
+
+		-------------------------------------------------------------------------		
 		group "Cross Section"
 		(
-			button addSelectedToCrossSectionUI "Add Selected Face"
-			button removeSelectedFromCrossSectionUI "Remove Selected Face"
-			button clearAllCrossSectionUI "Clear All"
+			button addSelectedFacesToCrossSectionUI "Add Selected Face" width:200
+			button removeSelectedFacesFromCrossSectionUI "Remove Selected Face" width:200
+			button removeAllFacesFromCrossSectionUI "Clear All" width:200
 		)
 		
+		on addSelectedFacesToCrossSectionUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					convertToMesh meshObj
+				
+					if( not (demolitionTool.addSelectedFacesToCrossSection meshObj mapChannelUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				
+				if(succeeded) then
+					messageBox "Succeed in Add Selected Faces from Cross Section"
+				else
+					messageBox "Failed to Add Selected Faces from Cross Section"	
+			)
+		)
+		
+		on removeSelectedFacesFromCrossSectionUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					convertToMesh meshObj
+				
+					if( not (demolitionTool.removeSelectedFacesFromCrossSection meshObj mapChannelUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				
+				if(succeeded) then
+					messageBox "Succeed in Remove Selected Faces from Cross Section"
+				else
+					messageBox "Failed to Remove Selected Faces from Cross Section"	
+			)
+		)
+		
+		on removeAllFacesFromCrossSectionUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					convertToMesh meshObj
+				
+					if( not (demolitionTool.removeAllFacesFromCrossSection meshObj mapChannelUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				if(succeeded) then
+					messageBox "Succeed in Remove All Faces from Cross Section"
+				else
+					messageBox "Failed to Remove All Faces from Cross Section"	
+			)
+		)
+		
+		-------------------------------------------------------------------------		
 		group "Export"
 		(
-			button exportDemolitionUI "Export Demolition"
+			button exportFBXAndJsonUI "Export FBX and JSON"
 		)
 
-		on exportDemolitionUI pressed do
+		on exportFBXAndJsonUI pressed do
 		(
 			if($==undefined) then
 			(
@@ -615,16 +608,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 						return false
 					)
 					
+					/*
 					jsonFilePath = getSaveFileName types:"JSON(*.json)|*.json"
 					if(jsonFilePath==undefined) then
 					(
 						messageBox "Please select a json file to save"
 			
 						return false
-					)					
-					-- jsonFilePath = (getFilenamePath fbxFilePath) + (getFilenameFile fbxFilePath) + ".json"
+					)
+					*/
+					jsonFilePath = (getFilenamePath fbxFilePath) + (getFilenameFile fbxFilePath) + ".json"
 		
-					if( not (demolitionTool.exportDemolition meshObj mapChannelUI.value 32 fbxFilePath jsonFilePath)) then
+					if( not (demolitionTool.exportFBXAndJson meshObj mapChannelUI.value maxMeshGroupUI.value fbxFilePath jsonFilePath)) then
 					(
 						succeeded = false
 						break
@@ -635,141 +630,6 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 					messageBox "Export Demolition succeeded."
 				else
 					messageBox "Export Demolition failed."
-			)
-		)
-				
-		
-		on computeMeshFaceGroupsUI pressed do
-		(
-			if($==undefined) then
-			(
-				messageBox "Please select at least 1 mesh."
-			)
-			else
-			(
-				succeeded = true
-				for meshObj in $* do
-				(
-					convertToMesh meshObj
-
-					if( not (demolitionTool.computeMeshFaceGroups meshObj mapChannelUI.value 32)) then
-					(
-						succeeded = false
-						break
-					)
-				)
-
-				if(succeeded) then
-					messageBox "Compute Mesh Face Groups succeeded."
-				else
-					messageBox "Compute Mesh Face Groups failed."
-			)
-		)
-		
-		on clearMeshFaceGroupsUI pressed do
-		(
-			if($==undefined) then
-			(
-				messageBox "Please select at least 1 mesh."
-			)
-			else
-			(
-				succeeded = true
-				for meshObj in $* do
-				(
-					convertToMesh meshObj
-				
-					if( not (demolitionTool.clearMeshFaceGroups meshObj mapChannelUI.value 32)) then
-					(
-						succeeded = false
-						break
-					)					
-				)
-				
-				if(succeeded) then
-					messageBox "Clear Mesh Face Groups succeeded."
-				else
-					messageBox "Clear Mesh Face Groups failed."		
-			)
-		)	
-		
-		on addSelectedToCrossSectionUI pressed do
-		(
-			if($==undefined) then
-			(
-				messageBox "Please select at least 1 mesh."
-			)
-			else
-			(
-				succeeded = true
-				for meshObj in $* do
-				(
-					convertToMesh meshObj
-				
-					if( not (demolitionTool.addSelectedToCrossSection meshObj mapChannelUI.value)) then
-					(
-						succeeded = false
-						break
-					)	
-				)
-				
-				if(succeeded) then
-					messageBox "Selected Faces are added as Cross Section, succeeded"
-				else
-					messageBox "Selected Faces are added as Cross Section, failed"
-			)
-		)
-		
-		on removeSelectedFromCrossSectionUI pressed do
-		(
-			if($==undefined) then
-			(
-				messageBox "Please select at least 1 mesh."
-			)
-			else
-			(
-				succeeded = true
-				for meshObj in $* do
-				(
-					convertToMesh meshObj
-				
-					if( not (demolitionTool.removeSelectedFromCrossSection meshObj mapChannelUI.value)) then
-					(
-						succeeded = false
-						break
-					)	
-				)
-				
-				if(succeeded) then
-					messageBox "Selected Faces are removed from Cross Section, succeeded"
-				else
-					messageBox "Selected Faces are removed from Cross Section, failed"	
-			)
-		)
-		
-		on clearAllCrossSectionUI pressed do
-		(
-			if($==undefined) then
-			(
-				messageBox "Please select at least 1 mesh."
-			)
-			else
-			(
-				succeeded = true
-				for meshObj in $* do
-				(
-					convertToMesh meshObj
-				
-					if( not (demolitionTool.clearAllCrossSection meshObj mapChannelUI.value)) then
-					(
-						succeeded = false
-						break
-					)	
-				)
-				if(succeeded) then
-					messageBox "all Faces are removed from Cross Section, succeeded"
-				else
-					messageBox "all Faces are removed from Cross Section, failed"
 			)
 		)
 	)
