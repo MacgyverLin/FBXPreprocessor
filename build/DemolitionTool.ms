@@ -154,10 +154,41 @@ struct DemolitionTool
 	),
 	
 	----------------------------------------------------------
-	fn computeFaceGroups meshObj =
+	fn validMapChannel meshObj useMapChannel =
 	(
-		assert(meshObj!=undefined)
+		maxChannel = meshop.getNumMaps meshObj
+		
+		if(useMapChannel>=maxChannel) then
+		(
+			format "Map Channel % is allocated.\n" (useMapChannel+1)
+			
+			vertexPerFace = 3
+			numFaces = meshop.getNumFaces meshObj			
+			
+			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
+		
+			meshop.buildMapFaces meshObj useMapChannel keep:true
 
+			meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
+			
+			for faceIdx = 1 to numFaces do
+			(
+				vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+				meshop.setMapFace meshObj useMapChannel faceIdx vertexIdxs
+
+				for v = 1 to vertexIdxs.count do
+					meshop.setMapVert meshObj useMapChannel vertexIdxs[v] [0, 0, 0]
+			)
+		)
+		else
+		(
+			format "Map Channel %  has already allocated.\n" (useMapChannel+1)
+		)
+	)
+	,
+	
+	fn computeFaceGroupMapByMeshElements meshObj =
+	(
 		currentGroup = -1
 		
 		faceIDArray = #()
@@ -166,7 +197,7 @@ struct DemolitionTool
 		(
 			if(faceIDArray[i]==undefined) then
 			(
-				currentGroup = currentGroup + 1;
+				currentGroup = currentGroup + 1
 				faceGroupMap[currentGroup] = (FaceGroup currentGroup)
 			)
 
@@ -181,6 +212,14 @@ struct DemolitionTool
 				)
 			)
 		)
+	
+		return faceGroupMap
+	)
+	,	
+	
+	fn computeFaceGroupByMeshElements meshObj =
+	(
+		faceGroupMap = computeFaceGroupMapByMeshElements meshObj
 		
 		faceGroups = #()
 		for faceGroupKeyValue in faceGroupMap do
@@ -200,11 +239,12 @@ struct DemolitionTool
 	)
 	,	
 	
-	----------------------------------------------------------
-	fn collectFaceGroups meshObj useMapChannel =
+	fn collectFaceGroupMap meshObj useMapChannel =
 	(
+		validMapChannel meshObj useMapChannel
+			
 		vertexPerFace = 3
-		faceGroups = #()
+		faceGroupMap = Dictionary(#integer)
 		for face in meshObj.faces do
 		(		
 			faceIdx = face.index
@@ -245,7 +285,41 @@ struct DemolitionTool
 		
 		return faceGroups
 	)
+	,
+	
+	fn collectFaceGroups meshObj =
+	(
+		faceGroupMap = collectFaceGroupMap meshObj
+		
+		faceGroups = #()
+		for faceGroupKeyValue in faceGroupMap do
+		(
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+
+			faceGroups[faceGroupKey+1] = faceGroupValue
+		)
+		
+		for i = 1 to faceGroups.count do
+		(
+			-- format "% % %\n" i faceGroups[i].groupID faceGroups[i]
+		)
+		
+		return faceGroups
+	)
 	,		
+	
+	fn convertFacesToFaceIndices faces = 
+	(
+		faceIndices = #()
+		for face in faces do
+		(
+			append faceIndices face.index
+		)
+		
+		return faceIndices
+	)
+	,	
 	
 	-----------------------------------------------------------------------------------------
 	-- Bound
@@ -343,15 +417,16 @@ struct DemolitionTool
 		return true
 	)
 	,
-
+	
 	-----------------------------------------------------------------------------------------
 	--- Face Group
 	fn setFaceGroupID meshObj vertexPerFace useMapChannel faceIndices groupID =
 	(
+		validMapChannel meshObj useMapChannel
+		
 		for faceIdx in faceIndices do
 		(		
 			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace meshObj useMapChannel faceIdx vertexIdxs
 		
 			for v = 1 to vertexIdxs.count do
 			(
@@ -365,17 +440,12 @@ struct DemolitionTool
 
 	fn setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups = 
 	(
+		validMapChannel meshObj useMapChannel
+		
 		vertexPerFace = 3
 		maxChannel = meshop.getNumMaps meshObj
 		numFaces = meshop.getNumFaces meshObj
-		
-		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
-		
-		meshop.buildMapFaces meshObj useMapChannel keep:true
-
-		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
-		
+				
 		for i = 1 to faceGroups.count do
 		(
 			setFaceGroupID meshObj vertexPerFace useMapChannel faceGroups[i].faceIndices faceGroups[i].groupID
@@ -385,105 +455,11 @@ struct DemolitionTool
 	)
 	,
 	
-	-----------------------------------------------------------------------------------------
-	--- Cross Section Face
-	fn setMeshCrossSectionFace meshObj useMapChannel faces isCrossSection = 
+	fn getFaceIndicesByGroupID meshObj useMapChannel groupID faceIndices  =
 	(
+		validMapChannel meshObj useMapChannel
+		
 		vertexPerFace = 3
-		maxChannel = meshop.getNumMaps meshObj
-		numFaces = meshop.getNumFaces meshObj
-		
-		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
-		
-		meshop.buildMapFaces meshObj useMapChannel keep:true
-		
-		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
-		
-		for face in faces do
-		(
-			faceIdx = face.index
-			
-			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-			meshop.setMapFace meshObj useMapChannel faceIdx vertexIdxs
-			
-			vertexIdxs = (meshop.getMapFace meshObj useMapChannel faceIdx)
-			for v = 1 to vertexIdxs.count do
-			(
-				p = meshop.getMapVert meshObj useMapChannel vertexIdxs[v]
-				p.y = isCrossSection
-				meshop.setMapVert meshObj useMapChannel vertexIdxs[v] p
-			)			
-		)		
-		
-		return true
-	)
-	,
-
-	-------------------------------------------------------------------
-	fn convertFacesToFaceIndices faces = 
-	(
-		faceIndices = #()
-		for face in faces do
-		(
-			append faceIndices face.index
-		)
-		
-		return faceIndices
-	)
-	,
-	
-	fn initializeMesh meshObj useMapChannel maxGroupCount = 
-	(
-		faceGroups = #()
-		faceGroups[1] = FaceGroup 0 density:1 faceIndices:(convertFacesToFaceIndices meshObj.faces) bound:(BoundingBox [0, 0, 0]) 
-		
-		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
-
-		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
-		
-		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
-
-		return true
-	)
-	,
-	
-	fn setSelectedFacesGroupID meshObj useMapChannel groupID =
-	(
-		vertexPerFace = 3
-		maxChannel = meshop.getNumMaps meshObj
-		numFaces = meshop.getNumFaces meshObj
-		
-		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
-		
-		meshop.buildMapFaces meshObj useMapChannel keep:true
-
-		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
-
-		setFaceGroupID meshObj vertexPerFace useMapChannel (convertFacesToFaceIndices meshObj.selectedfaces) groupID
-		
-		return true
-	)
-	,
-
-	fn selectFacesByGroupID meshObj useMapChannel groupID clearSelectedFaces =
-	(
-		vertexPerFace = 3
-		maxChannel = meshop.getNumMaps meshObj
-		numFaces = meshop.getNumFaces meshObj
-		
-		if(useMapChannel>=maxChannel) then
-			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
-		
-		meshop.buildMapFaces meshObj useMapChannel keep:true
-
-		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
-
-		if(clearSelectedFaces) then
-			newSelectedFaceIndices = #()
-		else
-			newSelectedFaceIndices = (convertFacesToFaceIndices meshObj.selectedfaces)
 		
 		for face in meshObj.faces do
 		(		
@@ -514,19 +490,68 @@ struct DemolitionTool
 
 			if(allVertexSameGroupID and faceGroupID==groupID) then
 			(
-				appendIfUnique newSelectedFaceIndices faceIdx
+				appendIfUnique faceIndices faceIdx
 			)
 		)	
 		
-		meshObj.selectedFaces = newSelectedFaceIndices		
+		return faceIndices		
+	)
+	,	
+	
+	-----------------------------------------------------------------------------------------
+	--- Cross Section Face
+	fn setMeshCrossSectionFace meshObj useMapChannel faces isCrossSection = 
+	(
+		vertexPerFace = 3
+		validMapChannel meshObj useMapChannel
 		
-		return true		
+		for face in faces do
+		(
+			faceIdx = face.index
+			
+			vertexIdxs = (meshop.getMapFace meshObj useMapChannel faceIdx)
+			for v = 1 to vertexIdxs.count do
+			(
+				p = meshop.getMapVert meshObj useMapChannel vertexIdxs[v]
+				p.y = isCrossSection
+				meshop.setMapVert meshObj useMapChannel vertexIdxs[v] p
+			)
+		)
+		
+		return true
 	)
 	,
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	-------------------------------------------------------------------
+	-- UI callback handler
+	fn initializeMesh meshObj useMapChannel maxGroupCount = 
+	(
+		faceGroups = #()
+		faceGroups[1] = FaceGroup 0 density:1 faceIndices:(convertFacesToFaceIndices meshObj.faces) bound:(BoundingBox [0, 0, 0]) 
+		
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
 
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
+
+		return true
+	)
+	,
+	
+	------------------------------------------------------------------
 	fn computeFaceGroupByMeshElement meshObj useMapChannel maxGroupCount = 
 	(
-		faceGroups = computeFaceGroups meshObj
+		faceGroups = computeFaceGroupByMeshElements meshObj
 		if(faceGroups.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
@@ -540,23 +565,52 @@ struct DemolitionTool
 		
 		return true
 	)
-	,
+	,	
 	
+	fn setSelectedFacesGroupID meshObj useMapChannel groupID =
+	(
+		vertexPerFace = 3
+	
+		setFaceGroupID meshObj vertexPerFace useMapChannel (convertFacesToFaceIndices meshObj.selectedfaces) groupID
+		
+		return true
+	)
+	,
+
+	fn selectFacesByGroupID meshObj useMapChannel groupID clearSelectedFaces =
+	(
+		if(clearSelectedFaces) then
+			meshObj.selectedFaces = getFaceIndicesByGroupID meshObj useMapChannel groupID #()
+		else
+			meshObj.selectedFaces = getFaceIndicesByGroupID meshObj useMapChannel groupID (convertFacesToFaceIndices meshObj.selectedfaces)
+			
+		
+		return true
+	)
+	,
+
+	---------------------------------------------------------	
 	fn addSelectedFacesToCrossSection meshObj useMapChannel = 
 	(
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 1
+		
+		return true
 	)
 	,
 	
 	fn removeAllFacesFromCrossSection meshObj useMapChannel = 
 	(
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 0
+		
+		return true
 	)
 	,
 	
 	fn removeSelectedFacesFromCrossSection meshObj useMapChannel = 
 	(
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
+		
+		return true
 	),
 	
 	fn exportFBXAndJson meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
@@ -598,7 +652,7 @@ struct DemolitionTool
 	
 	fn exportFBXAndJson1 meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
-		faceGroups = computeFaceGroups meshObj
+		faceGroups = computeFaceGroupByMeshElements meshObj
 		if(faceGroups.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
