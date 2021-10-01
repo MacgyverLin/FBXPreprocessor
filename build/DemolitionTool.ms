@@ -795,20 +795,59 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			spinner maxMeshGroupUI "Max Mesh Group:" range:[16,32,32] type:#integer enabled:false  width:100
 			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true  width:100
 			button initializeMeshUI "Initialize Mesh" width:200 
+			
+			button testUI "testUI" width:200 
 		)		
+		
+		on testUI pressed do
+		(
+			/*
+			openEdgeIndices = meshop.getOpenEdges $ as Array
+			
+			for openEdgeIdx in openEdgeIndices do
+			(
+				v = meshop.getVertsUsingEdge $ openEdgeIdx as Array
+				--format "%\n" v
+			)
+			
+			v = $.verts.count				
+			e = $.edges.count / 2
+			f = $.faces.count
+			x = v - e + f
+			g = (2 - x) / 2
+				
+			format "V %\n" v
+			format "E %\n" e
+			format "F %\n" f
+			format "Euler characteristic %\n" x
+			format "Genus %\n" g
+			*/
+			
+			p = convertToPoly $
+			if(p.capHoles #Edge flags: 2) then
+				messageBox "cap ok"
+			else
+				messageBox "cap failed"
+			p = convertToMesh $
+		)
 		
 		on initializeMeshUI pressed do
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
-					if( not (demolitionTool.initializeMesh meshObj mapChannelUI.value maxMeshGroupUI.value)) then
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)
+					if( not (demolitionTool.initializeMesh sel mapChannelUI.value maxMeshGroupUI.value)) then
 					(
 						succeeded = false
 						break
@@ -841,12 +880,17 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.setSelectedFacesGroupID meshObj mapChannelUI.value (setIDValueUI.value-1))) then
 					(
 						succeeded = false
@@ -864,13 +908,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
 					(
 						succeeded = false
@@ -884,13 +933,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
 					(
 						succeeded = false
@@ -904,13 +958,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.computeFaceGroupByMeshElement meshObj mapChannelUI.value maxMeshGroupUI.value)) then
 					(
 						succeeded = false
@@ -939,13 +998,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.selectFacesByCrossSectionID meshObj mapChannelUI.value 1 crossSectionClearSelectionUI.checked)) then
 					(
 						succeeded = false
@@ -959,13 +1023,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.addSelectedFacesToCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
@@ -984,13 +1053,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.removeSelectedFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
@@ -1009,13 +1083,18 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						break
+					)					
 					if( not (demolitionTool.removeAllFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
@@ -1040,13 +1119,19 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at a mesh."
+				messageBox "Please select at 1 and only 1 mesh."
 			)
 			else
 			(
 				succeeded = true
 				for meshObj in selection do
 				(
+					if((classof meshObj)==Editable_Mesh) then
+					(
+						succeeded = false
+						return false
+					)
+					
 					fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx"
 					if(fbxFilePath==undefined) then
 					(
