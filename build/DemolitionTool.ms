@@ -162,7 +162,7 @@ struct DemolitionTool
 		
 		if(useMapChannel>=maxChannel) then
 		(
-			format "Map Channel % is allocated.\n" (useMapChannel+1)
+			-- format "Map Channel % is allocated.\n" (useMapChannel+1)
 			
 			vertexPerFace = 3
 			numFaces = meshop.getNumFaces meshObj			
@@ -184,7 +184,7 @@ struct DemolitionTool
 		)
 		else
 		(
-			format "Map Channel %  has already allocated.\n" (useMapChannel+1)
+			-- format "Map Channel %  has already allocated.\n" (useMapChannel+1)
 		)
 	)
 	,
@@ -392,7 +392,7 @@ struct DemolitionTool
 	
 	fn setFaceGroupBound meshObj faceGroup =
 	(
-		meshInvTransform = (inverse $.transform)
+		meshInvTransform = (inverse meshObj.transform)
 		
 		vertexPositions = #()
 		for faceIdx in faceGroup.faceIndices do
@@ -433,7 +433,7 @@ struct DemolitionTool
 		for faceIdx in faceIndices do
 		(		
 			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
-		
+			
 			for v = 1 to vertexIdxs.count do
 			(
 				p = meshop.getMapVert meshObj useMapChannel vertexIdxs[v]
@@ -505,6 +505,50 @@ struct DemolitionTool
 		
 		return faceIndices		
 	)
+	,
+	
+	fn getFaceIndicesByCrossSectionID meshObj useMapChannel crossSectionID faceIndices  =
+	(
+		validMapChannel meshObj useMapChannel
+		
+		vertexPerFace = 3
+		
+		for face in meshObj.faces do
+		(		
+			faceIdx = face.index
+			
+			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+			
+			-- sanity check
+			allVertexSameCrossSectionID= true
+			faceCrossSectionID = -1
+			for v = 1 to vertexIdxs.count-1 do
+			(
+				p0 = meshop.getMapVert meshObj useMapChannel vertexIdxs[v+0]
+				p1 = meshop.getMapVert meshObj useMapChannel vertexIdxs[v+1]
+				if( not (p0.y == p1.y) ) then
+				(
+					allVertexSameCrossSectionID = false
+					faceCrossSectionID = -1
+				)
+				
+				faceCrossSectionID = p0.y
+			)
+			if(not allVertexSameCrossSectionID) then
+			(
+				messageBox "The map vertices is corrupted."
+				return false
+			)
+
+			if(allVertexSameCrossSectionID and faceCrossSectionID==crossSectionID) then
+			(
+				appendIfUnique faceIndices faceIdx
+			)
+		)	
+		
+		return faceIndices		
+	)	
+	
 	,	
 	
 	-----------------------------------------------------------------------------------------
@@ -581,6 +625,7 @@ struct DemolitionTool
 	(
 		vertexPerFace = 3
 	
+		format "setSelectedFacesGroupID\n" 
 		setFaceGroupID meshObj vertexPerFace useMapChannel (convertFacesToFaceIndices meshObj.selectedfaces) groupID
 		
 		return true
@@ -600,6 +645,17 @@ struct DemolitionTool
 	,
 
 	---------------------------------------------------------	
+	fn selectFacesByCrossSectionID meshObj useMapChannel crossSectionID clearSelectedFaces = 
+	(
+		if(clearSelectedFaces) then
+			meshObj.selectedFaces = getFaceIndicesByCrossSectionID meshObj useMapChannel crossSectionID #()
+		else
+			meshObj.selectedFaces = getFaceIndicesByCrossSectionID meshObj useMapChannel crossSectionID (convertFacesToFaceIndices meshObj.selectedfaces)
+		
+		return true
+	)
+	,
+	
 	fn addSelectedFacesToCrossSection meshObj useMapChannel = 
 	(
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 1
@@ -714,14 +770,14 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		
 		on initializeMeshUI pressed do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
 				(
 					if( not (demolitionTool.initializeMesh meshObj mapChannelUI.value maxMeshGroupUI.value)) then
 					(
@@ -750,19 +806,19 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			checkbox clearSelectionUI "Clear Selection" width:200 align:#center checked:true
 		)
 		
-		on setIDValueUI changed val do
+		on setIDValueUI entered val val2 do
 		(
 			succeeded = true
 		
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
-				for meshObj in $* do
+				for meshObj in selection do
 				(
-					if( not (demolitionTool.setSelectedFacesGroupID meshObj mapChannelUI.value (val-1))) then
+					if( not (demolitionTool.setSelectedFacesGroupID meshObj mapChannelUI.value (setIDValueUI.value-1))) then
 					(
 						succeeded = false
 						break
@@ -770,19 +826,21 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				)
 			)
 			
+			selectIDValueUI.value = setIDValueUI.value
+			
 			subobjectLevel = 4
 		)
 		
 		on selectIDValueUI changed val do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
 				(
 					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
 					(
@@ -795,14 +853,14 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 
 		on selectIDButtonUI pressed do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
 				(
 					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
 					(
@@ -815,14 +873,14 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		
 		on computeFaceGroupByMeshElementUI pressed do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
 				(
 					if( not (demolitionTool.computeFaceGroupByMeshElement meshObj mapChannelUI.value maxMeshGroupUI.value)) then
 					(
@@ -841,21 +899,43 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		-------------------------------------------------------------------------
 		group "Cross Section"
 		(
-			button addSelectedFacesToCrossSectionUI "Add Selected Face" width:200
-			button removeSelectedFacesFromCrossSectionUI "Remove Selected Face" width:200
-			button removeAllFacesFromCrossSectionUI "Clear All" width:200
+			button selectFacesByCrossSectionIDUI "Select CrossSection Faces" width:230
+			button addSelectedFacesToCrossSectionUI "Add Selected Faces To CrossSection" width:230
+			button removeSelectedFacesFromCrossSectionUI "Remove Selected Faces From CrossSection" width:230
+			button removeAllFacesFromCrossSectionUI "Remove All Faces From CrossSection" width:230
+			checkbox crossSectionClearSelectionUI "Clear Selection" width:200 align:#center checked:true
 		)
 		
-		on addSelectedFacesToCrossSectionUI pressed do
+		on selectFacesByCrossSectionIDUI pressed do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
+				(
+					if( not (demolitionTool.selectFacesByCrossSectionID meshObj mapChannelUI.value 1 crossSectionClearSelectionUI.checked)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+			)
+		)
+		
+		on addSelectedFacesToCrossSectionUI pressed do
+		(
+			if(not selection.count==1) then
+			(
+				messageBox "Please select at a mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in selection do
 				(
 					if( not (demolitionTool.addSelectedFacesToCrossSection meshObj mapChannelUI.value)) then
 					(
@@ -867,20 +947,20 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				if(succeeded) then
 					messageBox "Succeed in Add Selected Faces from Cross Section"
 				else
-					messageBox "Failed to Add Selected Faces from Cross Section"	
+					messageBox "Failed to Add Selected Faces from Cross Section"
 			)
 		)
 		
 		on removeSelectedFacesFromCrossSectionUI pressed do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
 				(
 					if( not (demolitionTool.removeSelectedFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
@@ -892,20 +972,20 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				if(succeeded) then
 					messageBox "Succeed in Remove Selected Faces from Cross Section"
 				else
-					messageBox "Failed to Remove Selected Faces from Cross Section"	
+					messageBox "Failed to Remove Selected Faces from Cross Section"
 			)
 		)
 		
 		on removeAllFacesFromCrossSectionUI pressed do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
 				(
 					if( not (demolitionTool.removeAllFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
@@ -913,6 +993,7 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 						break
 					)	
 				)
+
 				if(succeeded) then
 					messageBox "Succeed in Remove All Faces from Cross Section"
 				else
@@ -928,14 +1009,14 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 
 		on exportFBXAndJsonUI pressed do
 		(
-			if($==undefined) then
+			if(not selection.count==1) then
 			(
-				messageBox "Please select at least 1 mesh."
+				messageBox "Please select at a mesh."
 			)
 			else
 			(
 				succeeded = true
-				for meshObj in $* do
+				for meshObj in selection do
 				(
 					fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx"
 					if(fbxFilePath==undefined) then
@@ -972,5 +1053,5 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		)
 	)
 	
-	createDialog DemolitionToolUI_Panel height:400 width:400 pos:[150,200]
+	createDialog DemolitionToolUI_Panel height:500 width:400 pos:[150,200]
 )

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: m_dj_guilian_01
   m_EditorClassIdentifier: 
   faceGroups:
-  - groupID: 0
+  - groupID: 17
     bound:
       center: {x: -9.60329, y: 269.572, z: -25.7306}
       size: {x: 106.699, y: 134.625, z: 14.3353}

@@ -861,7 +861,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4028932e03d43d49a561ecb5280623e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  demolishableData: {fileID: 11400000, guid: b310dca7f0a38cf4698e4afadabec05a, type: 2}
+  demolishableData: {fileID: 0}
   testPivot: 0
 --- !u!21 &777410480
 Material:
