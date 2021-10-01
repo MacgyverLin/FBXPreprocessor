@@ -15,12 +15,8 @@ MonoBehaviour:
   faceGroups:
   - groupID: 0
     bound:
-      center: {x: 55.9214, y: 213.98, z: -25.1795}
-      size: {x: 56.3759, y: 53.4635, z: 13.7842}
-  - groupID: 17
-    bound:
-      center: {x: -78.7041, y: 328.199, z: -26.3115}
-      size: {x: 37.5983, y: 75.9984, z: 14.4054}
+      center: {x: -9.60329, y: 269.572, z: -25.7306}
+      size: {x: 106.699, y: 134.625, z: 14.3353}
   - groupID: 1
     bound:
       center: {x: 57.2794, y: 157.029, z: -30.8582}
