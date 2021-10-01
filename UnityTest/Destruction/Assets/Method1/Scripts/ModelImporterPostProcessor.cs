@@ -35,6 +35,6 @@ public class ModelImporterPostProcessor : AssetPostprocessor
         AssetDatabase.DeleteAsset(scriptableObjectPath);
         AssetDatabase.CreateAsset(demolishableData, scriptableObjectPath);
         //AssetDatabase.SaveAssets();
-        //AssetDatabase.DeleteAsset(jsonPath);
+        AssetDatabase.DeleteAsset(jsonPath);
     }
 }

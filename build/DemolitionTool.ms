@@ -139,6 +139,7 @@ struct DemolitionTool
 	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
 	*/
 	
+	----------------------------------------------------------
 	fn formatJSON filename faceGroups = 
 	(
 		fptr = openFile filename mode:"wt"
@@ -152,7 +153,102 @@ struct DemolitionTool
 		return true
 	),
 	
-	-------------------------------------------------------------------------
+	----------------------------------------------------------
+	fn computeFaceGroups meshObj =
+	(
+		assert(meshObj!=undefined)
+
+		currentGroup = -1
+		
+		faceIDArray = #()
+		faceGroupMap = Dictionary(#integer)
+		for i = 1 to meshObj.numfaces do
+		(
+			if(faceIDArray[i]==undefined) then
+			(
+				currentGroup = currentGroup + 1;
+				faceGroupMap[currentGroup] = (FaceGroup currentGroup)
+			)
+
+			elementFaceIndices = meshop.GetElementsUsingFace meshObj i as Array
+			for j = 1 to elementFaceIndices.count do
+			(
+				elementFaceIndex = elementFaceIndices[j]
+				if(faceIDArray[elementFaceIndex]==undefined) then
+				(
+					faceIDArray[elementFaceIndex] = currentGroup
+					appendIfUnique faceGroupMap[currentGroup].faceIndices elementFaceIndex
+				)
+			)
+		)
+		
+		faceGroups = #()
+		for faceGroupKeyValue in faceGroupMap do
+		(
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+
+			faceGroups[faceGroupKey+1] = faceGroupValue
+		)
+		
+		for i = 1 to faceGroups.count do
+		(
+			-- format "% % %\n" i faceGroups[i].groupID faceGroups[i]
+		)
+		
+		return faceGroups
+	)
+	,	
+	
+	----------------------------------------------------------
+	fn collectFaceGroups meshObj useMapChannel =
+	(
+		vertexPerFace = 3
+		faceGroups = #()
+		for face in meshObj.faces do
+		(		
+			faceIdx = face.index
+			
+			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+			
+			-- sanity check
+			allVertexSameGroupID = true
+			faceGroupID = -1
+			for v = 1 to vertexIdxs.count-1 do
+			(
+				p0 = meshop.getMapVert meshObj useMapChannel vertexIdxs[v+0]
+				p1 = meshop.getMapVert meshObj useMapChannel vertexIdxs[v+1]
+				if( not (p0.x == p1.x) ) then
+				(
+					allVertexSameGroupID = false
+					faceGroupID = -1
+				)
+				
+				faceGroupID = int(p0.x)
+			)
+			if(not allVertexSameGroupID) then
+			(
+				messageBox "The map vertices is corrupted."
+				return false
+			)
+
+			if(allVertexSameGroupID) then
+			(
+				if(faceGroups[faceGroupID+1]==undefined) then
+				(
+					faceGroups[faceGroupID+1] = (FaceGroup faceGroupID)
+				)
+				
+				appendIfUnique faceGroups[faceGroupID+1].faceIndices faceIdx
+			)
+		)	
+		
+		return faceGroups
+	)
+	,		
+	
+	-----------------------------------------------------------------------------------------
+	-- Bound
 	fn vector3Max v1 v2 = 
 	(
 		result = [0, 0, 0]
@@ -197,54 +293,6 @@ struct DemolitionTool
 	)
 	,
 	
-	----------------------------------------------------------
-	fn computeFaceGroups meshObj =
-	(
-		assert(meshObj!=undefined)
-
-		currentGroup = -1
-		
-		faceIDArray = #()
-		faceGroupMap = Dictionary(#integer)
-		for i = 1 to meshObj.numfaces do
-		(
-			if(faceIDArray[i]==undefined) then
-			(
-				currentGroup = currentGroup + 1;
-				faceGroupMap[currentGroup] = (FaceGroup currentGroup)
-			)
-
-			elementFaceIndices = meshop.GetElementsUsingFace meshObj i as Array
-			for j = 1 to elementFaceIndices.count do
-			(
-				elementFaceIndex = elementFaceIndices[j]
-				if(faceIDArray[elementFaceIndex]==undefined) then
-				(
-					faceIDArray[elementFaceIndex] = currentGroup
-					appendIfUnique faceGroupMap[currentGroup].faceIndices elementFaceIndex
-				)
-			)
-		)
-		
-		faceGroups = #()
-		for faceGroupKeyValue in faceGroupMap do
-		(
-			faceGroupKey = faceGroupKeyValue.key
-			faceGroupValue = faceGroupKeyValue.value
-
-			faceGroups[faceGroupKey+1] = faceGroupValue
-		)
-		
-		for i = 1 to faceGroups.count do
-		(
-			format "% % %\n" i faceGroups[i].groupID faceGroups[i]
-		)
-		
-		return faceGroups
-	)
-	,
-		
-	----------------------------------------------------
 	fn computeAABB vertexPositions =
 	(
 		minV = [999999, 999999, 999999]
@@ -296,7 +344,8 @@ struct DemolitionTool
 	)
 	,
 
-	------------------------------------	
+	-----------------------------------------------------------------------------------------
+	--- Face Group
 	fn setFaceGroupID meshObj vertexPerFace useMapChannel faceIndices groupID =
 	(
 		for faceIdx in faceIndices do
@@ -336,8 +385,8 @@ struct DemolitionTool
 	)
 	,
 	
-	-------------------------------------------------------------------
-	-- internal Face
+	-----------------------------------------------------------------------------------------
+	--- Cross Section Face
 	fn setMeshCrossSectionFace meshObj useMapChannel faces isCrossSection = 
 	(
 		vertexPerFace = 3
@@ -372,7 +421,110 @@ struct DemolitionTool
 	,
 
 	-------------------------------------------------------------------
+	fn convertFacesToFaceIndices faces = 
+	(
+		faceIndices = #()
+		for face in faces do
+		(
+			append faceIndices face.index
+		)
+		
+		return faceIndices
+	)
+	,
+	
 	fn initializeMesh meshObj useMapChannel maxGroupCount = 
+	(
+		faceGroups = #()
+		faceGroups[1] = FaceGroup 0 density:1 faceIndices:(convertFacesToFaceIndices meshObj.faces) bound:(BoundingBox [0, 0, 0]) 
+		
+		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
+
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+		
+		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
+
+		return true
+	)
+	,
+	
+	fn setSelectedFacesGroupID meshObj useMapChannel groupID =
+	(
+		vertexPerFace = 3
+		maxChannel = meshop.getNumMaps meshObj
+		numFaces = meshop.getNumFaces meshObj
+		
+		if(useMapChannel>=maxChannel) then
+			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
+		
+		meshop.buildMapFaces meshObj useMapChannel keep:true
+
+		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
+
+		setFaceGroupID meshObj vertexPerFace useMapChannel (convertFacesToFaceIndices meshObj.selectedfaces) groupID
+		
+		return true
+	)
+	,
+
+	fn selectFacesByGroupID meshObj useMapChannel groupID clearSelectedFaces =
+	(
+		vertexPerFace = 3
+		maxChannel = meshop.getNumMaps meshObj
+		numFaces = meshop.getNumFaces meshObj
+		
+		if(useMapChannel>=maxChannel) then
+			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
+		
+		meshop.buildMapFaces meshObj useMapChannel keep:true
+
+		meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
+
+		if(clearSelectedFaces) then
+			newSelectedFaceIndices = #()
+		else
+			newSelectedFaceIndices = (convertFacesToFaceIndices meshObj.selectedfaces)
+		
+		for face in meshObj.faces do
+		(		
+			faceIdx = face.index
+			
+			vertexIdxs = [(faceIdx-1) * vertexPerFace + 1, (faceIdx-1) * vertexPerFace + 2, (faceIdx-1) * vertexPerFace + 3]
+			
+			-- sanity check
+			allVertexSameGroupID = true
+			faceGroupID = -1
+			for v = 1 to vertexIdxs.count-1 do
+			(
+				p0 = meshop.getMapVert meshObj useMapChannel vertexIdxs[v+0]
+				p1 = meshop.getMapVert meshObj useMapChannel vertexIdxs[v+1]
+				if( not (p0.x == p1.x) ) then
+				(
+					allVertexSameGroupID = false
+					faceGroupID = -1
+				)
+				
+				faceGroupID = p0.x
+			)
+			if(not allVertexSameGroupID) then
+			(
+				messageBox "The map vertices is corrupted."
+				return false
+			)
+
+			if(allVertexSameGroupID and faceGroupID==groupID) then
+			(
+				appendIfUnique newSelectedFaceIndices faceIdx
+			)
+		)	
+		
+		meshObj.selectedFaces = newSelectedFaceIndices		
+		
+		return true		
+	)
+	,
+
+	fn computeFaceGroupByMeshElement meshObj useMapChannel maxGroupCount = 
 	(
 		faceGroups = computeFaceGroups meshObj
 		if(faceGroups.count>=maxGroupCount) then
@@ -385,8 +537,6 @@ struct DemolitionTool
 		setMeshFaceGroupIDs meshObj useMapChannel maxGroupCount faceGroups
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
-		
-		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
 		
 		return true
 	)
@@ -410,6 +560,43 @@ struct DemolitionTool
 	),
 	
 	fn exportFBXAndJson meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
+	(
+		faceGroups = collectFaceGroups meshObj useMapChannel
+		
+		if(faceGroups.count>=maxGroupCount) then
+		(
+			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
+			
+			return false
+		)
+		
+		setMeshFaceGroupBounds meshObj maxGroupCount faceGroups
+
+		if(not exportFile fbxFilePath using:FBXEXP) then
+		(
+			messageBox "Failed to Export fbx file"
+			return false
+		)		
+		else
+		(
+			messageBox "Success to Export fbx file"
+		)
+		
+		if(not formatJSON jsonFilePath faceGroups) then
+		(
+			messageBox "Failed to Export Json file"
+			return false
+		)
+		else
+		(
+			messageBox "Success to Export Json file"
+		)
+		
+		return true
+	),
+	
+	
+	fn exportFBXAndJson1 meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
 		faceGroups = computeFaceGroups meshObj
 		if(faceGroups.count>=maxGroupCount) then
@@ -444,7 +631,7 @@ struct DemolitionTool
 		)		
 		
 		return true
-	)
+	)	
 )
 
 demolitionTool = DemolitionTool()
@@ -458,13 +645,8 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		(
 			spinner maxMeshGroupUI "Max Mesh Group:" range:[16,32,32] type:#integer enabled:false  width:100
 			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true  width:100
-			button initializeMeshUI "Initialize Mesh" width:200
+			button initializeMeshUI "Initialize Mesh" width:200 
 		)		
-		
-		-------------------------------------------------------------------------		
-		group "Mesh Face Groups"
-		(
-		)
 		
 		on initializeMeshUI pressed do
 		(
@@ -477,8 +659,6 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				succeeded = true
 				for meshObj in $* do
 				(
-					convertToMesh meshObj
-					
 					if( not (demolitionTool.initializeMesh meshObj mapChannelUI.value maxMeshGroupUI.value)) then
 					(
 						succeeded = false
@@ -491,9 +671,110 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				else
 					messageBox "Succeed in Initialize Mesh"
 			)
-		)		
-
+		)
+		
 		-------------------------------------------------------------------------		
+		group "Mesh Face Groups"
+		(
+			button computeFaceGroupByMeshElementUI "Compute by Mesh Element" width:200 
+			
+			label setIDLabelUI "Set ID:" across:2 align:#right
+			spinner setIDValueUI range:[1,32,1] type:#integer align:#left
+			
+			button selectIDButtonUI "Select ID:" across:2 align:#right
+			spinner selectIDValueUI range:[1,32,1] type:#integer align:#left
+			checkbox clearSelectionUI "Clear Selection" width:200 align:#center checked:true
+		)
+		
+		on setIDValueUI changed val do
+		(
+			succeeded = true
+		
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				for meshObj in $* do
+				(
+					if( not (demolitionTool.setSelectedFacesGroupID meshObj mapChannelUI.value (val-1))) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+			)
+			
+			subobjectLevel = 4
+		)
+		
+		on selectIDValueUI changed val do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+			)
+		)			
+
+		on selectIDButtonUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+			)
+		)	
+		
+		on computeFaceGroupByMeshElementUI pressed do
+		(
+			if($==undefined) then
+			(
+				messageBox "Please select at least 1 mesh."
+			)
+			else
+			(
+				succeeded = true
+				for meshObj in $* do
+				(
+					if( not (demolitionTool.computeFaceGroupByMeshElement meshObj mapChannelUI.value maxMeshGroupUI.value)) then
+					(
+						succeeded = false
+						break
+					)	
+				)
+				
+				if(succeeded) then
+					messageBox "Succeed in Compute FaceGroup By Mesh Element"
+				else
+					messageBox "Succeed in Compute FaceGroup By Mesh Element"
+			)
+		)	
+		
+		-------------------------------------------------------------------------
 		group "Cross Section"
 		(
 			button addSelectedFacesToCrossSectionUI "Add Selected Face" width:200
@@ -512,8 +793,6 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				succeeded = true
 				for meshObj in $* do
 				(
-					convertToMesh meshObj
-				
 					if( not (demolitionTool.addSelectedFacesToCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
@@ -539,8 +818,6 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				succeeded = true
 				for meshObj in $* do
 				(
-					convertToMesh meshObj
-				
 					if( not (demolitionTool.removeSelectedFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
@@ -566,8 +843,6 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				succeeded = true
 				for meshObj in $* do
 				(
-					convertToMesh meshObj
-				
 					if( not (demolitionTool.removeAllFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
@@ -584,7 +859,7 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		-------------------------------------------------------------------------		
 		group "Export"
 		(
-			button exportFBXAndJsonUI "Export FBX and JSON"
+			button exportFBXAndJsonUI "Export FBX and JSON" width:200
 		)
 
 		on exportFBXAndJsonUI pressed do
@@ -598,8 +873,6 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 				succeeded = true
 				for meshObj in $* do
 				(
-					convertToMesh meshObj
-
 					fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx"
 					if(fbxFilePath==undefined) then
 					(
@@ -619,6 +892,7 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 					*/
 					jsonFilePath = (getFilenamePath fbxFilePath) + (getFilenameFile fbxFilePath) + ".json"
 		
+					--if( not (demolitionTool.exportFBXAndJson1 meshObj mapChannelUI.value maxMeshGroupUI.value fbxFilePath jsonFilePath)) then
 					if( not (demolitionTool.exportFBXAndJson meshObj mapChannelUI.value maxMeshGroupUI.value fbxFilePath jsonFilePath)) then
 					(
 						succeeded = false
@@ -634,5 +908,5 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		)
 	)
 	
-	createDialog DemolitionToolUI_Panel height:300 width:400 pos:[150,200]
+	createDialog DemolitionToolUI_Panel height:400 width:400 pos:[150,200]
 )
