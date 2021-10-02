@@ -209,8 +209,18 @@ public class Demolishable : MonoBehaviour
         Initialize();
     }
 
+
+    
+    void Test()
+    {
+        // TextAsset t = Resources.Load<TextAsset>("mac");
+        // string s = JSONStringFinder.Find(t.text, "DemolishableData = ");
+        // Debug.Log(s);
+    }
+
     void Reset()
     {
+        Test();
         Initialize();
     }
 
@@ -221,7 +231,7 @@ public class Demolishable : MonoBehaviour
 
     private void Initialize(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
-        demolishableData = Resources.Load<DemolishableData>(GetComponent<MeshFilter>().name);
+        //demolishableData = GameObject.Instantiate<DemolishableData>(Resources.Load<DemolishableData>(GetComponent<MeshFilter>().name));
 
         float linearSpeed = 10.0f * explosionForce;
         float angularSpeed = 360.0f * explosionForce;
