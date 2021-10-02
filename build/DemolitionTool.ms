@@ -159,19 +159,27 @@ struct DemolitionTool
 	fn validMapChannel meshObj useMapChannel =
 	(
 		maxChannel = meshop.getNumMaps meshObj
+		vertexPerFace = 3
+		numFaces = meshop.getNumFaces meshObj			
 		
 		if(useMapChannel>=maxChannel) then
 		(
-			-- format "Map Channel % is allocated.\n" (useMapChannel+1)
-			
-			vertexPerFace = 3
-			numFaces = meshop.getNumFaces meshObj			
+			format "Map Channel % is allocated.\n" (useMapChannel+1)
 			
 			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
-		
 			meshop.buildMapFaces meshObj useMapChannel keep:true
-
-			meshop.setNumMapVerts meshObj useMapChannel (numFaces * vertexPerFace) keep:true
+		)
+		else
+		(
+			format "Map Channel %  has already allocated.\n" (useMapChannel+1)
+		)
+		
+		totalVertex = (numFaces * vertexPerFace)
+		if(totalVertex > meshop.getNumMapVerts meshObj useMapChannel) then
+		(
+			format "Map Channel %, vertices is not enough, resize to %.\n" (useMapChannel+1) totalVertex
+			
+			meshop.setNumMapVerts meshObj useMapChannel totalVertex keep:true
 			
 			for faceIdx = 1 to numFaces do
 			(
@@ -180,11 +188,11 @@ struct DemolitionTool
 
 				for v = 1 to vertexIdxs.count do
 					meshop.setMapVert meshObj useMapChannel vertexIdxs[v] [0, 0, 0]
-			)
+			)			
 		)
 		else
 		(
-			-- format "Map Channel %  has already allocated.\n" (useMapChannel+1)
+			format "Map Channel %, vertices is enough, size = %.\n" (useMapChannel+1) totalVertex
 		)
 	)
 	,
@@ -588,6 +596,9 @@ struct DemolitionTool
 	-- UI callback handler
 	fn initializeMesh meshObj useMapChannel maxGroupCount = 
 	(
+		max modify mode
+		subObjectLevel = 0
+
 		faceGroupMap = Dictionary(#integer)
 		
 		faceGroupMap[0] = FaceGroup 0 density:1 faceIndices:(convertFacesToFaceIndices meshObj.faces) bound:(BoundingBox [0, 0, 0]) 
@@ -605,6 +616,9 @@ struct DemolitionTool
 	------------------------------------------------------------------
 	fn computeFaceGroupByMeshElement meshObj useMapChannel maxGroupCount = 
 	(
+		max modify mode
+		subObjectLevel = 0
+		
 		faceGroupMap = computeFaceGroupMapByMeshElements meshObj
 		if(faceGroupMap.count>=maxGroupCount) then
 		(
@@ -617,44 +631,53 @@ struct DemolitionTool
 
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap
 		
+		max modify mode
+		subObjectLevel = 4
+		
 		return true
 	)
 	,	
 	
 	fn selectFacesByGroupID meshObj useMapChannel groupID clearSelectedFaces =
 	(
+		max modify mode
+		subObjectLevel = 0
+		
 		if(clearSelectedFaces) then
 			meshObj.selectedFaces = getFaceIndicesByGroupID meshObj useMapChannel groupID #()
 		else
 			meshObj.selectedFaces = getFaceIndicesByGroupID meshObj useMapChannel groupID (convertFacesToFaceIndices meshObj.selectedfaces)
-			
+
 		max modify mode
-
 		subObjectLevel = 4
-
+		
 		return true
 	)
 	,	
-	
+
 	fn setSelectedFacesGroupID meshObj useMapChannel groupID =
 	(
+		max modify mode
+		subObjectLevel = 0
+		
 		vertexPerFace = 3
 	
 		setFaceGroupID meshObj vertexPerFace useMapChannel (convertFacesToFaceIndices meshObj.selectedfaces) groupID
 
-		selectFacesByGroupID meshObj useMapChannel groupID true
+		--selectFacesByGroupID meshObj useMapChannel groupID true
 		
 		max modify mode
-
 		subObjectLevel = 4
 		
 		return true
 	)
-	,
-
+	,	
 	---------------------------------------------------------	
 	fn selectFacesByCrossSectionID meshObj useMapChannel crossSectionID clearSelectedFaces = 
 	(
+		max modify mode
+		subObjectLevel = 0
+		
 		if(clearSelectedFaces) then
 		(
 			meshObj.selectedFaces = getFaceIndicesByCrossSectionID meshObj useMapChannel crossSectionID #()
@@ -665,7 +688,6 @@ struct DemolitionTool
 		)
 		
 		max modify mode
-
 		subObjectLevel = 4
 		
 		return true
@@ -674,11 +696,13 @@ struct DemolitionTool
 	
 	fn addSelectedFacesToCrossSection meshObj useMapChannel = 
 	(
+		max modify mode
+		subObjectLevel = 0
+		
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 1
 		
 		max modify mode
-
-		subObjectLevel = 4
+		subObjectLevel = 4		
 		
 		return true
 	)
@@ -686,10 +710,12 @@ struct DemolitionTool
 	
 	fn removeSelectedFacesFromCrossSection meshObj useMapChannel = 
 	(
+		max modify mode
+		subObjectLevel = 0
+		
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.selectedFaces 0
 		
 		max modify mode
-
 		subObjectLevel = 4		
 		
 		return true
@@ -698,11 +724,13 @@ struct DemolitionTool
 	
 	fn removeAllFacesFromCrossSection meshObj useMapChannel = 
 	(
+		max modify mode
+		subObjectLevel = 0
+		
 		setMeshCrossSectionFace meshObj useMapChannel meshObj.faces 0
 		
 		max modify mode
-
-		subObjectLevel = 4		
+		subObjectLevel = 4
 		
 		return true
 	)
@@ -721,7 +749,7 @@ struct DemolitionTool
 		
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap
 
-		if(not exportFile fbxFilePath using:FBXEXP) then
+		if(not exportFile fbxFilePath #noPrompt using:FBXEXP) then
 		(
 			messageBox "Failed to Export fbx file"
 			return false
@@ -789,6 +817,21 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 (
 	rollout DemolitionToolUI_Panel "DemolitionTool"
 	(
+		fn noticeMessage succeeded msg reason =
+		(
+			s = stringStream ""
+			
+			if(not reason=="") then
+				reason = ", " + reason
+			
+			if(succeeded) then
+				format "Succeded in %%\n" msg reason to:s
+			else
+				format "Failed To %%\n" msg reason to:s			
+			
+			messageBox s
+		)
+		
 		-------------------------------------------------------------------------
 		group "MapChannel"
 		(
@@ -824,7 +867,7 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			*/
 			
 			p = convertToPoly $
-			if(p.capHoles #Edge flags: 2) then
+			if(p.capHoles #Edge) then
 				messageBox "cap ok"
 			else
 				messageBox "cap failed"
@@ -833,31 +876,36 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		
 		on initializeMeshUI pressed do
 		(
+			succeeded = true
+			reason = ""
+
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "InitializeMesh" reason	
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
+						reason = "selected Mesh is not and Editable Mesh."
+						continue
 					)
-					if( not (demolitionTool.initializeMesh sel mapChannelUI.value maxMeshGroupUI.value)) then
+					
+					if( not (demolitionTool.initializeMesh meshObj mapChannelUI.value maxMeshGroupUI.value)) then
 					(
 						succeeded = false
-						break
-					)	
+						reason = "initializeMesh failed."
+						continue
+					)
 				)
 				
-				if(succeeded) then
-					messageBox "Succeed in Initialize Mesh"
-				else
-					messageBox "Succeed in Initialize Mesh"
+				noticeMessage succeeded "InitializeMesh" reason	
 			)
 		)
 		
@@ -874,113 +922,158 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			checkbox clearSelectionUI "Clear Selection" width:200 align:#center checked:true
 		)
 		
+		on computeFaceGroupByMeshElementUI pressed do
+		(
+			succeeded = true
+			reason = ""
+			
+			if(not selection.count==1) then
+			(
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Compute FaceGroup By Mesh Element" reason
+			)
+			else
+			(
+				for meshObj in selection do
+				(
+					if(not ((classof meshObj)==Editable_mesh)) then
+					(
+						succeeded = false
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
+					)					
+					if( not (demolitionTool.computeFaceGroupByMeshElement meshObj mapChannelUI.value maxMeshGroupUI.value)) then
+					(
+						succeeded = false
+						reason = "computeFaceGroupByMeshElement failed."
+
+						continue
+					)	
+				)
+				
+				noticeMessage succeeded "Compute FaceGroup By Mesh Element" reason
+			)
+		)	
+				
+		
 		on setIDValueUI entered val val2 do
 		(
 			succeeded = true
-		
+			reason = ""
+
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Set Selected Faces GroupID" reason
 			)
 			else
 			(
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
-					)					
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
+					)
+
 					if( not (demolitionTool.setSelectedFacesGroupID meshObj mapChannelUI.value (setIDValueUI.value-1))) then
 					(
 						succeeded = false
-						break
+						reason = "setSelectedFacesGroupID failed."
+						
+						continue
 					)	
 				)
+
+				if(not succeeded) then
+					noticeMessage succeeded "Set Selected Faces GroupID" reason
+
+				if(succeeded) then
+				(
+					selectIDValueUI.value = setIDValueUI.value
+					subobjectLevel = 4
+				)
 			)
-			
-			selectIDValueUI.value = setIDValueUI.value
-			
-			subobjectLevel = 4
 		)
 		
-		on selectIDValueUI changed val do
+		on selectIDValueUI entered val do
 		(
+			succeeded = true
+			reason = ""
+			
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Select Faces By GroupID" reason
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
-					)					
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
+					)
 					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
 					(
 						succeeded = false
-						break
-					)	
+						reason = "selectFacesByGroupID failed."
+						
+						continue
+					)
 				)
+				
+				if(not succeeded) then
+					noticeMessage succeeded "Select Faces By GroupID" reason
 			)
 		)			
 
 		on selectIDButtonUI pressed do
 		(
+			succeeded = true
+			reason = ""
+			
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Select Faces By GroupID" reason
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
-					)					
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
+					)
 					if( not (demolitionTool.selectFacesByGroupID meshObj mapChannelUI.value (selectIDValueUI.value-1) clearSelectionUI.checked)) then
 					(
 						succeeded = false
-						break
-					)	
-				)
-			)
-		)	
-		
-		on computeFaceGroupByMeshElementUI pressed do
-		(
-			if(not selection.count==1) then
-			(
-				messageBox "Please select at 1 and only 1 mesh."
-			)
-			else
-			(
-				succeeded = true
-				for meshObj in selection do
-				(
-					if((classof meshObj)==Editable_Mesh) then
-					(
-						succeeded = false
-						break
-					)					
-					if( not (demolitionTool.computeFaceGroupByMeshElement meshObj mapChannelUI.value maxMeshGroupUI.value)) then
-					(
-						succeeded = false
-						break
-					)	
+						reason = "selectFacesByGroupID failed."
+						
+						continue
+					)
 				)
 				
-				if(succeeded) then
-					messageBox "Succeed in Compute FaceGroup By Mesh Element"
-				else
-					messageBox "Succeed in Compute FaceGroup By Mesh Element"
+				if(not succeeded) then
+					noticeMessage succeeded "Select Faces By GroupID" reason
 			)
 		)	
 		
@@ -996,116 +1089,149 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		
 		on selectFacesByCrossSectionIDUI pressed do
 		(
+			succeeded = true
+			reason = ""
+			
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Select CrossSection Faces" reason
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
 					)					
 					if( not (demolitionTool.selectFacesByCrossSectionID meshObj mapChannelUI.value 1 crossSectionClearSelectionUI.checked)) then
 					(
 						succeeded = false
-						break
+						reason = "selectFacesByCrossSectionID failed."
+						
+						continue
 					)	
 				)
+				
+				if(not succeeded) then
+					noticeMessage succeeded "Select CrossSection Faces" reason
 			)
 		)
 		
 		on addSelectedFacesToCrossSectionUI pressed do
 		(
+			succeeded = true
+			reason = ""
+			
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Add Selected Faces To CrossSection" reason
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
 					)					
 					if( not (demolitionTool.addSelectedFacesToCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
-						break
+						reason = "addSelectedFacesToCrossSection failed."
+
+						continue
 					)	
 				)
 				
-				if(succeeded) then
-					messageBox "Succeed in Add Selected Faces from Cross Section"
-				else
-					messageBox "Failed to Add Selected Faces from Cross Section"
+				--if(not succeeded) then
+				noticeMessage succeeded "Add Selected Faces To CrossSection" reason
 			)
 		)
 		
 		on removeSelectedFacesFromCrossSectionUI pressed do
 		(
+			succeeded = true
+			reason = ""
+			
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Remove Selected Faces From CrossSection" reason
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
 					)					
 					if( not (demolitionTool.removeSelectedFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
-						break
+						reason = "removeSelectedFacesFromCrossSection failed."
+						
+						continue
 					)	
 				)
 				
-				if(succeeded) then
-					messageBox "Succeed in Remove Selected Faces from Cross Section"
-				else
-					messageBox "Failed to Remove Selected Faces from Cross Section"
+				--if(not succeeded) then
+				noticeMessage succeeded "Remove Selected Faces From CrossSection" reason
 			)
 		)
 		
 		on removeAllFacesFromCrossSectionUI pressed do
 		(
+			succeeded = true
+			reason = ""
+			
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Remove All Faces From CrossSection" reason
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						break
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
 					)					
 					if( not (demolitionTool.removeAllFacesFromCrossSection meshObj mapChannelUI.value)) then
 					(
 						succeeded = false
-						break
+						reason = "removeAllFacesFromCrossSection failed."
+						
+						continue
 					)	
 				)
 
-				if(succeeded) then
-					messageBox "Succeed in Remove All Faces from Cross Section"
-				else
-					messageBox "Failed to Remove All Faces from Cross Section"	
+				--if(not succeeded) then
+				noticeMessage succeeded "Remove All Faces From CrossSection" reason
 			)
 		)
 		
@@ -1117,27 +1243,35 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 
 		on exportFBXAndJsonUI pressed do
 		(
+			succeeded = true
+			reason = ""
+			
 			if(not selection.count==1) then
 			(
-				messageBox "Please select at 1 and only 1 mesh."
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
+				
+				noticeMessage succeeded "Export FBX And Json" reason
 			)
 			else
 			(
-				succeeded = true
 				for meshObj in selection do
 				(
-					if((classof meshObj)==Editable_Mesh) then
+					if(not ((classof meshObj)==Editable_mesh)) then
 					(
 						succeeded = false
-						return false
+						reason = "selected Mesh is not and Editable Mesh."
+						
+						continue
 					)
 					
-					fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx"
+					fbxFilePath = getSaveFileName types:"FBX(*.fbx)|*.fbx" historyCategory:"Demolition Exporter"
 					if(fbxFilePath==undefined) then
 					(
-						messageBox "Please select a fbx file to save"
-			
-						return false
+						succeeded = false
+						reason = "Please select a fbx file to save"
+
+						continue
 					)
 					
 					/*
@@ -1155,14 +1289,13 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 					if( not (demolitionTool.exportFBXAndJson meshObj mapChannelUI.value maxMeshGroupUI.value fbxFilePath jsonFilePath)) then
 					(
 						succeeded = false
-						break
+						reason = "exportFBXAndJson failed."
+
+						continue
 					)
 				)
 
-				if(succeeded) then
-					messageBox "Export Demolition succeeded."
-				else
-					messageBox "Export Demolition failed."
+				noticeMessage succeeded "Export FBX And Json" reason
 			)
 		)
 	)
