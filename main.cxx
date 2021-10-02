@@ -74,6 +74,7 @@ int main(int argc, const char** argv)
 #ifdef TEST
 	const char* fileins[] =
 	{
+		"testin.fbx",
 		"0.fbx",
 		"1.fbx",
 		"1open.fbx",
@@ -86,6 +87,7 @@ int main(int argc, const char** argv)
 
 	const char* fileouts[] =
 	{
+		"test.fbx",
 		"0.fbx",
 		"1.fbx",
 		"1open.fbx",
@@ -96,8 +98,8 @@ int main(int argc, const char** argv)
 		"6.fbx"
 	};
 
-	for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
-	//int i = 1;
+	//for (int i = 0; i < sizeof(fileouts) / sizeof(fileouts[0]); i++)
+	int i = 0;
 #else
 #endif
 	{

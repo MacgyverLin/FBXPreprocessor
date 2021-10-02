@@ -56,12 +56,14 @@
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio Tools for Unity\16.0\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\CameraController.cs" />
-    <Compile Include="Assets\DisableCulling.cs" />
+    <Compile Include="Assets\Method1\Scripts\Camera\CameraController.cs" />
+    <Compile Include="Assets\Method1\Scripts\Camera\DisableCulling.cs" />
     <Compile Include="Assets\Method1\Scripts\DemolishController.cs" />
     <Compile Include="Assets\Method1\Scripts\Demolishable.cs" />
     <Compile Include="Assets\Method1\Scripts\DemolishableData.cs" />
     <Compile Include="Assets\Method1\Scripts\ModelImporterPostProcessor.cs" />
+    <Compile Include="Assets\Method1\Scripts\ShowPenetration.cs" />
+    <Compile Include="Assets\Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Method1\Materials\NormalMap.shader" />

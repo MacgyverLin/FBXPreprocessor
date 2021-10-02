@@ -112,7 +112,7 @@ class SimplePhysics : PhysicsBase
         //rotationQ.eulerAngles = angularPosition;
         //bool hit = Physics.BoxCast(this.linearPosition, faceGroup.bound.size, this.linearVelocity, out hitInfo, rotationQ, this.linearVelocity.magnitude * dt);
 
-        bool hit = Physics.SphereCast(this.linearPosition, 0.3f, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt);
+        bool hit = Physics.SphereCast(this.linearPosition, 0.3f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
         if (hit)
         {
             float fraction = hitInfo.distance / this.linearVelocity.magnitude;
@@ -211,9 +211,6 @@ public class Demolishable : MonoBehaviour
 
     void Reset()
     {
-        //Debug.Log("Assets/Method1/Meshes/Textures/" + GetComponent<MeshFilter>().name);
-        //demolishableData = (DemolishableData)AssetDatabase.LoadAssetAtPath("Assets/Method1/Meshes/Textures/" + GetComponent<MeshFilter>().name, typeof(DemolishableData));
-
         Initialize();
     }
 
@@ -224,6 +221,8 @@ public class Demolishable : MonoBehaviour
 
     private void Initialize(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
     {
+        demolishableData = Resources.Load<DemolishableData>(GetComponent<MeshFilter>().name);
+
         float linearSpeed = 10.0f * explosionForce;
         float angularSpeed = 360.0f * explosionForce;
 
