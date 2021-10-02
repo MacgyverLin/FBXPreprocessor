@@ -861,7 +861,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4028932e03d43d49a561ecb5280623e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  demolishableData: {fileID: 0}
+  demolishableData: {fileID: 11400000, guid: 66328937aae4c9e4b9b57f6a2a0253b3, type: 2}
   testPivot: 0
 --- !u!21 &777410480
 Material:
@@ -1758,7 +1758,7 @@ MonoBehaviour:
   - {fileID: 1141435664}
   explosionForce: 1
   explosionRadius: 30
-  upwardsModifier: 1
+  upwardsModifier: 4
   mode: 1
   doFading: 0
   rigidBodyMaxLifetime: 10

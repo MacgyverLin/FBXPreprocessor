@@ -47,15 +47,15 @@ class SimplePhysics : PhysicsBase
 
     protected float test = Random.Range(10.0f, 36.0f) * 4.0f;
 
-    public SimplePhysics()
+    public SimplePhysics(FaceGroup faceGroup)
     {
+        this.faceGroup = faceGroup;
     }
 
     public void Init(GameObject gameobject, 
                      Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
                      Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
-                     Vector3 scale, 
-                     FaceGroup faceGroup)
+                     Vector3 scale)
     {
         this.sleeping = false;
         this.linearPosition = gameobject.transform.TransformPoint(faceGroup.bound.center);
@@ -69,8 +69,6 @@ class SimplePhysics : PhysicsBase
         this.angularDrag = angularDrag;
 
         this.scale = new Vector4(scale.x, scale.y, scale.z, 1.0f);
-
-        this.faceGroup = faceGroup;
     }
 
     public void TestPivot(bool testPivot)
@@ -213,6 +211,9 @@ public class Demolishable : MonoBehaviour
 
     void Reset()
     {
+        //Debug.Log("Assets/Method1/Meshes/Textures/" + GetComponent<MeshFilter>().name);
+        //demolishableData = (DemolishableData)AssetDatabase.LoadAssetAtPath("Assets/Method1/Meshes/Textures/" + GetComponent<MeshFilter>().name, typeof(DemolishableData));
+
         Initialize();
     }
 
@@ -231,7 +232,7 @@ public class Demolishable : MonoBehaviour
         {
             FaceGroup faceGroup = demolishableData.GetFaceGroup(i);
 
-            physics[i] = new SimplePhysics();
+            physics[i] = new SimplePhysics(faceGroup);
             physics[i].Init
             (
                 this.gameObject,
@@ -241,8 +242,7 @@ public class Demolishable : MonoBehaviour
                 new Vector3(Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed)),
                 new Vector3(0.0f, 0.0f, 0.0f),
                 0.01f,
-                this.transform.localScale,
-                demolishableData.GetFaceGroup(i)
+                this.transform.localScale
             );
         }
 
