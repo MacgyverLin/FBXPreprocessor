@@ -23,6 +23,7 @@ struct FaceGroup
 	faceIndices=#()
 )
 
+/*
 struct JSONExporter
 (
 	fn toUnityVector3 v3dsmax =
@@ -121,7 +122,7 @@ struct JSONExporter
 	),	
 	
 	
-	fn formatDemolitionData fptr faceGroupMap = 
+	fn formatJSON fptr faceGroupMap = 
 	(
 		format "{\n" to:fptr
 		
@@ -133,28 +134,136 @@ struct JSONExporter
 	)
 )
 jsonExporter = JSONExporter()
+*/
+
+struct JSONExporter
+(
+	fn toUnityVector3 v3dsmax =
+	(
+		vunity = [-v3dsmax.x, v3dsmax.y, v3dsmax.z]
+		
+		return vunity
+	),
+	
+	fn toUnrealVector3 v3dsmax =
+	(
+		vunreal = [v3dsmax.x, v3dsmax.y, v3dsmax.z]
+		
+		return vunreal
+	),
+			
+	fn formatVector3Unity fptr v3dsmax = 
+	(
+		v = toUnityVector3 v3dsmax
+		format "{" to:fptr
+			format "\"x\":%,\"y\":%,\"z\":%" v.x v.y v.z to:fptr
+		format "}" to:fptr
+	),
+	
+	fn formatVector3Unreal fptr v3dsmax = 
+	(
+		v = toUnrealVector3 v3dsmax
+		format "{" to:fptr
+			format "\"x\":%,\"y\":%,\"z\":%" v.x v.y v.z to:fptr
+		format "}" to:fptr
+	),
+
+	fn formatVector3 fptr v = 
+	(
+		formatVector3Unity fptr v
+		--formatVector3Unreal fptr v
+	),	
+	
+	fn formatSize fptr v = 
+	(
+		format "{" to:fptr
+			format "\"x\":%,\"y\":%,\"z\":%" v.x v.y v.z to:fptr
+		format "}" to:fptr
+	),		
+	
+	fn formatFaceBoundingBox fptr bound = 
+	(
+		format "{" to:fptr
+			format "\"center\":" to:fptr
+			formatVector3 fptr bound.center
+			format "," to:fptr
+		
+			format "\"size\":" to:fptr
+			formatSize fptr bound.size
+		format "}" to:fptr
+	),
+	
+	fn formatFaceGroup fptr faceGroup = 
+	(
+		format "{" to:fptr
+			format "\"groupID\":%," faceGroup.groupID to:fptr
+			format "\"density\":%," faceGroup.density to:fptr
+			format "\"bound\":" to:fptr
+			
+			formatFaceBoundingBox fptr faceGroup.bound
+		format "}" to:fptr
+	),
+	
+	fn formatFaceGroupMap fptr faceGroupMap = 
+	(
+		format "\"faceGroups\":" to:fptr
+		format "[" to:fptr
+		
+		groupCount = 0
+		for faceGroupKeyValue in faceGroupMap do
+		(
+			faceGroupKey = faceGroupKeyValue.key
+			faceGroupValue = faceGroupKeyValue.value
+			
+			formatFaceGroup fptr faceGroupValue
+
+			groupCount += 1;
+			if(groupCount < faceGroupMap.count) then
+				format "," to:fptr
+			else
+				format "" to:fptr
+		)
+		
+		format "]" to:fptr
+	),	
+	
+	
+	fn formatJSON fptr faceGroupMap = 
+	(
+		format "{" to:fptr
+		
+		formatFaceGroupMap fptr faceGroupMap
+		
+		format "}" to:fptr
+		
+		return true
+	)
+)
+jsonExporter = JSONExporter()
 
 struct DemolitionTool
 (
-	/*
-	running from commandline
-	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
-	*/
-	
 	----------------------------------------------------------
-	fn formatJSON filename faceGroupMap = 
+	fn exportJSONToStream fptr faceGroupMap = 
+	(
+		jsonExporter.formatJSON fptr faceGroupMap
+		
+		return true
+	),
+	
+	fn exportJSON filename faceGroupMap = 
 	(
 		fptr = openFile filename mode:"wt"
 		if(fptr==undefined) then
 			return false
 
-		jsonExporter.formatDemolitionData fptr faceGroupMap
+		exportJSONToStream fptr faceGroupMap
 		
 		close fptr
 		
 		return true
 	),
-	
+
 	----------------------------------------------------------
 	fn validMapChannel meshObj useMapChannel =
 	(
@@ -740,6 +849,13 @@ struct DemolitionTool
 	(
 		faceGroupMap = collectFaceGroupMap meshObj useMapChannel
 		
+		ss = stringStream ""
+		exportJSONToStream ss faceGroupMap
+		
+		format "%\n" (ss as string)
+
+		setUserPropVal meshObj "DemolishableData" (ss as string)
+		
 		if(faceGroupMap.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
@@ -759,7 +875,7 @@ struct DemolitionTool
 			messageBox "Success to Export fbx file"
 		)
 		
-		if(not formatJSON jsonFilePath faceGroupMap) then
+		if(not exportJson jsonFilePath faceGroupMap) then
 		(
 			messageBox "Failed to Export Json file"
 			return false
