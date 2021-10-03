@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 243407377858d5a4d894598e8c1be363, type: 3}
+  m_Name: 4
+  m_EditorClassIdentifier: 
+  faceGroups:
+  - groupID: 0
+    bound:
+      center: {x: 0.0688088, y: 0.00770869, z: 0.415407}
+      size: {x: 0.56881, y: 0.017647, z: 0.584596}
+  - groupID: 1
+    bound:
+      center: {x: -0.227542, y: 0.00434217, z: 0.742475}
+      size: {x: 0.272459, y: 0.0210135, z: 0.257527}
+  - groupID: 2
+    bound:
+      center: {x: 0.397497, y: -0.31162, z: 0.899051}
+      size: {x: 0.0441119, y: 0.306623, z: 0.0397273}
+  - groupID: 3
+    bound:
+      center: {x: 0.399046, y: -0.31162, z: 0.102504}
+      size: {x: 0.0397275, y: 0.306623, z: 0.0441119}
+  - groupID: 4
+    bound:
+      center: {x: -0.397499, y: -0.31162, z: 0.100955}
+      size: {x: 0.0441119, y: 0.306623, z: 0.0397276}
+  - groupID: 5
+    bound:
+      center: {x: -0.399049, y: -0.260516, z: 0.897501}
+      size: {x: 0.0397275, y: 0.255519, z: 0.0441119}
+  - groupID: 6
+    bound:
+      center: {x: -0.399049, y: -0.516035, z: 0.897501}
+      size: {x: 0.0397274, y: 0, z: 0.0441119}

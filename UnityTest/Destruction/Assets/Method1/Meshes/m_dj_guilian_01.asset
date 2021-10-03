@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 243407377858d5a4d894598e8c1be363, type: 3}
+  m_Name: m_dj_guilian_01
+  m_EditorClassIdentifier: 
+  faceGroups:
+  - groupID: 17
+    bound:
+      center: {x: -9.60329, y: 269.572, z: -25.7306}
+      size: {x: 106.699, y: 134.625, z: 14.3353}
+  - groupID: 1
+    bound:
+      center: {x: 57.2794, y: 157.029, z: -30.8582}
+      size: {x: 57.7338, y: 73.294, z: 14.535}
+  - groupID: 3
+    bound:
+      center: {x: -33.4021, y: 328.288, z: -30.1161}
+      size: {x: 82.9004, y: 75.6222, z: 14.5513}
+  - groupID: 4
+    bound:
+      center: {x: 44.1685, y: 330.329, z: -25.9564}
+      size: {x: 44.6229, y: 76.4448, z: 14.0503}
+  - groupID: 5
+    bound:
+      center: {x: 89.8749, y: 332.128, z: -33.3097}
+      size: {x: 90.3294, y: 70.8408, z: 14.5979}
+  - groupID: 6
+    bound:
+      center: {x: -60.1873, y: 225.224, z: -27.3016}
+      size: {x: 55.2307, y: 42.22, z: 14.9332}
+  - groupID: 7
+    bound:
+      center: {x: -58.8109, y: 166.969, z: -28.3926}
+      size: {x: 57.4915, y: 63.3548, z: 16.4865}
+  - groupID: 8
+    bound:
+      center: {x: -6.46624, y: 43.7114, z: -8.98093}
+      size: {x: 138.674, y: 76.4626, z: 43.2404}
+  - groupID: 9
+    bound:
+      center: {x: -5.08612, y: 411.418, z: -47.9841}
+      size: {x: 140.055, y: 26.2537, z: 6.74477}
+  - groupID: 10
+    bound:
+      center: {x: 12.5035, y: 182.611, z: -46.1447}
+      size: {x: 157.644, y: 182.662, z: 4.90532}
