@@ -848,14 +848,6 @@ struct DemolitionTool
 	fn exportFBXAndJson meshObj useMapChannel maxGroupCount fbxFilePath jsonFilePath = 
 	(
 		faceGroupMap = collectFaceGroupMap meshObj useMapChannel
-		
-		ss = stringStream ""
-		exportJSONToStream ss faceGroupMap
-		
-		format "%\n" (ss as string)
-
-		setUserPropVal meshObj "DemolishableData" (ss as string)
-		
 		if(faceGroupMap.count>=maxGroupCount) then
 		(
 			messageBox "Maximiun group count reached, Reduce Elements count of the mesh"
@@ -865,6 +857,12 @@ struct DemolitionTool
 		
 		setMeshFaceGroupBounds meshObj maxGroupCount faceGroupMap
 
+		ss = stringStream ""
+		exportJSONToStream ss faceGroupMap
+		format "%\n" (ss as string)
+		
+		setUserPropVal meshObj "DemolishableData" (ss as string) quoteString:false
+		
 		if(not exportFile fbxFilePath #noPrompt using:FBXEXP) then
 		(
 			messageBox "Failed to Export fbx file"
@@ -874,7 +872,8 @@ struct DemolitionTool
 		(
 			messageBox "Success to Export fbx file"
 		)
-		
+
+		/*
 		if(not exportJson jsonFilePath faceGroupMap) then
 		(
 			messageBox "Failed to Export Json file"
@@ -884,6 +883,7 @@ struct DemolitionTool
 		(
 			messageBox "Success to Export Json file"
 		)
+		*/
 		
 		return true
 	),
@@ -1119,7 +1119,7 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			)
 		)
 		
-		on selectIDValueUI entered val do
+		on selectIDValueUI entered val val2 do
 		(
 			succeeded = true
 			reason = ""
@@ -1401,7 +1401,6 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 					*/
 					jsonFilePath = (getFilenamePath fbxFilePath) + (getFilenameFile fbxFilePath) + ".json"
 		
-					--if( not (demolitionTool.exportFBXAndJson1 meshObj mapChannelUI.value maxMeshGroupUI.value fbxFilePath jsonFilePath)) then
 					if( not (demolitionTool.exportFBXAndJson meshObj mapChannelUI.value maxMeshGroupUI.value fbxFilePath jsonFilePath)) then
 					(
 						succeeded = false

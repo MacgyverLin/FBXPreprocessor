@@ -75,7 +75,7 @@ public class ModelImporterPostProcessor : AssetPostprocessor
             if (propNames[i] == "UDP3DSMAX")
             {
                 string jsonText = JSONStringFinder.Find(values[i] as string, "DemolishableData = ");
-                Debug.Log(jsonText);
+                //Debug.Log(jsonText);
 
                 ModelImporter modelImporter = assetImporter as ModelImporter;
                 string scriptableObjectPath = modelImporter.assetPath.Replace(".fbx", ".asset");
@@ -83,7 +83,11 @@ public class ModelImporterPostProcessor : AssetPostprocessor
                 DemolishableData demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
                 JsonUtility.FromJsonOverwrite(jsonText, demolishableData);
 
-                AssetDatabase.DeleteAsset(scriptableObjectPath);
+                //go.AddComponent<Demolishable>();
+                //go.GetComponent<Demolishable>().demolishableData  = ScriptableObject.CreateInstance<DemolishableData>();
+                //JsonUtility.FromJsonOverwrite(jsonText, go.GetComponent<Demolishable>().demolishableData);
+
+                //AssetDatabase.DeleteAsset(scriptableObjectPath);
                 AssetDatabase.CreateAsset(demolishableData, scriptableObjectPath);
                 AssetDatabase.SaveAssets();
             }

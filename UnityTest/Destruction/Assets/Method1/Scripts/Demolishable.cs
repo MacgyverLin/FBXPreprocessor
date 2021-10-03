@@ -39,10 +39,10 @@ class SimplePhysics : PhysicsBase
     protected Vector3 linearVelocity = new Vector3(0.0f, 0.0f, 0.0f);
     protected Vector3 linearAcc = new Vector3(0.0f, 0.0f, 0.0f);
     protected float linearDrag = 0.0f;
-    
-    protected Vector3 angularPosition = new Vector3(0.0f, 0.0f, 0.0f);
-    protected Vector3 angularVelocity = new Vector3(0.0f, 0.0f, 0.0f);
-    protected Vector3 angularAcc = new Vector3(0.0f, 0.0f, 0.0f);
+
+    protected Quaternion angularPosition = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
+    protected Quaternion angularVelocity = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
+    protected Quaternion angularAcc = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
     protected float angularDrag = 0.0f;
 
     protected float test = Random.Range(10.0f, 36.0f) * 4.0f;
@@ -52,9 +52,9 @@ class SimplePhysics : PhysicsBase
         this.faceGroup = faceGroup;
     }
 
-    public void Init(GameObject gameobject, 
+    public void Init(GameObject gameobject,
                      Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
-                     Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
+                     Quaternion angularVelocity, Quaternion angularAcc, float angularDrag,
                      Vector3 scale)
     {
         this.sleeping = false;
@@ -63,7 +63,7 @@ class SimplePhysics : PhysicsBase
         this.linearAcc = linearAcc;
         this.linearDrag = linearDrag;
 
-        this.angularPosition = gameobject.transform.eulerAngles;
+        this.angularPosition = gameobject.transform.rotation;
         this.angularVelocity = angularVelocity;
         this.angularAcc = angularAcc;
         this.angularDrag = angularDrag;
@@ -96,38 +96,49 @@ class SimplePhysics : PhysicsBase
         transform = m4 * m3 * m2 * m1;
     }
 
+    Quaternion ScaledQuaternion(Quaternion quaternion, float scale)
+    {
+        Quaternion scaled_quaternion = new Quaternion(quaternion.x * scale, quaternion.y * scale, quaternion.z * scale, quaternion.w * scale);
+
+        return scaled_quaternion;
+    }
+
+    Quaternion SummedQuaternion(Quaternion quaternion_alpha, Quaternion quaternion_beta)
+    {
+        Quaternion summed_quaternion = new Quaternion(quaternion_alpha.x + quaternion_beta.x, quaternion_alpha.y + quaternion_beta.y, quaternion_alpha.z + quaternion_beta.z, quaternion_alpha.w + quaternion_beta.w);
+
+        return summed_quaternion;
+    }
+
+    Quaternion AddQuaternionDerivative(Quaternion q, Quaternion dq, float dt)
+    {
+        return SummedQuaternion(ScaledQuaternion(dq, dt / 2) * q, q).normalized;
+    }
+
     public void UpdateDynamics()
     {
         if (sleeping)
             return;
 
-        float dt = Time.deltaTime * 0.1f;
+        float dt = Time.deltaTime * 0.05f;
         if (Input.GetKey(KeyCode.B))
-            dt = dt * 10.0f;
+            dt = dt / 0.05f;
 
         RaycastHit hitInfo = new RaycastHit();
-        //bool hit = Physics.Raycast(this.linearPosition, this.linearVelocity, out hitInfo, this.linearVelocity.magnitude * dt);
-
-        //Quaternion rotationQ = new Quaternion();
-        //rotationQ.eulerAngles = angularPosition;
-        //bool hit = Physics.BoxCast(this.linearPosition, faceGroup.bound.size, this.linearVelocity, out hitInfo, rotationQ, this.linearVelocity.magnitude * dt);
-
         bool hit = Physics.SphereCast(this.linearPosition, 0.3f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
         if (hit)
         {
             float fraction = hitInfo.distance / this.linearVelocity.magnitude;
+            float dtFraction = dt * fraction;
             // Debug.Log(string.Format("Time:{0}, Distance:{1}, Mag:{2} ", fraction, hitInfo.distance, this.linearVelocity.magnitude));
 
             ///////////////////////////////////////
-            this.linearPosition += this.linearVelocity * dt * fraction;
+            this.linearPosition += this.linearVelocity * dtFraction;
             this.linearVelocity -= this.linearVelocity * this.linearDrag;
 
             ///////////////////////////////////////
-            this.angularPosition += this.angularVelocity * dt * fraction;
-            this.angularVelocity -= this.angularVelocity * this.angularDrag;
-
-            //this.linearPosition = hitInfo.point;
-            //this.angularPosition = new Vector3(0.0f, 0.0f, 0.0f);// hitInfo.normal;
+            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dtFraction);
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dtFraction);
 
             sleeping = true;
         }
@@ -139,13 +150,12 @@ class SimplePhysics : PhysicsBase
             this.linearVelocity += this.linearAcc * dt;
 
             ///////////////////////////////////////
-            this.angularPosition += this.angularVelocity * dt;
-            this.angularVelocity -= this.angularVelocity * this.angularDrag * dt;
-            this.angularVelocity += this.angularAcc * dt;
+            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dt*10.0f);
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dt * 10.0f);
         }
 
         //if (this.linearPosition.y < 1)
-        //sleeping = true;
+            //sleeping = true;
 
         //////////////////////////////
         Vector3 pivot = faceGroup.bound.center;
@@ -154,9 +164,7 @@ class SimplePhysics : PhysicsBase
         m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
-        Quaternion q = new Quaternion();
-        q.eulerAngles = angularPosition;
-        m2.SetTRS(Vector3.zero, q, Vector3.one);
+        m2.SetTRS(Vector3.zero, angularPosition, Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
         //m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
@@ -169,7 +177,7 @@ class SimplePhysics : PhysicsBase
 
     public override void Update(bool testPivot)
     {
-        if(testPivot)
+        if (testPivot)
             TestPivot(testPivot);
         else
             UpdateDynamics();
@@ -209,18 +217,8 @@ public class Demolishable : MonoBehaviour
         Initialize();
     }
 
-
-    
-    void Test()
-    {
-        // TextAsset t = Resources.Load<TextAsset>("mac");
-        // string s = JSONStringFinder.Find(t.text, "DemolishableData = ");
-        // Debug.Log(s);
-    }
-
     void Reset()
     {
-        Test();
         Initialize();
     }
 
@@ -234,12 +232,14 @@ public class Demolishable : MonoBehaviour
         //demolishableData = GameObject.Instantiate<DemolishableData>(Resources.Load<DemolishableData>(GetComponent<MeshFilter>().name));
 
         float linearSpeed = 10.0f * explosionForce;
-        float angularSpeed = 360.0f * explosionForce;
+        float angularSpeed = 360.0f * 30.0f * explosionForce;
 
         physics = new SimplePhysics[demolishableData.GetFaceGroupCount()];
         for (int i = 0; i < demolishableData.GetFaceGroupCount(); i++)
         {
             FaceGroup faceGroup = demolishableData.GetFaceGroup(i);
+
+            Quaternion q = Quaternion.AngleAxis(Random.Range(-32, 32), new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), Random.Range(-1, 1)).normalized);
 
             physics[i] = new SimplePhysics(faceGroup);
             physics[i].Init
@@ -248,8 +248,8 @@ public class Demolishable : MonoBehaviour
                 new Vector3(Random.Range(-linearSpeed, linearSpeed), Random.Range(0.0f, linearSpeed * upwardsModifier), Random.Range(-linearSpeed, linearSpeed)),
                 new Vector3(0.0f, -9.8f, 0.0f),
                 0.01f,
-                new Vector3(Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed), Random.Range(-angularSpeed, angularSpeed)),
-                new Vector3(0.0f, 0.0f, 0.0f),
+                Quaternion.AngleAxis(Random.Range(0, angularSpeed), new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), Random.Range(-1, 1))),
+                Quaternion.AngleAxis(0.0f, Vector3.right),
                 0.01f,
                 this.transform.localScale
             );
