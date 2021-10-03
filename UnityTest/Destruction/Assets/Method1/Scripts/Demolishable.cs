@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 class PhysicsBase
 {
     protected Matrix4x4 transform = Matrix4x4.identity;
@@ -38,15 +39,15 @@ class SimplePhysics : PhysicsBase
     protected Vector3 linearPosition = new Vector3(0.0f, 0.0f, 0.0f);
     protected Vector3 linearVelocity = new Vector3(0.0f, 0.0f, 0.0f);
     protected Vector3 linearAcc = new Vector3(0.0f, 0.0f, 0.0f);
-    protected float linearDrag = 0.0f;
+    protected float linearDrag = 0.1f;
 
     protected Quaternion angularPosition = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
     protected Quaternion angularVelocity = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
     protected Quaternion angularAcc = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
-    protected float angularDrag = 0.0f;
+    protected float angularDrag = 0.1f;
 
-    protected float elasticity = 0.1f;
-    protected float friction = 0.7f;
+    protected float elasticity = 0.3f;
+    protected float friction = 0.4f;
 
     public SimplePhysics(FaceGroup faceGroup)
     {
@@ -84,7 +85,6 @@ class SimplePhysics : PhysicsBase
         m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m2 = Matrix4x4.identity;
-        Quaternion q = new Quaternion();
         m2.SetTRS(Vector3.zero, Quaternion.AngleAxis(30.0f, Vector3.right), Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
@@ -98,21 +98,17 @@ class SimplePhysics : PhysicsBase
 
     Quaternion ScaledQuaternion(Quaternion quaternion, float scale)
     {
-        Quaternion scaled_quaternion = new Quaternion(quaternion.x * scale, quaternion.y * scale, quaternion.z * scale, quaternion.w * scale);
-
-        return scaled_quaternion;
+        return new Quaternion(quaternion.x * scale, quaternion.y * scale, quaternion.z * scale, quaternion.w * scale);
     }
 
     Quaternion SummedQuaternion(Quaternion quaternion_alpha, Quaternion quaternion_beta)
     {
-        Quaternion summed_quaternion = new Quaternion(quaternion_alpha.x + quaternion_beta.x, quaternion_alpha.y + quaternion_beta.y, quaternion_alpha.z + quaternion_beta.z, quaternion_alpha.w + quaternion_beta.w);
-
-        return summed_quaternion;
+        return new Quaternion(quaternion_alpha.x + quaternion_beta.x, quaternion_alpha.y + quaternion_beta.y, quaternion_alpha.z + quaternion_beta.z, quaternion_alpha.w + quaternion_beta.w);
     }
 
     Quaternion AddQuaternionDerivative(Quaternion q, Quaternion dq, float dt)
     {
-        return SummedQuaternion(ScaledQuaternion(dq, dt / 2) * q, q).normalized;
+        return SummedQuaternion(q, ScaledQuaternion(dq, dt / 2) * q).normalized;
     }
 
     public void UpdateDynamics()
@@ -120,9 +116,9 @@ class SimplePhysics : PhysicsBase
         if (sleeping)
             return;
 
-        float dt = Time.deltaTime * 0.05f;
+        float dt = Time.deltaTime;
         if (Input.GetKey(KeyCode.B))
-            dt = dt / 0.05f;
+            dt = dt * 0.05f;
 
         RaycastHit hitInfo = new RaycastHit();
         bool hit = Physics.SphereCast(this.linearPosition, 1.0f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
@@ -132,27 +128,55 @@ class SimplePhysics : PhysicsBase
             float dtFraction = dt * fraction;
 
             ///////////////////////////////////////
-            this.linearPosition += this.linearVelocity * dtFraction;
-            this.linearVelocity -= this.linearVelocity * this.linearDrag * dtFraction;
+            // p
+            this.linearPosition += dtFraction * this.linearVelocity;
+
+            // drag
+            this.linearVelocity -= (this.linearDrag) * this.linearVelocity;
+
+            // acc
+            this.linearVelocity += dtFraction * this.linearAcc;
 
             Vector3 vertVelocity = hitInfo.normal * Vector3.Dot(this.linearVelocity, hitInfo.normal);
             Vector3 horiVelocity = this.linearVelocity - vertVelocity;
+
+            // bounce and friction
             this.linearVelocity -= (1.0f + elasticity) * vertVelocity;
             this.linearVelocity -= friction * horiVelocity;
 
             ///////////////////////////////////////
-            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dtFraction);
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dtFraction);
+            // p
+            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dtFraction * 10.0f);
+
+            // drag
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag);
+
+            // acc
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dtFraction * 10.0f);
+
+            // bounce and friction
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -friction);
         }
         else
         {
             ///////////////////////////////////////
-            this.linearPosition += this.linearVelocity * dt;
-            this.linearVelocity -= this.linearVelocity * this.linearDrag * dt;
-            this.linearVelocity += this.linearAcc * dt;
+            // p
+            this.linearPosition += dt * this.linearVelocity ;
+
+            // drag
+            this.linearVelocity -= (this.linearDrag) * this.linearVelocity;
+
+            // acc
+            this.linearVelocity += dt * this.linearAcc;
 
             ///////////////////////////////////////
-            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dt*10.0f);
+            // p
+            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dt * 10.0f);
+
+            // drag
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag);
+
+            // acc
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dt * 10.0f);
         }
 
