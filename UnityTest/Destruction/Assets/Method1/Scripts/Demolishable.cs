@@ -45,7 +45,8 @@ class SimplePhysics : PhysicsBase
     protected Quaternion angularAcc = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
     protected float angularDrag = 0.0f;
 
-    protected float test = Random.Range(10.0f, 36.0f) * 4.0f;
+    protected float elasticity = 0.1f;
+    protected float friction = 0.7f;
 
     public SimplePhysics(FaceGroup faceGroup)
     {
@@ -84,8 +85,7 @@ class SimplePhysics : PhysicsBase
 
         Matrix4x4 m2 = Matrix4x4.identity;
         Quaternion q = new Quaternion();
-        q.eulerAngles = new Vector3(test, test, test) * Time.time;
-        m2.SetTRS(Vector3.zero, q, Vector3.one);
+        m2.SetTRS(Vector3.zero, Quaternion.AngleAxis(30.0f, Vector3.right), Vector3.one);
 
         Matrix4x4 m3 = Matrix4x4.identity;
         m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
@@ -125,22 +125,24 @@ class SimplePhysics : PhysicsBase
             dt = dt / 0.05f;
 
         RaycastHit hitInfo = new RaycastHit();
-        bool hit = Physics.SphereCast(this.linearPosition, 0.3f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
+        bool hit = Physics.SphereCast(this.linearPosition, 1.0f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
         if (hit)
         {
             float fraction = hitInfo.distance / this.linearVelocity.magnitude;
             float dtFraction = dt * fraction;
-            // Debug.Log(string.Format("Time:{0}, Distance:{1}, Mag:{2} ", fraction, hitInfo.distance, this.linearVelocity.magnitude));
 
             ///////////////////////////////////////
             this.linearPosition += this.linearVelocity * dtFraction;
-            this.linearVelocity -= this.linearVelocity * this.linearDrag;
+            this.linearVelocity -= this.linearVelocity * this.linearDrag * dtFraction;
+
+            Vector3 vertVelocity = hitInfo.normal * Vector3.Dot(this.linearVelocity, hitInfo.normal);
+            Vector3 horiVelocity = this.linearVelocity - vertVelocity;
+            this.linearVelocity -= (1.0f + elasticity) * vertVelocity;
+            this.linearVelocity -= friction * horiVelocity;
 
             ///////////////////////////////////////
             this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dtFraction);
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dtFraction);
-
-            sleeping = true;
         }
         else
         {
@@ -154,9 +156,6 @@ class SimplePhysics : PhysicsBase
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dt * 10.0f);
         }
 
-        //if (this.linearPosition.y < 1)
-            //sleeping = true;
-
         //////////////////////////////
         Vector3 pivot = faceGroup.bound.center;
 
@@ -166,13 +165,13 @@ class SimplePhysics : PhysicsBase
         Matrix4x4 m2 = Matrix4x4.identity;
         m2.SetTRS(Vector3.zero, angularPosition, Vector3.one);
 
-        Matrix4x4 m3 = Matrix4x4.identity;
+        //Matrix4x4 m3 = Matrix4x4.identity;
         //m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
 
         Matrix4x4 m4 = Matrix4x4.identity;
         m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
 
-        transform = m4 * m3 * m2 * m1;
+        transform = m4 * m2 * m1;
     }
 
     public override void Update(bool testPivot)
