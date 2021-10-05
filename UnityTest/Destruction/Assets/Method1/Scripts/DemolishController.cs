@@ -46,13 +46,13 @@ public class DemolishController : MonoBehaviour
                 {
                     Quaternion q = new Quaternion();
                     q.eulerAngles = new Vector3(0, randomAngle, 0);
-                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i/2 * 4.5f + randomX, 0, randomZ), q).GetComponent<Demolishable>());
+                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i/2 * 6.5f + randomX - 70, 0, randomZ), q).GetComponent<Demolishable>());
                 }
                 else
                 {
                     Quaternion q = new Quaternion();
                     q.eulerAngles = new Vector3(0, -180 + randomAngle, 0);
-                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i / 2 * 4.5f + randomX, 0, 30 + randomZ), q).GetComponent<Demolishable>());
+                    demolishables.Add(GameObject.Instantiate(gameObjs[(int)idx], new Vector3(i / 2 * 6.5f + randomX - 70, 0, 30 + randomZ), q).GetComponent<Demolishable>());
                 }
             }
         }

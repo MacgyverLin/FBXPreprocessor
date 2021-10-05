@@ -132,7 +132,7 @@ class SimplePhysics : PhysicsBase
             this.linearPosition += dtFraction * this.linearVelocity;
 
             // drag
-            this.linearVelocity -= (this.linearDrag) * this.linearVelocity;
+            this.linearVelocity -= (this.linearDrag * dtFraction) * this.linearVelocity;
 
             // acc
             this.linearVelocity += dtFraction * this.linearAcc;
@@ -149,7 +149,7 @@ class SimplePhysics : PhysicsBase
             this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dtFraction * 10.0f);
 
             // drag
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag);
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dtFraction);
 
             // acc
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dtFraction * 10.0f);
@@ -166,7 +166,7 @@ class SimplePhysics : PhysicsBase
             this.linearPosition += dt * this.linearVelocity ;
 
             // drag
-            this.linearVelocity -= (this.linearDrag) * this.linearVelocity;
+            this.linearVelocity -= (this.linearDrag * dt) * this.linearVelocity;
 
             // acc
             this.linearVelocity += dt * this.linearAcc;
@@ -176,7 +176,7 @@ class SimplePhysics : PhysicsBase
             this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dt * 10.0f);
 
             // drag
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag);
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dt);
 
             // acc
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dt * 10.0f);
@@ -191,13 +191,13 @@ class SimplePhysics : PhysicsBase
         Matrix4x4 m2 = Matrix4x4.identity;
         m2.SetTRS(Vector3.zero, angularPosition, Vector3.one);
 
-        //Matrix4x4 m3 = Matrix4x4.identity;
-        //m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
+        Matrix4x4 m3 = Matrix4x4.identity;
+        m3.SetTRS(Vector3.zero, Quaternion.identity, scale);
 
         Matrix4x4 m4 = Matrix4x4.identity;
-        m4.SetTRS(this.linearPosition, Quaternion.identity, scale);
+        m4.SetTRS(this.linearPosition, Quaternion.identity, Vector3.one);
 
-        transform = m4 * m2 * m1;
+        transform = m4 * m3 * m2 * m1;
     }
 
     public override void Update(bool testPivot)
