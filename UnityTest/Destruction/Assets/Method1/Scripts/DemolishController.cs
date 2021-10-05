@@ -19,6 +19,9 @@ public class DemolishController : MonoBehaviour
     public float rigidBodyMaxLifetime = 4.0f;
     public float fadeTime = 1.0f;
 
+    public float elasticity = 0.3f;
+    public float fraction = 0.4f;
+
     // Update is called once per frame
     void Update()
     {
@@ -28,7 +31,7 @@ public class DemolishController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+            Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction);
         }
     }
 
@@ -58,12 +61,12 @@ public class DemolishController : MonoBehaviour
         }
     }
 
-    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
     {
-        StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
+        StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction));
     }
 
-    private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
+    private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode, float elasticity, float fraction)
     {
         int i = demolishables.Count-1;
 
@@ -72,7 +75,7 @@ public class DemolishController : MonoBehaviour
             if (demolishables[i].isActiveAndEnabled)
             {
                 Debug.Log(i);
-                demolishables[i].GetComponent<Demolishable>().Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode);
+                demolishables[i].GetComponent<Demolishable>().Demolish(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction);
             }
 
             i--;

@@ -710,7 +710,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &499446193
 Transform:
   m_ObjectHideFlags: 0
@@ -1929,11 +1929,13 @@ MonoBehaviour:
   - {fileID: 901578057}
   explosionForce: 1
   explosionRadius: 30
-  upwardsModifier: 1
+  upwardsModifier: 4
   mode: 1
   doFading: 0
   rigidBodyMaxLifetime: 10
   fadeTime: 2
+  elasticity: 0.7
+  fraction: 0.9
 --- !u!114 &1380135869
 MonoBehaviour:
   m_ObjectHideFlags: 0

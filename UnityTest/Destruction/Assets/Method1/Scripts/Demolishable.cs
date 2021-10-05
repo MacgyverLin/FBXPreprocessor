@@ -49,6 +49,9 @@ class SimplePhysics : PhysicsBase
     protected float elasticity = 0.3f;
     protected float friction = 0.4f;
 
+    float dragMultiplier = 1.0f;
+    int bounceCount = 2;
+
     public SimplePhysics(FaceGroup faceGroup)
     {
         this.faceGroup = faceGroup;
@@ -57,7 +60,7 @@ class SimplePhysics : PhysicsBase
     public void Init(GameObject gameobject,
                      Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
                      Quaternion angularVelocity, Quaternion angularAcc, float angularDrag,
-                     Vector3 scale)
+                     Vector3 scale, float elasticity, float friction, int bounceCount = 2)
     {
         this.sleeping = false;
         this.linearPosition = gameobject.transform.TransformPoint(faceGroup.bound.center);
@@ -71,6 +74,10 @@ class SimplePhysics : PhysicsBase
         this.angularDrag = angularDrag;
 
         this.scale = new Vector4(scale.x, scale.y, scale.z, 1.0f);
+
+        this.elasticity = elasticity;
+        this.friction = friction;
+        this.bounceCount = bounceCount;
     }
 
     public void TestPivot(bool testPivot)
@@ -122,17 +129,25 @@ class SimplePhysics : PhysicsBase
 
         RaycastHit hitInfo = new RaycastHit();
         bool hit = Physics.SphereCast(this.linearPosition, 1.0f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
+        //bool hit = Physics.BoxCast(this.linearPosition, faceGroup.bound.size, this.linearVelocity.normalized, out hitInfo, this.angularPosition, this.linearVelocity.magnitude * dt);
         if (hit)
         {
             float fraction = hitInfo.distance / this.linearVelocity.magnitude;
             float dtFraction = dt * fraction;
+
+            this.bounceCount--;
+            dragMultiplier = 10.0f;
+            if (this.bounceCount == 0)
+            {
+                sleeping = true;
+            }
 
             ///////////////////////////////////////
             // p
             this.linearPosition += dtFraction * this.linearVelocity;
 
             // drag
-            this.linearVelocity -= (this.linearDrag * dtFraction) * this.linearVelocity;
+            this.linearVelocity -= (this.linearDrag * dragMultiplier * dtFraction) * this.linearVelocity;
 
             // acc
             this.linearVelocity += dtFraction * this.linearAcc;
@@ -149,15 +164,14 @@ class SimplePhysics : PhysicsBase
             this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dtFraction * 10.0f);
 
             // drag
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dtFraction);
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dragMultiplier * dtFraction);
 
             // acc
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dtFraction * 10.0f);
 
             // bounce and friction
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -elasticity);
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -friction);
-
-            //sleeping = true;
         }
         else
         {
@@ -166,7 +180,7 @@ class SimplePhysics : PhysicsBase
             this.linearPosition += dt * this.linearVelocity ;
 
             // drag
-            this.linearVelocity -= (this.linearDrag * dt) * this.linearVelocity;
+            this.linearVelocity -= (this.linearDrag * dragMultiplier *  dt) * this.linearVelocity;
 
             // acc
             this.linearVelocity += dt * this.linearAcc;
@@ -176,7 +190,7 @@ class SimplePhysics : PhysicsBase
             this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dt * 10.0f);
 
             // drag
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dt);
+            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dragMultiplier * dt);
 
             // acc
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dt * 10.0f);
@@ -252,7 +266,7 @@ public class Demolishable : MonoBehaviour
     {
     }
 
-    private void Initialize(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    private void Initialize(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
     {
         //demolishableData = GameObject.Instantiate<DemolishableData>(Resources.Load<DemolishableData>(GetComponent<MeshFilter>().name));
 
@@ -276,7 +290,9 @@ public class Demolishable : MonoBehaviour
                 Quaternion.AngleAxis(Random.Range(0, angularSpeed), new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), Random.Range(-1, 1))),
                 Quaternion.AngleAxis(0.0f, Vector3.right),
                 0.01f,
-                this.transform.localScale
+                this.transform.localScale,
+                elasticity,
+                fraction
             );
         }
 
@@ -314,14 +330,14 @@ public class Demolishable : MonoBehaviour
     }
 
     /// ////////////////////////////////////////////////////////////////////////////////////
-    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
     {
-        StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode));
+        StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction));
     }
 
-    private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode)
+    private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode, float elasticity, float fraction)
     {
-        BeginDemolish(explosionForce, explosionRadius, upwardsModifier, mode);
+        BeginDemolish(explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction);
 
         // yield return WaitAllRigidBodySleptOrTimeOut(Random.Range((rigidBodyMaxLifetime - 1.0f)/2, rigidBodyMaxLifetime - 1.0f));
         yield return WaitAllRigidBodySleptOrTimeOut(rigidBodyMaxLifetime);
@@ -336,14 +352,14 @@ public class Demolishable : MonoBehaviour
         }
     }
 
-    public void BeginDemolish(float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    public void BeginDemolish(float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
     {
         // make sure visible
         this.gameObject.SetActive(true);
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
-        Initialize(explosionForce, explosionRadius, upwardsModifier, mode);
+        Initialize(explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction);
     }
 
     IEnumerator WaitAllRigidBodySleptOrTimeOut(float timeout)
