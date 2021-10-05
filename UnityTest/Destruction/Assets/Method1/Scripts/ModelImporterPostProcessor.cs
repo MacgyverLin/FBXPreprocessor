@@ -49,23 +49,8 @@ public class ModelImporterPostProcessor : AssetPostprocessor
 {
     void OnPreprocessModel()
     {
-        /*
         ModelImporter modelImporter = assetImporter as ModelImporter;
-
-        string jsonPath = modelImporter.assetPath.Replace(".fbx", ".json");
-        string scriptableObjectPath = modelImporter.assetPath.Replace(".fbx", ".asset");
-        string scriptableObjectMetaPath = modelImporter.assetPath.Replace(".fbx", ".asset.meta");
-        Debug.Log(jsonPath + ", " + scriptableObjectPath + ", " + scriptableObjectMetaPath);
-
-        TextAsset jsonText = AssetDatabase.LoadAssetAtPath<TextAsset>(jsonPath);
-        ///Debug.Log(jsonText.text);
-        DemolishableData demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
-        JsonUtility.FromJsonOverwrite(jsonText.text, demolishableData);
-
-        AssetDatabase.CreateAsset(demolishableData, scriptableObjectPath);
-        AssetDatabase.SaveAssets();
-        //AssetDatabase.DeleteAsset(jsonPath);
-        */
+        modelImporter.meshOptimizationFlags = MeshOptimizationFlags.Everything;
     }
 
     void OnPostprocessGameObjectWithUserProperties(GameObject go, string[] propNames, System.Object[] values)
@@ -75,20 +60,22 @@ public class ModelImporterPostProcessor : AssetPostprocessor
             if (propNames[i] == "UDP3DSMAX")
             {
                 string jsonText = JSONStringFinder.Find(values[i] as string, "DemolishableData = ");
-                //Debug.Log(jsonText);
-
                 ModelImporter modelImporter = assetImporter as ModelImporter;
                 string scriptableObjectPath = modelImporter.assetPath.Replace(".fbx", ".asset");
 
-                DemolishableData demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
-                JsonUtility.FromJsonOverwrite(jsonText, demolishableData);
+                DemolishableData demolishableData = AssetDatabase.LoadAssetAtPath<DemolishableData>(scriptableObjectPath);
+                if (demolishableData == null)
+                {
+                    demolishableData = ScriptableObject.CreateInstance<DemolishableData>();
+                    JsonUtility.FromJsonOverwrite(jsonText, demolishableData);
 
-                //go.AddComponent<Demolishable>();
-                //go.GetComponent<Demolishable>().demolishableData  = ScriptableObject.CreateInstance<DemolishableData>();
-                //JsonUtility.FromJsonOverwrite(jsonText, go.GetComponent<Demolishable>().demolishableData);
-
-                //AssetDatabase.DeleteAsset(scriptableObjectPath);
-                AssetDatabase.CreateAsset(demolishableData, scriptableObjectPath);
+                    AssetDatabase.CreateAsset(demolishableData, scriptableObjectPath);
+                }
+                else
+                {
+                    JsonUtility.FromJsonOverwrite(jsonText, demolishableData);
+                }
+                
                 AssetDatabase.SaveAssets();
             }
         }

@@ -156,6 +156,8 @@ class SimplePhysics : PhysicsBase
 
             // bounce and friction
             this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -friction);
+
+            //sleeping = true;
         }
         else
         {
