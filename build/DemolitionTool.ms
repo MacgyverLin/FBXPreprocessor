@@ -1,4 +1,4 @@
-﻿/*
+/*
 	running from commandline
 	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
 */
@@ -22,119 +22,6 @@ struct FaceGroup
 	bound = BoundingBox [0, 0, 0],
 	faceIndices=#()
 )
-
-/*
-struct JSONExporter
-(
-	fn toUnityVector3 v3dsmax =
-	(
-		vunity = [-v3dsmax.x, v3dsmax.y, v3dsmax.z]
-		
-		return vunity
-	),
-	
-	fn toUnrealVector3 v3dsmax =
-	(
-		vunreal = [v3dsmax.x, v3dsmax.y, v3dsmax.z]
-		
-		return vunreal
-	),
-			
-	fn formatVector3Unity fptr v3dsmax = 
-	(
-		vunity = toUnityVector3 v3dsmax
-		format "\t\t\t\t{\n" to:fptr
-			format "\t\t\t\t\t\"x\":%,\n" vunity.x to:fptr
-			format "\t\t\t\t\t\"y\":%,\n" vunity.y to:fptr
-			format "\t\t\t\t\t\"z\":%\n" vunity.z to:fptr
-		format "\t\t\t\t}\n" to:fptr
-	),
-	
-	fn formatVector3Unreal fptr v3dsmax = 
-	(
-		vunreal = toUnrealVector3 v3dsmax
-		format "\t\t\t\t{\n" to:fptr
-			format "\t\t\t\t\t\"x\":%,\n" vunreal.x to:fptr
-			format "\t\t\t\t\t\"y\":%,\n" vunreal.y to:fptr
-			format "\t\t\t\t\t\"z\":%\n" vunreal.z to:fptr
-		format "\t\t\t\t}\n" to:fptr
-	),
-
-	fn formatVector3 fptr v = 
-	(
-		formatVector3Unity fptr v
-		--formatVector3Unreal fptr v
-	),	
-	
-	fn formatSize fptr v = 
-	(
-		format "\t\t\t\t{\n" to:fptr
-			format "\t\t\t\t\t\"x\":%,\n" v.x to:fptr
-			format "\t\t\t\t\t\"y\":%,\n" v.y to:fptr
-			format "\t\t\t\t\t\"z\":%\n" v.z to:fptr
-		format "\t\t\t\t}\n" to:fptr
-	),		
-	
-	fn formatFaceBoundingBox fptr bound = 
-	(
-		format "\t\t\t{\n" to:fptr
-			format "\t\t\t\t\"center\":\n" to:fptr
-			formatVector3 fptr bound.center
-			format "\t\t\t\t,\n" to:fptr
-		
-			format "\t\t\t\t\"size\":\n" to:fptr
-			formatSize fptr bound.size
-		format "\t\t\t}\n" to:fptr
-	),
-	
-	fn formatFaceGroup fptr faceGroup = 
-	(
-		format "\t\t{\n" to:fptr
-			format "\t\t\t\"groupID\":%,\n" faceGroup.groupID to:fptr
-			format "\t\t\t\"density\":%,\n" faceGroup.density to:fptr
-			format "\t\t\t\"bound\":\n" to:fptr
-			
-			formatFaceBoundingBox fptr faceGroup.bound
-		format "\t\t}\n" to:fptr
-	),
-	
-	fn formatFaceGroupMap fptr faceGroupMap = 
-	(
-		format "\t\"faceGroups\":\n" to:fptr
-		format "\t[\n" to:fptr
-		
-		groupCount = 0
-		for faceGroupKeyValue in faceGroupMap do
-		(
-			faceGroupKey = faceGroupKeyValue.key
-			faceGroupValue = faceGroupKeyValue.value
-			
-			formatFaceGroup fptr faceGroupValue
-
-			groupCount += 1;
-			if(groupCount < faceGroupMap.count) then
-				format "\t\t,\n" to:fptr
-			else
-				format "" to:fptr
-		)
-		
-		format "\t]\n" to:fptr
-	),	
-	
-	
-	fn formatJSON fptr faceGroupMap = 
-	(
-		format "{\n" to:fptr
-		
-		formatFaceGroupMap fptr faceGroupMap
-		
-		format "}\n" to:fptr
-		
-		return true
-	)
-)
-jsonExporter = JSONExporter()
-*/
 
 struct JSONExporter
 (
@@ -859,9 +746,13 @@ struct DemolitionTool
 
 		ss = stringStream ""
 		exportJSONToStream ss faceGroupMap
-		format "%\n" (ss as string)
+		--format "%\n" (ss as string)
 		
 		setUserPropVal meshObj "DemolishableData" (ss as string) quoteString:false
+		
+		attr = attributes attr (parameters main (demolishableData type:#string))
+		custAttributes.add meshObj attr
+		meshObj.demolishableData = ss
 		
 		if(not exportFile fbxFilePath #noPrompt using:FBXEXP) then
 		(
@@ -928,7 +819,7 @@ struct DemolitionTool
 )
 
 demolitionTool = DemolitionTool()
-
+	
 macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 (
 	rollout DemolitionToolUI_Panel "DemolitionTool"
@@ -947,17 +838,8 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			
 			messageBox s
 		)
-		
-		-------------------------------------------------------------------------
-		group "MapChannel"
-		(
-			spinner maxMeshGroupUI "Max Mesh Group:" range:[16,32,32] type:#integer enabled:false  width:100
-			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true  width:100
-			button initializeMeshUI "Initialize Mesh" width:200 
-			
-			button testUI "testUI" width:200 
-		)		
-		
+
+		button testUI "testUI" width:200
 		on testUI pressed do
 		(
 			/*
@@ -981,15 +863,24 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 			format "Euler characteristic %\n" x
 			format "Genus %\n" g
 			*/
+			--attr = attributes json (parameters main rollout:params(hitPoints type: #float ui:hits default:10 cost type: #float ui:cost default:100 sound type: #string) rollout params "Weapon Parameters"(spinner hits "Hit Points" type: #float	spinner cost "Cost" type: #float	dropdownlist sound_dd "Sound" items:# ("boom","sparkle","zap","fizzle")))
+			--custAttributes.add selection attr
 			
-			p = convertToPoly $
-			if(p.capHoles #Edge) then
-				messageBox "cap ok"
-			else
-				messageBox "cap failed"
-			p = convertToMesh $
+			a = Box()
+			attr = attributes attr (parameters main (json type:#string))
+			custAttributes.add a attr
+			a.json = "asd"
+			format "%\n" a.json
 		)
 		
+		-------------------------------------------------------------------------
+		group "MapChannel"
+		(
+			spinner maxMeshGroupUI "Max Mesh Group:" range:[16,32,32] type:#integer enabled:false  width:100
+			spinner mapChannelUI "Map Channel:" range:[1,8,3] type:#integer enabled:true  width:100
+			button initializeMeshUI "Initialize Mesh" width:200 
+		)		
+
 		on initializeMeshUI pressed do
 		(
 			succeeded = true

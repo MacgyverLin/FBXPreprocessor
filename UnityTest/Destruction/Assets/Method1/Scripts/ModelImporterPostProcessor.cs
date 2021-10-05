@@ -51,15 +51,18 @@ public class ModelImporterPostProcessor : AssetPostprocessor
     {
         ModelImporter modelImporter = assetImporter as ModelImporter;
         modelImporter.meshOptimizationFlags = MeshOptimizationFlags.Everything;
+        //modelImporter.addCollider = true;
     }
 
     void OnPostprocessGameObjectWithUserProperties(GameObject go, string[] propNames, System.Object[] values)
     {
         for(int i=0; i<propNames.Length; i++)
         {
-            if (propNames[i] == "UDP3DSMAX")
+            if (propNames[i] == "DemolishableData")
             {
-                string jsonText = JSONStringFinder.Find(values[i] as string, "DemolishableData = ");
+                //string jsonText = JSONStringFinder.Find(values[i] as string, "DemolishableData = ");
+                string jsonText = values[i] as string;
+                Debug.Log(jsonText);
                 ModelImporter modelImporter = assetImporter as ModelImporter;
                 string scriptableObjectPath = modelImporter.assetPath.Replace(".fbx", ".asset");
 
