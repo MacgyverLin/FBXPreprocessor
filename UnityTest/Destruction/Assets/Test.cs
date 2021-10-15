@@ -8,6 +8,8 @@ public class Test : MonoBehaviour
     private Collider[] neighbours;
     Collider thisCollider;
 
+    public float isDestructed = 1.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -67,11 +69,19 @@ public class Test : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+        //for (int i = 0; i < meshRenderer.materials.Length; i++)
+        //{
+            //meshRenderer.materials[i].SetFloat("_IsDestructed", isDestructed);
+        //}
+
+        /*
         Vector3 direction;
         float distance;
         if (ComputePenetration(transform, 1.0f, out direction, out distance))
         {
             transform.position += direction * distance;
         }
+        */
     }
 }

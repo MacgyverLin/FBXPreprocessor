@@ -129,7 +129,7 @@ class SimplePhysics : PhysicsBase
 
         RaycastHit hitInfo = new RaycastHit();
         bool hit = Physics.SphereCast(this.linearPosition, 1.0f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
-        //bool hit = Physics.BoxCast(this.linearPosition, faceGroup.bound.size, this.linearVelocity.normalized, out hitInfo, this.angularPosition, this.linearVelocity.magnitude * dt);
+        //bool hit = Physics.BoxCast(this.linearPosition, new Vector3(faceGroup.bound.size.x, faceGroup.bound.size.z, faceGroup.bound.size.y)*0.5f, this.linearVelocity.normalized, out hitInfo, this.angularPosition, this.linearVelocity.magnitude * dt);
         if (hit)
         {
             float fraction = hitInfo.distance / this.linearVelocity.magnitude;
@@ -302,9 +302,6 @@ public class Demolishable : MonoBehaviour
     void UpdatePhysics(bool showCrossSection)
     {
         Matrix4x4[] transforms = new Matrix4x4[32];
-        //Vector4[] translations = new Vector4[32];
-        //Vector4[] rotations = new Vector4[32];
-        //Vector4[] pivots = new Vector4[32];
 
         for (int i = 0; i < physics.Length; i++)
         {
@@ -312,10 +309,6 @@ public class Demolishable : MonoBehaviour
 
             physics[i].Update(testPivot);
             transforms[groupID] = physics[i].GetTransform();
-
-            //translations[groupID] = physics[i].GetTranslation();
-            //rotations[groupID] = physics[i].GetRotation();
-            //pivots[groupID] = physics[i].GetFaceGroup().bound.center;
         }
 
         MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
@@ -323,14 +316,27 @@ public class Demolishable : MonoBehaviour
         {
             meshRenderer.materials[i].SetFloat("_IsDestructed", showCrossSection ? 1.0f : 0.0f);
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
-
-            //meshRenderer.materials[i].SetVectorArray("_Translate", translations);
-            //meshRenderer.materials[i].SetVectorArray("_Rotation", rotations);
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////////////////////////
-    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
+    /*
+    MaterialPropertyBlock props = new MaterialPropertyBlock();
+    MeshRenderer renderer;
+
+    foreach (GameObject obj in objects)
+    {
+        float r = Random.Range(0.0f, 1.0f);
+        float g = Random.Range(0.0f, 1.0f);
+        float b = Random.Range(0.0f, 1.0f);
+        props.SetColor("_Color", new Color(r, g, b));
+
+        renderer = obj.GetComponent<MeshRenderer>();
+        renderer.SetPropertyBlock(props);
+    }
+    */
+
+/// ////////////////////////////////////////////////////////////////////////////////////
+public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
     {
         StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction));
     }

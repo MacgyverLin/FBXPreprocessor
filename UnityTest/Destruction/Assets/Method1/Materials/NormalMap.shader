@@ -1,4 +1,4 @@
-﻿Shader "Mac/NormalMap"
+﻿Shader "Tencent/TestDemolishWithNormalAndTangent"
 {
 	Properties
 	{
@@ -30,9 +30,13 @@
 			// ZWrite Off
 
 			CGPROGRAM
+
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma exclude_renderers flash
+			#pragma multi_compile_instancing
+			#pragma target 3.0
+
+			#include "UnityCG.cginc"
 	
 			// User Defined Variables
 			uniform float3 _Color;
@@ -46,14 +50,15 @@
 			uniform float4 _RimColor;
 			uniform float _RimPower;
 			uniform float _Alpha;
-			uniform float _IsDestructed;
-			uniform float4x4 _Transforms[32];
-			//uniform float4 _Rotation[32];
-			//uniform float4 _Translate[32];
 
+			float _IsDestructed;
 			// Unity Defined Variables;
 			uniform float4 _LightColor0;
-	
+
+			UNITY_INSTANCING_BUFFER_START(Props)
+				UNITY_DEFINE_INSTANCED_PROP(float4x4 , _Transforms[32])
+			UNITY_INSTANCING_BUFFER_END(Props)
+	 
 			// Base Input Structs
 			struct vertexInput 
 			{
@@ -62,6 +67,8 @@
 				float4 texcoord: TEXCOORD0;
 				float4 groupID_CrossSection: TEXCOORD2;
 				float4 tangent: TANGENT;
+
+				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 		
 			struct vertexOutput 
@@ -72,64 +79,40 @@
 				float3 normalWorld: TEXCOORD2;
 				float3 tangentWorld: TEXCOORD3;
 				float3 binormalWorld: TEXCOORD4;
+
+				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			float4x4 getTransform(int groupID)
 			{
-				return _Transforms[groupID];
-				/*
-				float4x4 m;
+				return UNITY_ACCESS_INSTANCED_PROP(Props, _Transforms)[groupID];
+			}
 
-				float4 rotation = _Rotation[groupID];
-				float4 translate = _Translate[groupID];
-
-				float yy2 = 2.0 * rotation.y * rotation.y;
-				float zz2 = 2.0 * rotation.z * rotation.z;
-				float xy2 = 2.0 * rotation.x * rotation.y;
-				float sz2 = 2.0 * rotation.w * rotation.z;
-				float xz2 = 2.0 * rotation.x * rotation.z;
-				float sy2 = 2.0 * rotation.w * rotation.y;
-				float xx2 = 2.0 * rotation.x * rotation.x;
-				float yz2 = 2.0 * rotation.y * rotation.z;
-				float sx2 = 2.0 * rotation.w * rotation.x;
-
-				m[0] = float4(1.0 - yy2 - zz2, xy2 + sz2, xz2 - sy2, translate.x);
-				m[1] = float4(xy2 - sz2, 1.0 - xx2 - zz2, yz2 + sx2, translate.y);
-				m[2] = float4(xz2 + sy2, yz2 - sx2, 1.0 - xx2 - yy2, translate.z);
-				m[3] = float4(0.0, 0.0, 0.0, 1.0);
-
-				return m;
-				*/
+			float getIsDestructed()
+			{
+				//return UNITY_ACCESS_INSTANCED_PROP(Props, _IsDestructed);
+				return _IsDestructed;
 			}
 
 			void demolish(inout vertexInput v, int groupID, int crossSection)
 			{
-				/*
-				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
+				float destructed = getIsDestructed();
+				//float destructed = 1.0f;
+				v.vertex.xyz *= max(destructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink				
 
-				// Convert Physics Transform to Object Space
-				if (_IsDestructed == 1.0)
-				{
-					float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
-					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
-
-					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
-				}
-				*/
-
-				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
-				
 				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
-				v.vertex.xyz = lerp(v.vertex.xyz, mul(transform, float4(v.vertex.xyz, 1.0)), _IsDestructed);
-				v.normal.xyz = lerp(v.normal.xyz, mul(transform, float4(v.normal.xyz, 0.0)), _IsDestructed);
-				v.tangent.xyz = lerp(v.tangent.xyz, mul(transform, float4(v.tangent.xyz, 0.0)), _IsDestructed);
+				v.vertex.xyz = lerp(v.vertex.xyz, mul(transform, float4(v.vertex.xyz, 1.0)), destructed);
+				v.normal.xyz = lerp(v.normal.xyz, mul(transform, float4(v.normal.xyz, 0.0)), destructed);
+				v.tangent.xyz = lerp(v.tangent.xyz, mul(transform, float4(v.tangent.xyz, 0.0)), destructed);
 			}
-	
+	  
 			// Vertex Function
 			vertexOutput vert(vertexInput v) 
 			{
 				vertexOutput o;
+
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
 
 				int groupID = (int)(v.groupID_CrossSection.x);
 				int crossSection = (int)(v.groupID_CrossSection.y);
@@ -150,6 +133,8 @@
 			// Fragment Function
 			float4 frag(vertexOutput i) : COLOR 
 			{
+				UNITY_SETUP_INSTANCE_ID(i);
+
 				float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
 				float3 lightDirection;
 				float atten;
@@ -204,6 +189,7 @@
 			ENDCG
 		}
 
+		/*
 		Pass
 		{
 			Tags
@@ -264,47 +250,10 @@
 			float4x4 getTransform(int groupID)
 			{
 				return _Transforms[groupID];
-				/*
-				float4x4 m;
-
-				float4 rotation = _Rotation[groupID];
-				float4 translate = _Translate[groupID];
-
-				float yy2 = 2.0 * rotation.y * rotation.y;
-				float zz2 = 2.0 * rotation.z * rotation.z;
-				float xy2 = 2.0 * rotation.x * rotation.y;
-				float sz2 = 2.0 * rotation.w * rotation.z;
-				float xz2 = 2.0 * rotation.x * rotation.z;
-				float sy2 = 2.0 * rotation.w * rotation.y;
-				float xx2 = 2.0 * rotation.x * rotation.x;
-				float yz2 = 2.0 * rotation.y * rotation.z;
-				float sx2 = 2.0 * rotation.w * rotation.x;
-
-				m[0] = float4(1.0 - yy2 - zz2, xy2 + sz2, xz2 - sy2, translate.x);
-				m[1] = float4(xy2 - sz2, 1.0 - xx2 - zz2, yz2 + sx2, translate.y);
-				m[2] = float4(xz2 + sy2, yz2 - sx2, 1.0 - xx2 - yy2, translate.z);
-				m[3] = float4(0.0, 0.0, 0.0, 1.0);
-
-				return m;
-				*/
 			}
 
 			void demolish(inout vertexInput v, int groupID, int crossSection)
 			{
-				/*
-				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
-
-				// Convert Physics Transform to Object Space
-				if (_IsDestructed == 1.0)
-				{
-					float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
-					v.vertex.xyz = mul(transform, float4(v.vertex.xyz, 1.0));
-
-					v.normal.xyz = mul(transform, float4(v.normal.xyz, 0.0));
-					v.tangent.xyz = mul(transform, float4(v.tangent.xyz, 0.0));
-				}
-				*/
-
 				v.vertex.xyz *= max(_IsDestructed, (1.0f - crossSection)); // if (_IsDestructed==1) || (crossSection==0) vetex not shrink
 
 				float4x4 transform = mul(unity_WorldToObject, getTransform(groupID));
@@ -388,7 +337,7 @@
 			}
 			ENDCG
 		}
-
+		
 		Pass
 		{
 			Tags 
@@ -474,5 +423,6 @@
 			}
 			ENDCG
 		}
+		*/
 	}
 }
