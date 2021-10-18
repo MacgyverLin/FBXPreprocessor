@@ -1,0 +1,7 @@
+{ 
+    "python.autoComplete.extraPaths": 
+    [
+        "C:/Program Files/Autodesk/Maya2018/devkit/other/pymel/extras/completion/py", 
+    ], 
+    "python.pythonPath": "C:/Program Files/Autodesk/Maya2018/bin/mayapy.exe"
+}
