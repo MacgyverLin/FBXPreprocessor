@@ -16,15 +16,34 @@ public class Bound
 }
 
 [System.Serializable]
+public class BoundCapsule
+{
+    public Vector3 center;
+    public float height;
+    public float radius;
+    public Vector3 direction;
+
+    public BoundCapsule(Vector3 center, float height, float radius, Vector3 direction)
+    {
+        this.center = center;
+        this.height = height;
+        this.radius = radius;
+        this.direction = direction;
+    }
+}
+
+[System.Serializable]
 public class FaceGroup
 {
     public int groupID;
     public Bound bound;
+    public BoundCapsule boundCapsule;
 
-    public FaceGroup(int groupID, Bound bound)
+    public FaceGroup(int groupID, Bound bound, BoundCapsule boundCapsule)
     {
         this.groupID = groupID;
         this.bound = bound;
+        this.boundCapsule = boundCapsule;
     }
 }
 

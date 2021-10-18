@@ -2,24 +2,26 @@
 	running from commandline
 	https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html	
 */
-struct BoundingCapsule
-(
-	center, 
-	height=2, 
-	radius=0.5
-)
-
 struct BoundingBox
 (
 	center,
 	size = [1, 1, 1]
 )
-	
+
+struct BoundingCapsule
+(
+	center,
+	height = 1,
+	radius = 1,
+	direction = [1, 0, 0]
+)
+
 struct FaceGroup
 (
 	groupID, 
 	density = 1,
 	bound = BoundingBox [0, 0, 0],
+	boundCapsule = BoundingCapsule [0, 0, 0],
 	faceIndices=#()
 )
 
@@ -68,7 +70,7 @@ struct JSONExporter
 		format "}" to:fptr
 	),		
 	
-	fn formatFaceBoundingBox fptr bound = 
+	fn formatFaceGroupBoundingBox fptr bound = 
 	(
 		format "{" to:fptr
 			format "\"center\":" to:fptr
@@ -80,14 +82,37 @@ struct JSONExporter
 		format "}" to:fptr
 	),
 	
+	fn formatFaceGroupBoundingCapsule fptr boundCapsule = 
+	(
+		format "{" to:fptr
+			format "\"center\":" to:fptr
+			formatVector3 fptr boundCapsule.center
+			format "," to:fptr
+		
+			format "\"height\": %" boundCapsule.height to:fptr
+			format "," to:fptr
+		
+			format "\"radius\": %" boundCapsule.radius to:fptr
+			format "," to:fptr
+		
+			format "\"direction\":" to:fptr
+			formatVector3 fptr boundCapsule.direction	
+		format "}" to:fptr
+	),	
+
 	fn formatFaceGroup fptr faceGroup = 
 	(
 		format "{" to:fptr
 			format "\"groupID\":%," faceGroup.groupID to:fptr
-			format "\"density\":%," faceGroup.density to:fptr
-			format "\"bound\":" to:fptr
 			
-			formatFaceBoundingBox fptr faceGroup.bound
+			format "\"density\":%," faceGroup.density to:fptr
+			
+			format "\"bound\":" to:fptr
+			formatFaceGroupBoundingBox fptr faceGroup.bound
+			format "," to:fptr
+		
+			format "\"boundCapsule\":" to:fptr
+			formatFaceGroupBoundingCapsule fptr faceGroup.boundCapsule
 		format "}" to:fptr
 	),
 	
@@ -160,20 +185,20 @@ struct DemolitionTool
 		
 		if(useMapChannel>=maxChannel) then
 		(
-			format "Map Channel % is allocated.\n" (useMapChannel+1)
+			--format "Map Channel % is allocated.\n" (useMapChannel+1)
 			
 			meshop.setNumMaps meshObj (useMapChannel+1) keep:true
 			meshop.buildMapFaces meshObj useMapChannel keep:true
 		)
 		else
 		(
-			format "Map Channel %  has already allocated.\n" (useMapChannel+1)
+			--format "Map Channel %  has already allocated.\n" (useMapChannel+1)
 		)
 		
 		totalVertex = (numFaces * vertexPerFace)
 		if(totalVertex > meshop.getNumMapVerts meshObj useMapChannel) then
 		(
-			format "Map Channel %, vertices is not enough, resize to %.\n" (useMapChannel+1) totalVertex
+			--format "Map Channel %, vertices is not enough, resize to %.\n" (useMapChannel+1) totalVertex
 			
 			meshop.setNumMapVerts meshObj useMapChannel totalVertex keep:true
 			
@@ -188,7 +213,7 @@ struct DemolitionTool
 		)
 		else
 		(
-			format "Map Channel %, vertices is enough, size = %.\n" (useMapChannel+1) totalVertex
+			--format "Map Channel %, vertices is enough, size = %.\n" (useMapChannel+1) totalVertex
 		)
 	)
 	,
@@ -374,23 +399,255 @@ struct DemolitionTool
 	)
 	,
 	
+	fn computeCentroid vertexPositions =
+	(
+		minV = [999999, 999999, 999999]
+		maxV = [-999999, -999999, -999999]
+		
+		centroid = [0, 0, 0]
+		for vertexPosition in vertexPositions do
+		(
+			centroid += vertexPosition
+			
+			minV = vector3Min minV vertexPosition
+			maxV = vector3Max maxV vertexPosition
+		)
+		centroid /= vertexPositions.count
+		
+		return centroid
+	)
+	,	
+	
 	fn computeAABB vertexPositions =
 	(
 		minV = [999999, 999999, 999999]
 		maxV = [-999999, -999999, -999999]
 		
-		center = [0, 0, 0]
+		centroid = [0, 0, 0]
 		for vertexPosition in vertexPositions do
 		(
-			center += vertexPosition
+			centroid += vertexPosition
 			
 			minV = vector3Min minV vertexPosition
 			maxV = vector3Max maxV vertexPosition
 		)
-		center /= vertexPositions.count
-		size = maxV - center
+		centroid /= vertexPositions.count
+		
+		size = maxV - centroid
 	
-		return BoundingBox center size
+		return BoundingBox centroid size
+	)
+	,
+
+	-----------------------------------------------------------------	
+	fn makeLine pointA pointB pointC =
+	(
+		ss = SplineShape pos:pointA
+		addNewSpline ss
+		addKnot ss 1 #corner #line pointA
+		addKnot ss 1 #corner #line pointB
+		addKnot ss 1 #corner #line pointC
+		updateShape ss
+		ss
+	)
+	,
+	
+	fn makeCapsule cap =
+	(
+		rotAxis = normalize (cross cap.direction [0, 0, 1])
+		rotAngle = acos (dot cap.direction [0, 0, 1])
+		--a = angleaxis rotAngle rotAxis
+		--format "%\n" a
+		trans = angleaxis rotAngle rotAxis as Matrix3
+		trans[4] = cap.center + cap.direction * (-cap.height * 0.5)
+		
+		c = Capsule radius:cap.radius height:cap.height heighttype:0 sides:16 heightsegs:1 smooth:on sliceon:off slicefrom:0 sliceto:0 mapcoords:on isSelected:off
+		c.transform = trans
+		c.wirecolor = color 115 115 115
+		
+		--bestline = makeLine (cap.center + cap.direction * -cap.height * 0.5) cap.center (cap.center + cap.direction * cap.height * 0.5)
+		--bestline.wirecolor = color 115 115 115
+	)
+	,
+	
+	fn findMajorAxis dir =
+	(
+		--return [1, 0, 0]
+		
+		if(dir.x>dir.y and dir.x>dir.z) then
+			return [1, 0, 0]
+		else if(dir.y>dir.x and dir.y>dir.z) then
+			return [0, 1, 0]
+		else
+			return [0, 0, 1]
+	)
+	,
+		
+	fn isVertexInCapsule vertex cap = 
+	(
+		halfHeight = (cap.height - (cap.radius * 2.0)) * 0.5
+		dist = dot (vertex - cap.center) cap.direction
+		
+		if(dist > halfHeight) then
+		(
+			dist = halfHeight
+		)
+		else if(dist < -halfHeight) then
+		(
+			dist = -halfHeight
+		)
+		
+		projVertex = (cap.center + dist * cap.direction)
+		d = length (vertex - projVertex)
+		if(d > cap.radius) then
+			format "% % % % % % %\n" vertex projVertex d cap.center dist cap.direction cap.radius
+		
+		return d <= cap.radius
+	)
+	,
+	
+	fn isAllVerticesInCapsule vertices cap = 
+	(
+		for i = 1 to vertices.count do
+		(
+			if( not(isVertexInCapsule vertices[i] cap) ) then
+			(
+				return false
+			)
+		)
+		
+		return true
+	)
+	,	
+	
+	-- https://zalo.github.io/blog/line-fitting/
+	fn computeBoundingCapsule vertices  = 
+	(
+		centroid = computeCentroid vertices
+		
+		/* best fitting line*/
+		direction = [0, 0, 0]
+		for i = 1 to vertices.count do
+		(
+			direction = vertices[i] - centroid
+		)
+		direction /= vertices.count
+		direction = normalize direction
+		/* best fitting line
+		iterations = 30
+		direction = [0, 0, 0]
+		for i = 1 to iterations do
+		(
+			nextDirection = [0, 0, 0]			
+			for i = 1 to vertices.count do
+			(
+				centeredPoint = vertices[i] - centroid;
+				nextDirection = nextDirection + (dot centeredPoint direction) * centeredPoint
+			)
+			direction = normalize nextDirection
+		)
+		*/
+		direction = findMajorAxis direction
+		
+		/* find min max mid distance along direction */
+		minH = 0
+		maxH = 0
+		radius = 0
+		for i = 1 to vertices.count do
+		(
+			v = vertices[i] - centroid
+			h = (dot v direction)
+			r = length (v - h * direction)
+			
+			if((i==1) or (maxH<h)) then
+			(
+				maxH = h
+			)
+			if((i==1) or (minH>h)) then
+			(
+				minH = h
+			)
+			if((i==1) or (radius<r)) then
+			(
+				radius = r
+			)
+		)
+		
+		midH = (minH + maxH) * 0.5
+		--format "% % %\n" minH midH maxH
+		centroid = centroid + direction * midH
+		minH = minH - midH
+		maxH = maxH - midH
+		--format "% % %\n" minH midH maxH
+		
+		minHeight = radius * 2.0
+		maxHeight = radius * 2.0 + (maxH - minH)
+		height = maxHeight
+		cap = BoundingCapsule center:centroid height:height radius:radius direction:direction
+		
+		t = 1.0
+		while(t > 0.05) do
+		(
+			if(isAllVerticesInCapsule vertices cap) then
+			(
+				t -= 0.05
+				height = minHeight + (maxHeight - minHeight) * t
+				cap = BoundingCapsule center:centroid height:height radius:radius direction:direction
+				
+				--format "isAllVerticesInCapsule % %\n" t height				
+			)
+			else
+			(
+				t += 0.05
+				height = minHeight + (maxHeight - minHeight) * t
+				cap = BoundingCapsule center:centroid height:height radius:radius direction:direction
+				
+				--format "not isAllVerticesInCapsule % %\n" t height				
+				exit
+			)
+		)
+		
+		/* binary search best radius */
+		/*
+		minHeight = radius * 2.0
+		maxHeight = radius * 2.0 + (maxH - minH)
+		height = maxHeight
+		
+		loopCount = 50
+		while( (minHeight < maxHeight) and (loopCount>0) ) do
+		(
+			midHeight = minHeight + (maxHeight - minHeight) * 0.5
+			cap = BoundingCapsule center:centroid height:midHeight radius:radius direction:direction		
+			
+			if((isAllVerticesInCapsule vertices cap)) then
+			(
+				maxHeight = midHeight
+				
+				format "isAllVerticesInCapsule % %\n" minHeight maxHeight
+			)
+			else
+			(
+				minHeight = midHeight
+				
+				format "not isAllVerticesInCapsule % %\n" minHeight maxHeight
+			)
+			
+			loopCount -= 1
+		)
+		*/
+		
+		/* show capsule and best fit line*/
+		--makeCapsule cap
+
+		return cap
+	)
+	,
+	
+	fn testComputeBoundingCapsule vertices  = 
+	(
+		computeBoundingCapsule vertices
+
+		return true
 	)
 	,
 	
@@ -411,6 +668,7 @@ struct DemolitionTool
 		)
 
 		faceGroup.bound = computeAABB vertexPositions
+		faceGroup.boundCapsule = computeBoundingCapsule vertexPositions
 	)
 	,
 
@@ -579,15 +837,6 @@ struct DemolitionTool
 	)
 	,
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	-------------------------------------------------------------------
 	-- UI callback handler
 	fn initializeMesh meshObj useMapChannel maxGroupCount = 
@@ -608,7 +857,7 @@ struct DemolitionTool
 		return true
 	)
 	,
-	
+
 	------------------------------------------------------------------
 	fn computeFaceGroupByMeshElement meshObj useMapChannel maxGroupCount = 
 	(
@@ -750,9 +999,9 @@ struct DemolitionTool
 		
 		setUserPropVal meshObj "DemolishableData" (ss as string) quoteString:false
 		
-		attr = attributes attr (parameters main (demolishableData type:#string))
+		attr = attributes attr (parameters main (DemolishableData type:#string))
 		custAttributes.add meshObj attr
-		meshObj.demolishableData = ss
+		meshObj.DemolishableData = ss
 		
 		if(not exportFile fbxFilePath #noPrompt using:FBXEXP) then
 		(
@@ -840,37 +1089,41 @@ macroScript DemolitionToolUI category:"Tencent" toolTip:"Demolition Tool"
 		)
 
 		button testUI "testUI" width:200
+		
 		on testUI pressed do
 		(
-			/*
-			openEdgeIndices = meshop.getOpenEdges $ as Array
-			
-			for openEdgeIdx in openEdgeIndices do
+			succeeded = true
+			reason = ""
+
+			if(not selection.count==1) then
 			(
-				v = meshop.getVertsUsingEdge $ openEdgeIdx as Array
-				--format "%\n" v
-			)
-			
-			v = $.verts.count				
-			e = $.edges.count / 2
-			f = $.faces.count
-			x = v - e + f
-			g = (2 - x) / 2
+				succeeded = false
+				reason = "Please select at 1 and only 1 mesh."
 				
-			format "V %\n" v
-			format "E %\n" e
-			format "F %\n" f
-			format "Euler characteristic %\n" x
-			format "Genus %\n" g
-			*/
-			--attr = attributes json (parameters main rollout:params(hitPoints type: #float ui:hits default:10 cost type: #float ui:cost default:100 sound type: #string) rollout params "Weapon Parameters"(spinner hits "Hit Points" type: #float	spinner cost "Cost" type: #float	dropdownlist sound_dd "Sound" items:# ("boom","sparkle","zap","fizzle")))
-			--custAttributes.add selection attr
-			
-			a = Box()
-			attr = attributes attr (parameters main (json type:#string))
-			custAttributes.add a attr
-			a.json = "asd"
-			format "%\n" a.json
+				noticeMessage succeeded "InitializeMesh" reason	
+			)
+			else
+			(
+				for meshObj in selection do
+				(
+					if(not ((classof meshObj)==Editable_mesh)) then
+					(
+						succeeded = false
+						reason = "selected Mesh is not and Editable Mesh."
+						continue
+					)
+
+					vertices = for i = 1 to (meshop.getNumVerts meshObj) collect (in coordsys world meshop.getVert meshObj i)
+					if( not (demolitionTool.testComputeBoundingCapsule vertices)) then
+					(
+						succeeded = false
+						reason = "computeBestFitCapsule failed."
+						continue
+					)
+				)
+				
+				noticeMessage succeeded "computeBestFitCapsule" reason	
+			)			
 		)
 		
 		-------------------------------------------------------------------------

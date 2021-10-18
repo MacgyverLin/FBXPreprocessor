@@ -223,32 +223,10 @@ class SimplePhysics : PhysicsBase
     }
 };
 
-class RigidbodyPhysics : PhysicsBase
-{
-    public RigidbodyPhysics()
-    {
-    }
-
-    public void Init(GameObject gameobject, Vector3 linearPosition, Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
-                     Vector3 angularPosition, Vector3 angularVelocity, Vector3 angularAcc, float angularDrag,
-                     Vector3 scale)
-    {
-        this.sleeping = false;
-    }
-
-    public override void Update(bool testPivot)
-    {
-        float dt = Time.deltaTime;
-        if (sleeping)
-            return;
-    }
-};
-
 public class Demolishable : MonoBehaviour
 {
     private SimplePhysics[] physics;
     public DemolishableData demolishableData;
-    public bool testPivot = false;
 
     // Start is void called before the first frame update
     void Start()
@@ -268,8 +246,6 @@ public class Demolishable : MonoBehaviour
 
     private void Initialize(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
     {
-        //demolishableData = GameObject.Instantiate<DemolishableData>(Resources.Load<DemolishableData>(GetComponent<MeshFilter>().name));
-
         float linearSpeed = 10.0f * explosionForce;
         float angularSpeed = 360.0f * 30.0f * explosionForce;
 
@@ -307,7 +283,7 @@ public class Demolishable : MonoBehaviour
         {
             int groupID = demolishableData.GetFaceGroup(i).groupID;
 
-            physics[i].Update(testPivot);
+            physics[i].Update(false);
             transforms[groupID] = physics[i].GetTransform();
         }
 
@@ -318,25 +294,9 @@ public class Demolishable : MonoBehaviour
             meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
         }
     }
-
-    /*
-    MaterialPropertyBlock props = new MaterialPropertyBlock();
-    MeshRenderer renderer;
-
-    foreach (GameObject obj in objects)
-    {
-        float r = Random.Range(0.0f, 1.0f);
-        float g = Random.Range(0.0f, 1.0f);
-        float b = Random.Range(0.0f, 1.0f);
-        props.SetColor("_Color", new Color(r, g, b));
-
-        renderer = obj.GetComponent<MeshRenderer>();
-        renderer.SetPropertyBlock(props);
-    }
-    */
-
-/// ////////////////////////////////////////////////////////////////////////////////////
-public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
+    
+    ///////////////////////////////////////////////////////////////////////////////////////
+    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
     {
         StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction));
     }
@@ -413,7 +373,6 @@ public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, 
 
         yield return null;
     }
-
 
     IEnumerator HideChild()
     {
