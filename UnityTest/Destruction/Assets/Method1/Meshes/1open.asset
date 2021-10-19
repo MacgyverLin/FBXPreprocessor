@@ -17,11 +17,26 @@ MonoBehaviour:
     bound:
       center: {x: 2.05272, y: -1.06995, z: 0.0285506}
       size: {x: 1.17299, y: 2.98474, z: 2.97145}
+    boundCapsule:
+      center: {x: 2.37973, y: -1.06995, z: 0.0285506}
+      height: 9.06444
+      radius: 3.03222
+      direction: {x: -1, y: 0, z: 0}
   - groupID: 1
     bound:
-      center: {x: -2.30831, y: -1.14571, z: 3.02686}
+      center: {x: -2.30831, y: -1.1457, z: 3.02686}
       size: {x: 1.80614, y: 3.06049, z: 1.44266}
+    boundCapsule:
+      center: {x: -2.30831, y: -1.08521, z: 3.02686}
+      height: 8.06966
+      radius: 2.38483
+      direction: {x: 0, y: 1, z: 0}
   - groupID: 2
     bound:
-      center: {x: -2.30831, y: -1.14571, z: -1.96623}
+      center: {x: -2.30831, y: -1.1457, z: -1.96623}
       size: {x: 1.80614, y: 3.06049, z: 1.55733}
+    boundCapsule:
+      center: {x: -2.30831, y: -1.08521, z: -1.96623}
+      height: 8.06966
+      radius: 2.38483
+      direction: {x: 0, y: 1, z: 0}

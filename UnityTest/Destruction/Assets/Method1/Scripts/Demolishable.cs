@@ -2,330 +2,201 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class PhysicsBase
+/////////////////////////////////////////////////////////
+public class Fragment
 {
-    protected Matrix4x4 transform = Matrix4x4.identity;
-    protected Vector4 scale = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-    protected bool sleeping = false;
+    private GameObject fragmentObject;
+    private Rigidbody rigidbody;
+    private CapsuleCollider capsuleCollider;
 
-    protected FaceGroup faceGroup;
+    private FaceGroup faceGroup;
+    private Matrix4x4 matrix4x4;
 
-    public PhysicsBase()
+    public Fragment()
     {
+        fragmentObject = GameObject.Instantiate(Resources.Load("CapsuleFragment", typeof(GameObject))) as GameObject;
+        rigidbody = fragmentObject.GetComponent<Rigidbody>();
+        capsuleCollider = fragmentObject.GetComponent<CapsuleCollider>();
     }
 
-    virtual public void Update(bool testPivot)
+    public void Init(float mass = 1.0f, float drag = 0.0f, float angularDrag = 0.05f, bool useGravity = true, bool isKinematic = false, RigidbodyInterpolation interpolation = RigidbodyInterpolation.None, CollisionDetectionMode collisionDetectionMode = CollisionDetectionMode.Discrete)
     {
+        rigidbody.mass = mass;
+        rigidbody.drag = drag;
+        rigidbody.angularDrag = angularDrag;
+        rigidbody.useGravity = useGravity;
+        rigidbody.isKinematic = isKinematic;
+        rigidbody.interpolation = interpolation;
+        rigidbody.collisionDetectionMode = collisionDetectionMode;
+    }
+
+    public void Explode(GameObject gameObject, FaceGroup faceGroup, float explosionForce, Vector3 explosionPosition, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force)
+    {
+        this.faceGroup = faceGroup;
+        fragmentObject.SetActive(true);
+
+        fragmentObject.transform.position = gameObject.transform.TransformPoint(faceGroup.bound.center);
+        fragmentObject.transform.rotation = gameObject.transform.rotation;
+        fragmentObject.transform.localScale = gameObject.transform.localScale;
+
+        rigidbody.position = fragmentObject.transform.position;
+        rigidbody.rotation = fragmentObject.transform.rotation;
+
+        //capsuleCollider.center = faceGroup.bound.center;
+        capsuleCollider.radius = Mathf.Sqrt((faceGroup.bound.size.x * faceGroup.bound.size.x) + (faceGroup.bound.size.y * faceGroup.bound.size.y) + (faceGroup.bound.size.z * faceGroup.bound.size.z));
+        capsuleCollider.height = capsuleCollider.radius * 2;
+
+        //rigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius, upwardsModifier, mode);
+        //rigidbody.AddExplosionForce(1.0f, gameObject.transform.position, 1.0f, 4.0f, mode);
+
+        Update();
+    }
+
+    public void SetActive(bool active)
+    {
+        fragmentObject.SetActive(active);
     }
 
     public bool IsSleeping()
     {
-        return sleeping;
+        return rigidbody.IsSleeping();
+    }
+
+    public void Update()
+    {
+        Vector3 pivot = faceGroup.bound.center;
+
+        Matrix4x4 m1 = Matrix4x4.identity;
+        m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
+
+        Matrix4x4 m2 = Matrix4x4.identity;
+        m2.SetTRS(Vector3.zero, fragmentObject.transform.rotation, Vector3.one);
+
+        Matrix4x4 m3 = Matrix4x4.identity;
+        m3.SetTRS(Vector3.zero, Quaternion.identity, fragmentObject.transform.localScale);
+
+        Matrix4x4 m4 = Matrix4x4.identity;
+        m4.SetTRS(fragmentObject.transform.position, Quaternion.identity, Vector3.one);
+
+        matrix4x4 = m4 * m3 * m2 * m1;
     }
 
     public Matrix4x4 GetTransform()
     {
-        return transform;
+        return matrix4x4;
     }
+}
 
-    public FaceGroup GetFaceGroup()
-    {
-        return faceGroup;
-    }
-};
-
-class SimplePhysics : PhysicsBase
+public class FragmentManager
 {
-    protected Vector3 linearPosition = new Vector3(0.0f, 0.0f, 0.0f);
-    protected Vector3 linearVelocity = new Vector3(0.0f, 0.0f, 0.0f);
-    protected Vector3 linearAcc = new Vector3(0.0f, 0.0f, 0.0f);
-    protected float linearDrag = 0.1f;
+    ///////////////////////////////////////////////////////////////
+    private List<Fragment> activeFragments;
+    private List<Fragment> inactiveFragments;
+    private const int maxFragmentCount = 256;
 
-    protected Quaternion angularPosition = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
-    protected Quaternion angularVelocity = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
-    protected Quaternion angularAcc = new Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
-    protected float angularDrag = 0.1f;
-
-    protected float elasticity = 0.3f;
-    protected float friction = 0.4f;
-
-    float dragMultiplier = 1.0f;
-    int bounceCount = 2;
-
-    public SimplePhysics(FaceGroup faceGroup)
+    private static FragmentManager _instance;
+    private FragmentManager()
     {
-        this.faceGroup = faceGroup;
-    }
+        activeFragments = new List<Fragment>();
+        inactiveFragments = new List<Fragment>();
 
-    public void Init(GameObject gameobject,
-                     Vector3 linearVelocity, Vector3 linearAcc, float linearDrag,
-                     Quaternion angularVelocity, Quaternion angularAcc, float angularDrag,
-                     Vector3 scale, float elasticity, float friction, int bounceCount = 2)
-    {
-        this.sleeping = false;
-        this.linearPosition = gameobject.transform.TransformPoint(faceGroup.bound.center);
-        this.linearVelocity = linearVelocity;
-        this.linearAcc = linearAcc;
-        this.linearDrag = linearDrag;
-
-        this.angularPosition = gameobject.transform.rotation;
-        this.angularVelocity = angularVelocity;
-        this.angularAcc = angularAcc;
-        this.angularDrag = angularDrag;
-
-        this.scale = new Vector4(scale.x, scale.y, scale.z, 1.0f);
-
-        this.elasticity = elasticity;
-        this.friction = friction;
-        this.bounceCount = bounceCount;
-    }
-
-    public void TestPivot(bool testPivot)
-    {
-        if (sleeping)
-            return;
-
-        //////////////////////////////
-        Vector3 pivot = faceGroup.bound.center;
-
-        Matrix4x4 m1 = Matrix4x4.identity;
-        m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
-
-        Matrix4x4 m2 = Matrix4x4.identity;
-        m2.SetTRS(Vector3.zero, Quaternion.AngleAxis(30.0f, Vector3.right), Vector3.one);
-
-        Matrix4x4 m3 = Matrix4x4.identity;
-        m3.SetTRS(pivot, Quaternion.identity, Vector3.one);
-
-        Matrix4x4 m4 = Matrix4x4.identity;
-        m4.SetTRS(Vector3.zero, Quaternion.identity, scale);
-
-        transform = m4 * m3 * m2 * m1;
-    }
-
-    Quaternion ScaledQuaternion(Quaternion quaternion, float scale)
-    {
-        return new Quaternion(quaternion.x * scale, quaternion.y * scale, quaternion.z * scale, quaternion.w * scale);
-    }
-
-    Quaternion SummedQuaternion(Quaternion quaternion_alpha, Quaternion quaternion_beta)
-    {
-        return new Quaternion(quaternion_alpha.x + quaternion_beta.x, quaternion_alpha.y + quaternion_beta.y, quaternion_alpha.z + quaternion_beta.z, quaternion_alpha.w + quaternion_beta.w);
-    }
-
-    Quaternion AddQuaternionDerivative(Quaternion q, Quaternion dq, float dt)
-    {
-        return SummedQuaternion(q, ScaledQuaternion(dq, dt / 2) * q).normalized;
-    }
-
-    public void UpdateDynamics()
-    {
-        if (sleeping)
-            return;
-
-        float dt = Time.deltaTime;
-        if (Input.GetKey(KeyCode.B))
-            dt = dt * 0.05f;
-
-        RaycastHit hitInfo = new RaycastHit();
-        bool hit = Physics.SphereCast(this.linearPosition, 1.0f, this.linearVelocity.normalized, out hitInfo, this.linearVelocity.magnitude * dt);
-        //bool hit = Physics.BoxCast(this.linearPosition, new Vector3(faceGroup.bound.size.x, faceGroup.bound.size.z, faceGroup.bound.size.y)*0.5f, this.linearVelocity.normalized, out hitInfo, this.angularPosition, this.linearVelocity.magnitude * dt);
-        if (hit)
+        for (int i = 0; i < maxFragmentCount; i++)
         {
-            float fraction = hitInfo.distance / this.linearVelocity.magnitude;
-            float dtFraction = dt * fraction;
-
-            this.bounceCount--;
-            dragMultiplier = 10.0f;
-            if (this.bounceCount == 0)
-            {
-                sleeping = true;
-            }
-
-            ///////////////////////////////////////
-            // p
-            this.linearPosition += dtFraction * this.linearVelocity;
-
-            // drag
-            this.linearVelocity -= (this.linearDrag * dragMultiplier * dtFraction) * this.linearVelocity;
-
-            // acc
-            this.linearVelocity += dtFraction * this.linearAcc;
-
-            Vector3 vertVelocity = hitInfo.normal * Vector3.Dot(this.linearVelocity, hitInfo.normal);
-            Vector3 horiVelocity = this.linearVelocity - vertVelocity;
-
-            // bounce and friction
-            this.linearVelocity -= (1.0f + elasticity) * vertVelocity;
-            this.linearVelocity -= friction * horiVelocity;
-
-            ///////////////////////////////////////
-            // p
-            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dtFraction * 10.0f);
-
-            // drag
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dragMultiplier * dtFraction);
-
-            // acc
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dtFraction * 10.0f);
-
-            // bounce and friction
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -elasticity);
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -friction);
+            Fragment fragment = new Fragment();
+            fragment.SetActive(false);
+            inactiveFragments.Add(fragment);
         }
-        else
-        {
-            ///////////////////////////////////////
-            // p
-            this.linearPosition += dt * this.linearVelocity ;
-
-            // drag
-            this.linearVelocity -= (this.linearDrag * dragMultiplier *  dt) * this.linearVelocity;
-
-            // acc
-            this.linearVelocity += dt * this.linearAcc;
-
-            ///////////////////////////////////////
-            // p
-            this.angularPosition = AddQuaternionDerivative(this.angularPosition, this.angularVelocity, dt * 10.0f);
-
-            // drag
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularVelocity, -this.angularDrag * dragMultiplier * dt);
-
-            // acc
-            this.angularVelocity = AddQuaternionDerivative(this.angularVelocity, this.angularAcc, dt * 10.0f);
-        }
-
-        //////////////////////////////
-        Vector3 pivot = faceGroup.bound.center;
-
-        Matrix4x4 m1 = Matrix4x4.identity;
-        m1.SetTRS(-pivot, Quaternion.identity, Vector3.one);
-
-        Matrix4x4 m2 = Matrix4x4.identity;
-        m2.SetTRS(Vector3.zero, angularPosition, Vector3.one);
-
-        Matrix4x4 m3 = Matrix4x4.identity;
-        m3.SetTRS(Vector3.zero, Quaternion.identity, scale);
-
-        Matrix4x4 m4 = Matrix4x4.identity;
-        m4.SetTRS(this.linearPosition, Quaternion.identity, Vector3.one);
-
-        transform = m4 * m3 * m2 * m1;
     }
 
-    public override void Update(bool testPivot)
+    public static FragmentManager Instance()
     {
-        if (testPivot)
-            TestPivot(testPivot);
-        else
-            UpdateDynamics();
+        if (_instance == null)
+        {
+            _instance = new FragmentManager();
+        }
+        return _instance;
     }
-};
 
+    public int GetMaxFragmentCount()
+    {
+        return maxFragmentCount;
+    }
+
+    public Fragment Alloc()
+    {
+        if (inactiveFragments.Count == 0)
+            return null;
+
+        Fragment fragment = inactiveFragments[0];
+        fragment.SetActive(false);
+
+        inactiveFragments.Remove(fragment);
+        activeFragments.Add(fragment);
+
+        return fragment;
+    }
+
+    public void Free(Fragment fragment)
+    {
+        Debug.Assert(activeFragments.Contains(fragment), "fragment is not in activelist");
+
+        fragment.SetActive(false);
+
+        activeFragments.Remove(fragment);
+        inactiveFragments.Add(fragment);
+    }
+}
+
+
+/////////////////////////////////////////////////////////
 public class Demolishable : MonoBehaviour
 {
-    private SimplePhysics[] physics;
     public DemolishableData demolishableData;
+    private Fragment[] fragments;
+    Matrix4x4[] transforms = new Matrix4x4[32];
 
-    // Start is void called before the first frame update
     void Start()
     {
-        Initialize();
     }
 
     void Reset()
     {
-        Initialize();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, Vector3 explosionPosition, float explosionRadius, float upwardsModifier = 1.0f, ForceMode mode = ForceMode.Force)
     {
+        StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionPosition, explosionRadius, upwardsModifier, mode));
     }
 
-    private void Initialize(float explosionForce = 0, float explosionRadius = 0, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
+    private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, Vector3 explosionPosition, float explosionRadius, float upwardsModifier = 1.0f, ForceMode mode = ForceMode.Force)
     {
-        float linearSpeed = 10.0f * explosionForce;
-        float angularSpeed = 360.0f * 30.0f * explosionForce;
-
-        physics = new SimplePhysics[demolishableData.GetFaceGroupCount()];
-        for (int i = 0; i < demolishableData.GetFaceGroupCount(); i++)
-        {
-            FaceGroup faceGroup = demolishableData.GetFaceGroup(i);
-
-            Quaternion q = Quaternion.AngleAxis(Random.Range(-32, 32), new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), Random.Range(-1, 1)).normalized);
-
-            physics[i] = new SimplePhysics(faceGroup);
-            physics[i].Init
-            (
-                this.gameObject,
-                new Vector3(Random.Range(-linearSpeed, linearSpeed), Random.Range(0.0f, linearSpeed * upwardsModifier), Random.Range(-linearSpeed, linearSpeed)),
-                new Vector3(0.0f, -9.8f, 0.0f),
-                0.01f,
-                Quaternion.AngleAxis(Random.Range(0, angularSpeed), new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), Random.Range(-1, 1))),
-                Quaternion.AngleAxis(0.0f, Vector3.right),
-                0.01f,
-                this.transform.localScale,
-                elasticity,
-                fraction
-            );
-        }
-
-        UpdatePhysics(false);
-    }
-
-    void UpdatePhysics(bool showCrossSection)
-    {
-        Matrix4x4[] transforms = new Matrix4x4[32];
-
-        for (int i = 0; i < physics.Length; i++)
-        {
-            int groupID = demolishableData.GetFaceGroup(i).groupID;
-
-            physics[i].Update(false);
-            transforms[groupID] = physics[i].GetTransform();
-        }
-
-        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-        for (int i = 0; i < meshRenderer.materials.Length; i++)
-        {
-            meshRenderer.materials[i].SetFloat("_IsDestructed", showCrossSection ? 1.0f : 0.0f);
-            meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
-        }
-    }
-    
-    ///////////////////////////////////////////////////////////////////////////////////////
-    public void Demolish(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
-    {
-        StartCoroutine(DemolishCoroutine(doFading, rigidBodyMaxLifetime, fadeTime, explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction));
-    }
-
-    private IEnumerator DemolishCoroutine(bool doFading, float rigidBodyMaxLifetime, float fadeTime, float explosionForce, float explosionRadius, float upwardsModifier, ForceMode mode, float elasticity, float fraction)
-    {
-        BeginDemolish(explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction);
-
-        // yield return WaitAllRigidBodySleptOrTimeOut(Random.Range((rigidBodyMaxLifetime - 1.0f)/2, rigidBodyMaxLifetime - 1.0f));
+        BeginExplode(explosionForce, explosionPosition, explosionRadius, upwardsModifier, mode);
+        
         yield return WaitAllRigidBodySleptOrTimeOut(rigidBodyMaxLifetime);
 
         yield return new WaitForSeconds(1.0f);
 
-        if (doFading)
-        {
-            yield return FadeChild(fadeTime);
+        yield return HideChild();
 
-            yield return HideChild();
-        }
+        EndExplode();
+
+        yield return null;
     }
 
-    public void BeginDemolish(float explosionForce, float explosionRadius, float upwardsModifier = 0.0f, ForceMode mode = ForceMode.Force, float elasticity = 0.3f, float fraction = 0.4f)
+    public void BeginExplode(float explosionForce, Vector3 explosionPosition, float explosionRadius, float upwardsModifier = 1.0f, ForceMode mode = ForceMode.Force)
     {
-        // make sure visible
-        this.gameObject.SetActive(true);
-        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-        meshRenderer.enabled = true;
+        fragments = new Fragment[demolishableData.GetFaceGroupCount()];
+        for (int i = 0; i < demolishableData.GetFaceGroupCount(); i++)
+        {
+            FaceGroup faceGroup = demolishableData.GetFaceGroup(i);
 
-        Initialize(explosionForce, explosionRadius, upwardsModifier, mode, elasticity, fraction);
+            fragments[i] = FragmentManager.Instance().Alloc();
+
+            fragments[i].Init();
+            fragments[i].Explode(this.gameObject, faceGroup, explosionForce, explosionPosition, explosionRadius, upwardsModifier, mode);
+        }
+
+        UpdateFragment(false);
     }
 
     IEnumerator WaitAllRigidBodySleptOrTimeOut(float timeout)
@@ -333,14 +204,14 @@ public class Demolishable : MonoBehaviour
         float startTime = Time.time;
 
         bool done = false;
-        while (!done/* && (Time.time-startTime<timeout)*/)
+        while (!done && (Time.time-startTime<timeout))
         {
-            UpdatePhysics(true);
+            UpdateFragment(true);
 
             done = true;
-            foreach (var rb in physics)
+            for(int i=0; i < fragments.Length; i++)
             {
-                if (!rb.IsSleeping())
+                if (!fragments[i].IsSleeping())
                 {
                     done = false;
                     break;
@@ -351,27 +222,22 @@ public class Demolishable : MonoBehaviour
         }
     }
 
-    IEnumerator FadeChild(float timeout)
+    void UpdateFragment(bool showCrossSection)
     {
-        // can cache component?
-        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-
-        float startTime = Time.time;
-        while ((Time.time - startTime) < timeout)
+        for (int i = 0; i < fragments.Length; i++)
         {
-            float alpha = 1.0f - ((Time.time - startTime) / timeout);
-            if (alpha < 0.0f)
-                yield break;
+            int groupID = demolishableData.GetFaceGroup(i).groupID;
 
-            for (int i = 0; i < meshRenderer.materials.Length; i++)
-            {
-                meshRenderer.materials[i].SetFloat("_Alpha", alpha);
-            }
-
-            yield return null;
+            fragments[i].Update();
+            transforms[groupID] = fragments[i].GetTransform();
         }
 
-        yield return null;
+        MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+        for (int i = 0; i < meshRenderer.materials.Length; i++)
+        {
+            meshRenderer.materials[i].SetFloat("_IsDestructed", showCrossSection ? 1.0f : 0.0f);
+            meshRenderer.materials[i].SetMatrixArray("_Transforms", transforms);
+        }
     }
 
     IEnumerator HideChild()
@@ -380,5 +246,13 @@ public class Demolishable : MonoBehaviour
         meshRenderer.enabled = false;
 
         yield return null;
+    }
+
+    public void EndExplode()
+    {
+        for (int i = 0; i < demolishableData.GetFaceGroupCount(); i++)
+        {
+            FragmentManager.Instance().Free(fragments[i]);
+        }
     }
 }

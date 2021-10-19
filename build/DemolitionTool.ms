@@ -465,6 +465,7 @@ struct DemolitionTool
 		c.transform = trans
 		c.wirecolor = color 115 115 115
 		
+		converttoMesh c
 		--bestline = makeLine (cap.center + cap.direction * -cap.height * 0.5) cap.center (cap.center + cap.direction * cap.height * 0.5)
 		--bestline.wirecolor = color 115 115 115
 	)
@@ -499,8 +500,6 @@ struct DemolitionTool
 		
 		projVertex = (cap.center + dist * cap.direction)
 		d = length (vertex - projVertex)
-		if(d > cap.radius) then
-			format "% % % % % % %\n" vertex projVertex d cap.center dist cap.direction cap.radius
 		
 		return d <= cap.radius
 	)
@@ -637,13 +636,13 @@ struct DemolitionTool
 		*/
 		
 		/* show capsule and best fit line*/
-		--makeCapsule cap
+		-- makeCapsule cap
 
 		return cap
 	)
 	,
 	
-	fn testComputeBoundingCapsule vertices  = 
+	fn testComputeBoundingCapsule vertices = 
 	(
 		computeBoundingCapsule vertices
 
